@@ -50,8 +50,8 @@ export function useTranslation<
   const ret = useTranslationOrg(ns, options);
   const { i18n } = ret;
   if (runsOnServerSide && lng && i18n.resolvedLanguage !== lng) {
-    console.error('SHOULD NEVER REACH HERE: server Lng:', lng)
-    // i18n.changeLanguage(lng);
+    // console.error('SHOULD NEVER REACH HERE: server Lng:', i18n.resolvedLanguage, lng)
+    i18n.changeLanguage(lng);
   } else {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     const [activeLng, setActiveLng] = useState(i18n.resolvedLanguage);

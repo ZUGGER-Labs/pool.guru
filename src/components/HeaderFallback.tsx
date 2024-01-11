@@ -45,7 +45,7 @@ const HeaderFallback = () => {
                 className="mr-6 flex-none overflow-hidden md:w-auto"
               >
                 {/* <MdCurrencyBitcoin className="w-8 h-8 text-[#F7931A]" /> */}
-                <Image src='/icon.png' alt="logo" width={32} height={32} />
+                <Image src='/fav.svg' alt="logo" width={32} height={32} />
               </Link>
   
               <div className="relative flex items-center ml-6">

@@ -25,6 +25,5 @@ export function getLang(lang?: any) {
   }
 
   const lng = lang["lang"] || fallbackLng;
-  // console.log("getLang:", lng);
   return lng;
 }
