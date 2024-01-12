@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@radix-ui/react-dropdown-menu": "^2.0.6",
     "@uniswap/sdk-core": "^4.0.10",
     "bignumber.js": "^9.1.2",
     "clsx": "^2.1.0",
@@ -33,6 +34,8 @@
     "autoprefixer": "^10.4.16",
     "eslint": "^8.56.0",
     "eslint-config-next": "14.0.4",
+    "https-proxy-agent": "^7.0.2",
+    "node-fetch": "2",
     "postcss": "^8.4.33",
     "tailwindcss": "^3.4.1",
     "typescript": "^5.3.3"

@@ -8,6 +8,7 @@ import { ChainId } from "@uniswap/sdk-core";
 import { useEffect, useState } from "react";
 import TokenItem from "../Token/TokenItem";
 import { sqrtPriceToPrice } from "@/uniswap/calculator";
+import { AmountFilter, ChainSwapFilter } from "./Filter";
 
 function FeeTier({fr, className}: {fr: number | string, className?: string}) {
     let ratio = ''
@@ -61,6 +62,9 @@ function Pools() {
 
   return (
     <div>
+      <AmountFilter />
+      <ChainSwapFilter />
+      
       <table>
         <thead>
           <tr>
