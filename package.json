@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 3030",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -13,6 +13,7 @@
     "@uniswap/sdk-core": "^4.0.10",
     "bignumber.js": "^9.1.2",
     "clsx": "^2.1.0",
+    "dayjs": "^1.11.10",
     "dotenv": "^16.3.1",
     "i18next": "^23.7.16",
     "i18next-browser-languagedetector": "^7.2.0",

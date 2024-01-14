@@ -43,10 +43,20 @@ export interface Token {
 export interface PoolDayData {
   date: number;
   volumeUSD: string;
+  feesUSD: string
   open: string;
   high: string;
   low: string;
   close: string;
+}
+
+export type PoolVolumeFeeData = {
+  fees24h: string | number
+  volume24h: string | number
+  fees7d: string | number
+  volume7d: string | number
+  fees30d: string | number
+  volume30d: string | number
 }
 
 export interface Pool {
@@ -65,8 +75,11 @@ export interface Pool {
   token0: Token;
   token1: Token;
   volumeUSD: string;
+  feesUSD: string;
   totalValueLockedUSD: string;
   poolDayData: PoolDayData[];
+  
+  volFeeData?: PoolVolumeFeeData
 }
 
 export interface Position {

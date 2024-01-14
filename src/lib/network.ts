@@ -15,6 +15,17 @@ const CHAIN_NAME: Record<number, string> = {
   [ChainId.BASE]: "base",
 };
 
+const CHAIN_BLOCK_SUBGRAPH_URL: Record<number, string> = {
+  [ChainId.MAINNET]: "https://api.thegraph.com/subgraphs/name/blocklytics/ethereum-blocks",
+  [ChainId.ARBITRUM_ONE]: "https://api.thegraph.com/subgraphs/name/ianlapham/arbitrum-one-blocks",
+  [ChainId.OPTIMISM]: "https://api.thegraph.com/subgraphs/name/ianlapham/uni-testing-subgraph",
+  [ChainId.POLYGON]: "https://api.thegraph.com/subgraphs/name/ianlapham/polygon-blocks",
+  [ChainId.CELO]: "https://api.thegraph.com/subgraphs/name/jesse-sawa/celo-blocks",
+  [ChainId.BNB]: "https://api.thegraph.com/subgraphs/name/wombat-exchange/bnb-chain-block",
+  [ChainId.AVALANCHE]: "https://api.thegraph.com/subgraphs/name/lynnshaoyu/avalanche-blocks",
+  [ChainId.BASE]: "https://api.studio.thegraph.com/query/48211/base-blocks/version/latest",
+};
+
 const CHAIN_UINSWAPV3_SUBGRAPH_URL: Record<number, Record<string, string>> = {
   [ChainId.MAINNET]: {
     uniswapv3:
@@ -57,10 +68,25 @@ function getNetworkName(chainId: number): string {
   return name;
 }
 
-function getNetworkEndpoint(chainId: number, dexType: DEX_TYPES = "uniswapv3") {
+function getNetworkDexEndpoint(
+  chainId: number,
+  dexType: DEX_TYPES = "uniswapv3"
+) {
   const endpoint = CHAIN_UINSWAPV3_SUBGRAPH_URL[chainId][dexType];
   if (!endpoint) throw new Error("unsupport dex type: " + dexType);
   return endpoint;
 }
 
-export { getNetworkEndpoint, getNetworkName, CHAIN_UINSWAPV3_SUBGRAPH_URL };
+function getBlockQueryEndpoint(chainId: number) {
+  const endpoint = CHAIN_BLOCK_SUBGRAPH_URL[chainId];
+
+  if (!endpoint) throw new Error("unsupport chain: " + chainId);
+  return endpoint;
+}
+
+export {
+  getNetworkDexEndpoint,
+  getBlockQueryEndpoint,
+  getNetworkName,
+  CHAIN_UINSWAPV3_SUBGRAPH_URL,
+};
