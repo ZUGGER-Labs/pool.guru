@@ -1,4 +1,4 @@
-import { Pool, PoolVolumeFeeData, Token } from "@/interfaces/uniswap.interface";
+import { Pool, PoolVolumeFeeData, Position, Token } from "@/interfaces/uniswap.interface";
 import {
   DEX_TYPES,
   getNetworkDexEndpoint,
@@ -306,4 +306,62 @@ const getUniswapV3Pools = async ({
   }
 };
 
-export { getUniswapV3Pools };
+// questions:
+// 1. 如何计算一个 position liquidity 对应的 USD
+// 2. 
+// get uniswap v3 pool positions
+const getUniswapV3PoolPosition = async ({
+  chainId,
+  pool,
+}: {
+  chainId: number;
+  pool: Pool;
+}): Promise<{
+  positions: Position[];
+}> => {
+  const endpoint = getNetworkDexEndpoint(chainId);
+  const res = await _query(endpoint, `query pools {
+    bundles {
+      ethPriceUSD
+    }
+    positions(where: {pool: "${pool.id}", liquidity_gt: "0"}) {
+      liquidity
+      owner
+      id
+      tickLower {
+        feesUSD
+        collectedFeesUSD
+        collectedFeesToken1
+        collectedFeesToken0
+        createdAtBlockNumber
+        createdAtTimestamp
+        feeGrowthOutside0X128
+        feeGrowthOutside1X128
+        liquidityGross
+        id
+        liquidityNet
+        liquidityProviderCount
+        tickIdx
+      }
+      tickUpper {
+        collectedFeesToken0
+        collectedFeesToken1
+        collectedFeesUSD
+        createdAtTimestamp
+        feeGrowthOutside0X128
+        feeGrowthOutside1X128
+        feesUSD
+        id
+        liquidityGross
+        liquidityNet
+        liquidityProviderCount
+        tickIdx
+      }
+      withdrawnToken0
+      withdrawnToken1
+    }
+  }`)
+  return res.data.positions
+}
+
+export { getUniswapV3Pools, getUniswapV3PoolPosition };
