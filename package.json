@@ -25,6 +25,7 @@
     "react-hot-toast": "^2.4.1",
     "react-i18next": "^14.0.0",
     "react-icons": "^5.0.0",
+    "recharts": "^2.10.4",
     "sharp": "^0.33.1",
     "tailwind-merge": "^2.2.0"
   },
