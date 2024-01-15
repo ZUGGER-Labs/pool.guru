@@ -6,8 +6,10 @@ import { getUniswapV3Pools } from "@/uniswap/graph";
 import { formatAmount } from "@/utils/format";
 import { ChainId } from "@uniswap/sdk-core";
 import { useEffect, useState } from "react";
-import TokenItem from "../Token/TokenItem";
+import TokenItem from "../common/TokenItem";
 import { sqrtPriceToPrice } from "@/uniswap/calculator";
+import { AmountFilter, ChainSwapFilter } from "./Filter";
+import PairItem from "../common/PairItem";
 
 function FeeTier({fr, className}: {fr: number | string, className?: string}) {
     let ratio = ''
@@ -47,7 +49,7 @@ function Pools() {
     const fetchPoolsInfo = async () => {
       const { pools, tokens } = await getUniswapV3Pools({
         chainId: ChainId.MAINNET,
-        take: 10,
+        total: 20,
         tvlUSD_gte: 5000,
         volUSD_gte: 5000,
       });
@@ -61,29 +63,36 @@ function Pools() {
 
   return (
     <div>
+      <AmountFilter />
+      <ChainSwapFilter />
+
       <table>
         <thead>
           <tr>
-            <td>TOKEN0</td>
-            <td>TOKEN1</td>
+            <td>Pair</td>
             <td>FeeRatio</td>
             <td>Liquidity</td>
+            <td>Fees/Vol 24H(USD)</td>
+            <td>Fees/Vol 7D(USD)</td>
+            <td>Fees/Vol 30D(USD)</td>
             <td>Vol(USD)</td>
             <td>TVL(USD)</td>
           </tr>
         </thead>
         <tbody>
           {poolsInfo.pools.map((pool) => {
+            const volFeeData = pool.volFeeData
             return (
               <tr key={pool.id}>
                 <td>
-                  <TokenItem token={pool.token0} />
+                  <PairItem token0={pool.token0} token1={pool.token1} />
                 </td>
-                <td>
-                  <TokenItem token={pool.token1} />
-                </td>
+
                 <td><FeeTier fr={pool.feeTier} /></td>
                 <td>{pool.liquidity}</td>
+            <td>{formatAmount(volFeeData?.fees24h)} {formatAmount(volFeeData?.volume24h)}</td>
+            <td>{formatAmount(volFeeData?.fees7d)} {formatAmount(volFeeData?.volume7d)}</td>
+            <td>{formatAmount(volFeeData?.fees30d)} {formatAmount(volFeeData?.volume30d)}</td>
                 <td>{formatAmount(+pool.volumeUSD)}</td>
                 <td>{formatAmount(+pool.totalValueLockedUSD)}</td>
               </tr>
