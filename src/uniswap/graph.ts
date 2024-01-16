@@ -1,4 +1,10 @@
-import { Pool, PoolVolumeFeeData, Position, Token } from "@/interfaces/uniswap.interface";
+import {
+  Pool,
+  PoolVolumeFeeData,
+  Position,
+  Tick,
+  Token,
+} from "@/interfaces/uniswap.interface";
 import {
   DEX_TYPES,
   getNetworkDexEndpoint,
@@ -141,7 +147,7 @@ const getPoolVolumeFees24H = async (
     for (let i = 0; i < pools.length; i++) {
       const skip = take * i;
       if (skip > 5000) {
-        break
+        break;
       }
       queires.push(
         _query(
@@ -215,6 +221,55 @@ const getPoolVolumeFees24H = async (
   return npools;
 };
 
+const getPoolData = async ({
+  chainId,
+  poolAddress,
+}: {
+  chainId: number;
+  poolAddress: string;
+}): Promise<Pool> => {
+  const endpoint = getNetworkDexEndpoint(chainId);
+  const res = await _query(
+    endpoint,
+    `query pool {
+    {
+    pool (id: "${poolAddress}") {
+      id
+      token0 {
+        decimals
+        id
+        name
+        symbol
+      }
+      token1 {
+        decimals
+        id
+        name
+        symbol
+      }
+      feeTier
+      liquidity
+      tick
+      sqrtPrice
+      feesUSD
+      volumeUSD
+      totalValueLockedUSD
+      createdAtTimestamp
+      poolDayData(first: 1, skip: 1, orderBy: date, orderDirection: desc) {
+        date
+        feesUSD
+        volumeUSD
+        open 
+        high
+        low
+        close
+      }
+    }
+  }`
+  );
+  return res.data.pool;
+};
+
 // get uniswap v3 pools
 const getUniswapV3Pools = async ({
   chainId,
@@ -247,7 +302,7 @@ const getUniswapV3Pools = async ({
     for (let i = 0; i < max; i++) {
       skip = i * take;
       if (skip > 5000) {
-        break
+        break;
       }
       const res = await _query(
         endpoint,
@@ -308,7 +363,7 @@ const getUniswapV3Pools = async ({
 
 // questions:
 // 1. 如何计算一个 position liquidity 对应的 USD
-// 2. 
+// 2.
 // get uniswap v3 pool positions
 const getUniswapV3PoolPosition = async ({
   chainId,
@@ -320,7 +375,9 @@ const getUniswapV3PoolPosition = async ({
   positions: Position[];
 }> => {
   const endpoint = getNetworkDexEndpoint(chainId);
-  const res = await _query(endpoint, `query pools {
+  const res = await _query(
+    endpoint,
+    `query pools {
     bundles {
       ethPriceUSD
     }
@@ -360,8 +417,37 @@ const getUniswapV3PoolPosition = async ({
       withdrawnToken0
       withdrawnToken1
     }
-  }`)
-  return res.data.positions
-}
+  }`
+  );
+  return res.data.positions;
+};
 
-export { getUniswapV3Pools, getUniswapV3PoolPosition };
+const getUniswapV3PoolTicks = async ({
+  chainId,
+  pool,
+  tickLower,
+  tickUpper,
+}: {
+  chainId: number;
+  pool: Pool;
+  tickLower?: number;
+  tickUpper?: number;
+}): Promise<{
+  ticks: Tick[];
+}> => {
+  const endpoint = getNetworkDexEndpoint(chainId);
+  const res = await _query(
+    endpoint,
+    `query ticks {
+    bundles {
+      ethPriceUSD
+    }
+    ticks(where: {pool: "${pool.id}", }) {
+
+    }
+  }`
+  );
+  return res.data.ticks;
+};
+
+export { getPoolData, getUniswapV3Pools, getUniswapV3PoolPosition };
