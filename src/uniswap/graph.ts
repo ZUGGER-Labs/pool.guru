@@ -422,32 +422,97 @@ const getUniswapV3PoolPosition = async ({
   return res.data.positions;
 };
 
-const getUniswapV3PoolTicks = async ({
-  chainId,
-  pool,
-  tickLower,
-  tickUpper,
-}: {
-  chainId: number;
-  pool: Pool;
-  tickLower?: number;
-  tickUpper?: number;
-}): Promise<{
-  ticks: Tick[];
-}> => {
+// todo: 根据 id 一次只返回100 个数据, 需要把 pool 的数据缓存到 redis 中!
+const getPoolsByIdList = async (chainId: number, idList: string[]) => {
   const endpoint = getNetworkDexEndpoint(chainId);
-  const res = await _query(
-    endpoint,
-    `query ticks {
-    bundles {
-      ethPriceUSD
-    }
-    ticks(where: {pool: "${pool.id}", }) {
+  const idLen = idList.length;
 
+  let pools: Pool[] = [];
+  let ethPriceUSD = "";
+
+  for (let i = 0; i < idLen; i++) {
+    const ids =
+      idList.slice(i*100, (i+1) * 100).reduce((acc, id) => {
+        return acc + `"${id}",`;
+      }, "[") + "]";
+
+      // console.log('ids:', ids)
+    const res = await _query(
+      endpoint,
+      `query pools {
+      bundles {
+        ethPriceUSD
+      }
+      pools (where: {id_in: ${ids} }) {
+        id
+        token0 {
+          decimals
+          derivedETH
+          id
+          symbol
+          name
+        }
+        token1 {
+          decimals
+          derivedETH
+          id
+          symbol
+          name
+        }
+        feeTier
+        liquidity
+        tick
+        sqrtPrice
+        feesUSD
+        volumeUSD
+        totalValueLockedUSD
+        createdAtTimestamp
+      }
+    }`
+    );
+
+    if (!res || res.errors || res.pools.length === 0) {
+      break;
     }
-  }`
-  );
-  return res.data.ticks;
+
+    ethPriceUSD = res.bundles[0].ethPriceUSD;
+    pools = pools.concat(res.pools);
+  }
+
+  return { pools, ethPriceUSD };
 };
 
-export { getPoolData, getUniswapV3Pools, getUniswapV3PoolPosition };
+// const getUniswapV3PoolTicks = async ({
+//   chainId,
+//   pool,
+//   tickLower,
+//   tickUpper,
+// }: {
+//   chainId: number;
+//   pool: Pool;
+//   tickLower?: number;
+//   tickUpper?: number;
+// }): Promise<{
+//   ticks: Tick[];
+// }> => {
+//   const endpoint = getNetworkDexEndpoint(chainId);
+//   const res = await _query(
+//     endpoint,
+//     `query ticks {
+//     bundles {
+//       ethPriceUSD
+//     }
+//     ticks(where: {pool: "${pool.id}", }) {
+
+//     }
+//   }`
+//   );
+//   return res.data.ticks;
+// };
+
+export {
+  getPoolData,
+  getUniswapV3Pools,
+  getUniswapV3PoolPosition,
+  getPoolsByIdList,
+};
