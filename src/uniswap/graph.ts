@@ -465,6 +465,8 @@ const getPoolsByIdList = async (chainId: number, idList: string[]) => {
         sqrtPrice
         feesUSD
         volumeUSD
+        feeGrowthGlobal0X128
+        feeGrowthGlobal1X128
         totalValueLockedUSD
         createdAtTimestamp
       }
@@ -481,6 +483,7 @@ const getPoolsByIdList = async (chainId: number, idList: string[]) => {
 
   return { pools, ethPriceUSD };
 };
+
 
 // const getUniswapV3PoolTicks = async ({
 //   chainId,

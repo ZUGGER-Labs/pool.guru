@@ -38,6 +38,8 @@ export interface Token {
   tokenDayData: TokenDayData[];
   totalValueLockedUSD: string;
   poolCount: number;
+
+  derivedETH?: number
 }
 
 export interface PoolDayData {
@@ -107,3 +109,49 @@ export interface Position {
   feeGrowthInside0LastX128: string;
   feeGrowthInside1LastX128: string;
 }
+
+export enum PositionStrategy {
+  LONG = "LONG",
+  MIDDLE = "MIDDLE",
+  SHORT = "SHORT",
+}
+
+export interface PositionColumnDataType {
+  key: string;
+  positionId: string;
+  isActive: boolean;
+  strategy: PositionStrategy;
+  roi: number;
+  apr: number;
+  liquidity: bigint;
+  priceRange: {
+    lower: number;
+    upper: number;
+    current: number;
+  };
+  createdAt: number;
+
+  // Additional data
+  maxDailyPriceFluctuation?: number;
+  maxWeeklyPriceFluctuation?: number;
+  token0Amount: number;
+  token1Amount: number;
+  token0Price: number;
+  token1Price: number;
+  totalFeeUSD: number;
+  claimedFee0: number;
+  claimedFee1: number;
+  unclaimedFee0: number;
+  unclaimedFee1: number;
+  hourlyFeeUSD: number;
+
+  // Filtering data
+  unclaimedROI: number;
+
+  // liquidity convert to USD
+  // token0Amount * token0Price(USD) + token1Amount * token1Price(USD)
+  assetUSD: number
+  pool?: Pool
+  position?: Position
+}
+
