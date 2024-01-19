@@ -36,7 +36,7 @@ const _processTokenInfo = (token: Token) => {
   return token;
 };
 
-const getBulkTokens = async (
+export const getBulkTokens = async (
   endpoint: string,
   tokenAddresses: string[]
 ): Promise<Token[]> => {
@@ -270,7 +270,7 @@ const getPoolData = async ({
   return res.data.pool;
 };
 
-// get uniswap v3 pools
+// get uniswap v3 pools & tokens
 const getUniswapV3Pools = async ({
   chainId,
   total,
@@ -321,6 +321,7 @@ const getUniswapV3Pools = async ({
           sqrtPrice
           feesUSD
           volumeUSD
+          txCount
           totalValueLockedUSD
           createdAtTimestamp
           poolDayData(first: 30, skip: 1, orderBy: date, orderDirection: desc) {
@@ -359,67 +360,6 @@ const getUniswapV3Pools = async ({
     console.warn("fetch pools failed:", chainId, err);
     return { pools: [], tokens: [] };
   }
-};
-
-// questions:
-// 1. 如何计算一个 position liquidity 对应的 USD
-// 2.
-// get uniswap v3 pool positions
-const getUniswapV3PoolPosition = async ({
-  chainId,
-  pool,
-}: {
-  chainId: number;
-  pool: Pool;
-}): Promise<{
-  positions: Position[];
-}> => {
-  const endpoint = getNetworkDexEndpoint(chainId);
-  const res = await _query(
-    endpoint,
-    `query pools {
-    bundles {
-      ethPriceUSD
-    }
-    positions(where: {pool: "${pool.id}", liquidity_gt: "0"}) {
-      liquidity
-      owner
-      id
-      tickLower {
-        feesUSD
-        collectedFeesUSD
-        collectedFeesToken1
-        collectedFeesToken0
-        createdAtBlockNumber
-        createdAtTimestamp
-        feeGrowthOutside0X128
-        feeGrowthOutside1X128
-        liquidityGross
-        id
-        liquidityNet
-        liquidityProviderCount
-        tickIdx
-      }
-      tickUpper {
-        collectedFeesToken0
-        collectedFeesToken1
-        collectedFeesUSD
-        createdAtTimestamp
-        feeGrowthOutside0X128
-        feeGrowthOutside1X128
-        feesUSD
-        id
-        liquidityGross
-        liquidityNet
-        liquidityProviderCount
-        tickIdx
-      }
-      withdrawnToken0
-      withdrawnToken1
-    }
-  }`
-  );
-  return res.data.positions;
 };
 
 // todo: 根据 id 一次只返回100 个数据, 需要把 pool 的数据缓存到 redis 中!
@@ -516,6 +456,5 @@ const getPoolsByIdList = async (chainId: number, idList: string[]) => {
 export {
   getPoolData,
   getUniswapV3Pools,
-  getUniswapV3PoolPosition,
   getPoolsByIdList,
 };

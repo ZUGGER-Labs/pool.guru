@@ -27,6 +27,7 @@ interface TokenDayData {
 }
 
 export interface Token {
+  chainId?: string | number
   id: string;
   name: string;
   symbol: string;
@@ -35,7 +36,7 @@ export interface Token {
   decimals: string;
 
   // For pool overview
-  tokenDayData: TokenDayData[];
+  tokenDayData?: TokenDayData[];
   totalValueLockedUSD: string;
   poolCount: number;
 
@@ -78,6 +79,7 @@ export interface Pool {
   token1: Token;
   volumeUSD: string;
   feesUSD: string;
+  txCount: string;
   totalValueLockedUSD: string;
   poolDayData: PoolDayData[];
   

@@ -7,21 +7,23 @@ const httpsProxyAgent = require('https-proxy-agent')
 
 const TOKEN_URLS = DEFAULT_LIST_OF_LISTS;
 
-const CHAINID_MAPPING = {
-  1: "ethereum",
-  3: "ethereum",
-  4: "ethereum",
-  5: "ethereum",
-  42: "ethereum",
-  80001: "ethereum",
-  10: "optimism",
-  420: "optimism",
-  137: "polygon",
-  42161: "arbitrum",
-  42220: "celo",
-  44787: "celo",
-  56: "bnb",
-};
+// 修改版本: 不区分不同的链
+
+// const CHAINID_MAPPING = {
+//   1: "ethereum",
+//   3: "ethereum",
+//   4: "ethereum",
+//   5: "ethereum",
+//   42: "ethereum",
+//   80001: "ethereum",
+//   10: "optimism",
+//   420: "optimism",
+//   137: "polygon",
+//   42161: "arbitrum",
+//   42220: "celo",
+//   44787: "celo",
+//   56: "bnb",
+// };
 
 Promise.all(TOKEN_URLS.map(async (url) => {
   // return axios.get(url, 
@@ -53,20 +55,23 @@ Promise.all(TOKEN_URLS.map(async (url) => {
     return tokens
       .filter((t) => t !== undefined && t.logoURI)
       .reduce((result, curr) => {
-        const platform = CHAINID_MAPPING[+curr.chainId];
-        if (platform === undefined) return result;
-        if (!result[platform]) result[platform] = {};
+        // const platform = CHAINID_MAPPING[+curr.chainId];
+        // if (platform === undefined) return result;
+        // if (!result[platform]) result[platform] = {};
 
         let logoURI = curr.logoURI;
         if (logoURI.indexOf("ipfs://") !== -1) {
           logoURI = logoURI.replace(`ipfs://`, `https://ipfs.io/ipfs/`);
         }
-        result[platform][curr.address.toLowerCase()] = logoURI;
+        if (result[curr.address.toLowerCase()]) {
+          console.log(`token ${curr.address} logo already exist, replace it`)
+        }
+        result[curr.address.toLowerCase()] = logoURI;
         return result;
       }, {});
   })
   .then((data) => {
-    const filepath = "./src/uniswap/chainTokenImageURI.json";
+    const filepath = "./src/uniswap/tokenImageURI.json";
 
     fs.writeFileSync(filepath, JSON.stringify(data, 2, 2));
     console.log(`[DONE] Generated token image URI mapping file to ${filepath}`);

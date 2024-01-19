@@ -37,3 +37,4 @@ next-env.d.ts
 
 .env
 src/uniswap/tokenImageURI.json
+src/uniswap/chainTokenImageURI.json

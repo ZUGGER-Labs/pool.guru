@@ -6,6 +6,8 @@ const _query = async (endpoint: string, query: string): Promise<any> => {
   });
 
   if (resp.status !== 200) {
+    console.log('query:', query)
+    console.log('invalid resp:', resp)
     throw new Error("invalid response status: " + resp.status);
   }
 

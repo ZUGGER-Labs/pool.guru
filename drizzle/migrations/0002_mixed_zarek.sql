@@ -1,0 +1,1 @@
+ALTER TABLE "tokens" ALTER COLUMN "symbol" SET DATA TYPE varchar;

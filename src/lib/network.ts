@@ -15,6 +15,17 @@ const CHAIN_NAME: Record<number, string> = {
   [ChainId.BASE]: "base",
 };
 
+const CHAIN_ID_BY_NAME: Record<string, number> = {
+  "ethereum": ChainId.MAINNET,
+  "arbitrum": ChainId.ARBITRUM_ONE,
+  "optimism": ChainId.OPTIMISM,
+  "polygon": ChainId.POLYGON,
+  "celo": ChainId.CELO,
+  "bnb": ChainId.BNB,
+  "avax": ChainId.AVALANCHE,
+  "base": ChainId.BASE,
+};
+
 const CHAIN_BLOCK_SUBGRAPH_URL: Record<number, string> = {
   [ChainId.MAINNET]: "https://api.thegraph.com/subgraphs/name/blocklytics/ethereum-blocks",
   [ChainId.ARBITRUM_ONE]: "https://api.thegraph.com/subgraphs/name/ianlapham/arbitrum-one-blocks",
@@ -85,6 +96,7 @@ function getBlockQueryEndpoint(chainId: number) {
 }
 
 export {
+  CHAIN_ID_BY_NAME,
   getNetworkDexEndpoint,
   getBlockQueryEndpoint,
   getNetworkName,

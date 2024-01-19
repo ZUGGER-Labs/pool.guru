@@ -1,0 +1,27 @@
+{
+  "version": "5",
+  "dialect": "pg",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1705650030400,
+      "tag": "0000_soft_wendell_rand",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1705652912172,
+      "tag": "0001_green_revanche",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1705653095268,
+      "tag": "0002_mixed_zarek",
+      "breakpoints": true
+    }
+  ]
+}

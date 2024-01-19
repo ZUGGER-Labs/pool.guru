@@ -21,6 +21,77 @@ interface PositionParams {
   orderDirection?: string;
 }
 
+// questions:
+// 1. 如何计算一个 position liquidity 对应的 USD
+// 2.
+// get uniswap v3 pool positions
+const getUniswapV3PoolPosition = async ({
+  chainId,
+  pool,
+}: {
+  chainId: number;
+  pool: Pool;
+}): Promise<{
+  positions: Position[];
+}> => {
+  const endpoint = getNetworkDexEndpoint(chainId);
+  const res = await _query(
+    endpoint,
+    `query pools {
+    bundles {
+      ethPriceUSD
+    }
+    positions(where: {pool: "${pool.id}", liquidity_gt: "0"}) {
+      owner
+      id
+      pool {
+        id
+        liquidity
+      }
+      tickLower {
+        feesUSD
+        collectedFeesUSD
+        collectedFeesToken1
+        collectedFeesToken0
+        createdAtTimestamp
+        feeGrowthOutside0X128
+        feeGrowthOutside1X128
+        liquidityGross
+        id
+        liquidityNet
+        tickIdx
+      }
+      tickUpper {
+        feesUSD
+        collectedFeesToken0
+        collectedFeesToken1
+        collectedFeesUSD
+        createdAtTimestamp
+        feeGrowthOutside0X128
+        feeGrowthOutside1X128
+        id
+        liquidityGross
+        liquidityNet
+        tickIdx
+      }
+      depositedToken0
+      depositedToken1
+      liquidity
+      collectedFeesToken0
+      collectedFeesToken1
+      feeGrowthInside0LastX128
+      feeGrowthInside1LastX128
+      transaction {
+        timestamp
+      }
+      withdrawnToken0
+      withdrawnToken1
+    }
+  }`
+  );
+  return res.data.positions;
+};
+
 // pid: pool address
 const getPositions = async (
   chainId: number,
@@ -260,4 +331,4 @@ const processPosition = async (
   } as PositionColumnDataType;
 };
 
-export { getPositions, processPositions };
+export { getPositions, processPositions, getUniswapV3PoolPosition };
