@@ -96,6 +96,7 @@ function getBlockQueryEndpoint(chainId: number) {
 }
 
 export {
+  CHAIN_NAME,
   CHAIN_ID_BY_NAME,
   getNetworkDexEndpoint,
   getBlockQueryEndpoint,
