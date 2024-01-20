@@ -174,7 +174,7 @@ const getPositions = async (
 };
 
 // 分析 position 的 asset apy roi, position 不一定属于同一个 pool
-const processPositions = async (
+const processPositions = (
   chainId: number,
   ethPriceUSD: number,
   positions: Position[],
@@ -188,14 +188,20 @@ const processPositions = async (
       console.warn("not found pool:", pos.pool?.id);
       continue;
     }
-    const item = await processPosition(chainId, ethPriceUSD, pos, pool);
+    try {
+    const item = processPosition(chainId, ethPriceUSD, pos, pool);
     result.push(item);
+    } catch (err) {
+      console.log('position: ', pos)
+      console.log('pool:', pool)
+      console.error(err)
+    }
   }
 
   return result;
 };
 
-const processPosition = async (
+const processPosition = (
   chainId: number,
   ethPriceUSD: number,
   pos: Position,
@@ -275,6 +281,12 @@ const processPosition = async (
     isPairToggled ? token0 : token1
   );
   console.log('unclaimedFees:', unclaimedFees)
+  if (Number.isNaN(unclaimedFees[0]) || Number.isNaN(unclaimedFees[1])) {
+    console.log('pool:', pool)
+    console.log('pos:', pos)
+    throw new Error('calculate unclaimed fee failed')
+  }
+
   const unclaimedFee0 = isPairToggled ? unclaimedFees[1] : unclaimedFees[0];
   const unclaimedFee1 = isPairToggled ? unclaimedFees[0] : unclaimedFees[1];
   const totalFee0 = claimedFee0 + unclaimedFee0;

@@ -311,9 +311,11 @@ const getUniswapV3Pools = async ({
           id
           token0 {
             id
+            decimals
           }
           token1 {
             id
+            decimals
           }
           feeTier
           liquidity
@@ -322,6 +324,8 @@ const getUniswapV3Pools = async ({
           feesUSD
           volumeUSD
           txCount
+          feeGrowthGlobal0X128
+          feeGrowthGlobal1X128
           totalValueLockedUSD
           createdAtTimestamp
           poolDayData(first: 30, skip: 1, orderBy: date, orderDirection: desc) {

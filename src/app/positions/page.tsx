@@ -16,7 +16,7 @@ async function Positions() {
   console.log('positions:', positions)
   console.log('ethPriceUSD:', ethPriceUSD, idList.length, poolDatas.length)
   // console.log('pools Data:', poolDatas)
-  const processedPositions: PositionColumnDataType[] = await processPositions(chainId, +ethPriceUSD, positions, poolsMap)
+  const processedPositions: PositionColumnDataType[] = processPositions(chainId, +ethPriceUSD, positions, poolsMap)
 
   return (
     <div>

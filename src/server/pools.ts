@@ -11,10 +11,11 @@ import { and, eq } from "drizzle-orm";
 import getRedis from "./redis";
 import { RedisClientType } from "redis";
 import { CHAIN_NAME, DEX_TYPES } from "@/lib/network";
+import { now } from "./utils";
 
-function getChainPoolKey(chainId: number): string {
-  const RedisPoolsKey = 'pools'
-  return RedisPoolsKey + ":" + chainId
+function chainPoolKey(chainId: number): string {
+  const RedisPoolsKey = "pools";
+  return RedisPoolsKey + ":" + chainId;
 }
 
 function toDBPool(
@@ -81,6 +82,51 @@ async function getPoolInfos(chainId: number) {
 }
 
 // 按照 tvl 排序的 pools
+async function getUniswapv3PoolById(chainId: number, poolId: string) {
+  const client = getGraphClient(chainId, false);
+
+  const res = await client.query({
+    query: gql`
+      query pool($id: String!) {
+        pool(id: $id) {
+          id
+          token0 {
+            id
+            decimals
+          }
+          token1 {
+            id
+            decimals
+          }
+          feeTier
+          liquidity
+          tick
+          sqrtPrice
+          feesUSD
+          volumeUSD
+          txCount
+          feeGrowthGlobal0X128
+          feeGrowthGlobal1X128
+          totalValueLockedUSD
+          createdAtTimestamp
+        }
+      }
+    `,
+    variables: {
+      id: poolId,
+    },
+  });
+
+  if (res.errors || !res.data || !res.data.pool) {
+    console.error(res.errors);
+    throw new Error('fetch pool failed')
+    return null;
+  }
+
+  return res.data.pool;
+}
+
+// 按照 tvl 排序的 pools
 async function getUniswapv3Pools(
   chainId: number,
   total: number = 0,
@@ -90,7 +136,7 @@ async function getUniswapv3Pools(
   const take = total === 0 ? 1000 : total > 1000 ? 1000 : total;
   const client = getGraphClient(chainId, false);
   let pools: Pool[] = [];
-  const queries: QueryOptions[] = []
+  const queries: QueryOptions[] = [];
 
   for (let i = 0; ; i++) {
     if (i * take > 5000) {
@@ -119,9 +165,11 @@ async function getUniswapv3Pools(
             id
             token0 {
               id
+              decimals
             }
             token1 {
               id
+              decimals
             }
             feeTier
             liquidity
@@ -130,6 +178,8 @@ async function getUniswapv3Pools(
             feesUSD
             volumeUSD
             txCount
+            feeGrowthGlobal0X128
+            feeGrowthGlobal1X128
             totalValueLockedUSD
             createdAtTimestamp
             poolDayData(
@@ -156,8 +206,8 @@ async function getUniswapv3Pools(
         volUSD: volUSD,
       },
     });
-    if (total > 0 && (i+1)*take > total) {
-      break
+    if (total > 0 && (i + 1) * take > total) {
+      break;
     }
     // console.log("res:", res);
     // if (res.errors || !res.data || res.data.pools.length === 0) {
@@ -168,12 +218,12 @@ async function getUniswapv3Pools(
     //   break;
     // }
   }
-  const resList = await Promise.all(queries.map(q => client.query(q)))
+  const resList = await Promise.all(queries.map((q) => client.query(q)));
   for (let res of resList) {
     if (res.errors || !res.data || res.data.pools.length === 0) {
-      continue
+      continue;
     }
-    pools = pools.concat(res.data.pools)
+    pools = pools.concat(res.data.pools);
   }
   // console.log(
   //   `getPools: chainId=${chainId} tvlUSD_gt=${tvlUSD} pools=${pools.length}`
@@ -221,13 +271,15 @@ async function getAllChainPools(tvlUSD = 5000, volUSD = 500) {
   ];
   const poolsMap: { [key: string]: Pool } = {};
 
-  const poolsList = await Promise.all(chains.map(cid => getUniswapv3Pools(cid, 0, tvlUSD, volUSD)))
+  const poolsList = await Promise.all(
+    chains.map((cid) => getUniswapv3Pools(cid, 0, tvlUSD, volUSD))
+  );
 
-  for (let i = 0; i < chains.length; i ++) {
-    const pools = poolsList[i]
-    const chainId = chains[i]
+  for (let i = 0; i < chains.length; i++) {
+    const pools = poolsList[i];
+    const chainId = chains[i];
     for (let p of pools) {
-      const key = chainId + "-" + p.id
+      const key = chainId + "-" + p.id;
       poolsMap[key] = p;
     }
   }
@@ -236,18 +288,21 @@ async function getAllChainPools(tvlUSD = 5000, volUSD = 500) {
 }
 
 // 从 redis 中 load 所有的 pools
-async function hgetPools(rc: any, chainId: number): Promise<{[key: string]: Pool}> {
-  const poolsResp = await rc.hGetAll(getChainPoolKey(chainId))
-  const pools: {[key: string]: Pool} = {}
+async function hgetPools(
+  rc: any,
+  chainId: number
+): Promise<{ [key: string]: Pool }> {
+  const poolsResp = await rc.hGetAll(chainPoolKey(chainId));
+  const pools: { [key: string]: Pool } = {};
   for (let pid in poolsResp) {
-    pools[pid] = JSON.parse(poolsResp[pid]) as Pool
+    pools[pid] = JSON.parse(poolsResp[pid]) as Pool;
   }
 
-  return pools
+  return pools;
 }
 
 async function syncPoolToRedis(rc: any, chainId: number, pool: Pool) {
-  await rc.hSet(getChainPoolKey(chainId), pool.id, JSON.stringify(pool))
+  await rc.hSet(chainPoolKey(chainId), pool.id, JSON.stringify(pool));
 }
 
 export interface PoolRoutineOpts {
@@ -259,51 +314,72 @@ export interface PoolRoutineOpts {
 }
 
 async function chainPoolsRoutine(chainId: number, opts: PoolRoutineOpts) {
-  const rc = await getRedis()
-  const tm1 = new Date().getTime()
-  const items = await getUniswapv3Pools(chainId, opts.total, opts.tvlUSD, opts.volUSD)
-  const graphPools = _.keyBy(items, (item) => item.id)
-  const redisPools = await hgetPools(rc, chainId)
-  const tm2 = new Date().getTime()
-  const chainName = CHAIN_NAME[chainId]
+  const rc = await getRedis();
+  const tm1 = new Date().getTime();
+  const items = await getUniswapv3Pools(
+    chainId,
+    opts.total,
+    opts.tvlUSD,
+    opts.volUSD
+  );
+  const graphPools = _.keyBy(items, (item) => item.id);
+  const redisPools = await hgetPools(rc, chainId);
+  const tm2 = new Date().getTime();
+  const chainName = CHAIN_NAME[chainId];
 
-  console.log('--------------------------------------------------------------------')
-  console.log(`fetch ${chainName} pools used: ${tm2 - tm1} ms`)
-  console.log(`${chainName} pools from graph: ${_.size(graphPools)}, pools in redis: ${_.size(redisPools)}`)
-  let changed = 0, notexist = 0
+  let tm = now();
+  console.log(
+    "--------------------------------------------------------------------"
+  );
+  console.log(`${tm}: fetch ${chainName} pools used: ${tm2 - tm1} ms`);
+  console.log(
+    `${tm}: ${chainName} pools from graph: ${_.size(
+      graphPools
+    )}, pools in redis: ${_.size(redisPools)}`
+  );
+  let changed = 0,
+    notexist = 0;
   for (let pid in graphPools) {
-    const gPool = graphPools[pid]
-    const rPool = redisPools[pid]
+    const gPool = graphPools[pid];
+    const rPool = redisPools[pid];
     if (rPool) {
       // exist in redis, diff with txCount
-      if ((+rPool.txCount) !== (+gPool.txCount)) {
-        changed ++
+      if (+rPool.txCount !== +gPool.txCount) {
+        changed++;
         // console.log(`chain ${chainId} pool ${poolId} txCount changed: redis=${rPool.txCount} lates=${gPool.txCount}`)
       }
     } else {
-      await syncPoolToRedis(rc, chainId, gPool)
-      notexist ++
+      await syncPoolToRedis(rc, chainId, gPool);
+      notexist++;
     }
   }
-  console.log(`${chainName} pools changed: `, changed, 'new pool:', notexist)
+  tm = now();
+  console.log(
+    `${tm}: ${chainName} pools changed: `,
+    changed,
+    "new pool:",
+    notexist
+  );
 }
 
-
-function runPoolRoutine(chains: {[key: number]: PoolRoutineOpts}) {
+function runPoolRoutine(chains: { [key: number]: PoolRoutineOpts }) {
   for (let chainId in chains) {
-    const opts = chains[chainId]
+    const opts = chains[chainId];
 
-    setInterval(async () => {
-      await chainPoolsRoutine(+chainId, {});
-    }, opts.interval ? opts.interval : 15000)
+    setInterval(
+      async () => {
+        await chainPoolsRoutine(+chainId, {});
+      },
+      opts.interval ? opts.interval : 15000
+    );
   }
 }
 
-runPoolRoutine({
-  1: {},
-  [ChainId.BASE]: {interval: 5000},
-  [ChainId.BNB]: {interval: 5000},
-})
+// runPoolRoutine({
+//   1: {},
+//   [ChainId.BASE]: {interval: 5000},
+//   [ChainId.BNB]: {interval: 5000},
+// })
 // getPools(1, 0, 5000)
 
-export { getChainPoolKey, getPoolInfos, runPoolRoutine };
+export { chainPoolKey, getUniswapv3Pools, getPoolInfos, runPoolRoutine, getUniswapv3PoolById };

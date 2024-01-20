@@ -1,6 +1,7 @@
 import {
   serial,
   integer,
+  bigint,
   text,
   pgTable,
   timestamp,
@@ -49,7 +50,7 @@ export const dbPoolData = pgTable(
     id: serial("id").primaryKey(),
     chainId: integer("chainId").default(1),
     poolId: varchar("poolId", { length: 120 }).notNull(),
-    date: integer("date").notNull(),
+    date: bigint("date", { mode: "number" }).notNull(),
     open: varchar("open", { length: 32 }).notNull(),
     high: varchar("high", { length: 32 }).notNull(),
     low: varchar("low", { length: 32 }).notNull(),
@@ -74,17 +75,23 @@ export const dbPools = pgTable(
     feeTier: integer("feeTier").notNull(),
     token0: varchar("token0", { length: 120 }).notNull(),
     token1: varchar("token1", { length: 120 }).notNull(),
-    liquidity: varchar("liquidity", { length: 64 }).notNull().default('0'),
+    liquidity: varchar("liquidity", { length: 80 }).notNull().default("0"),
     tick: varchar("tick", { length: 20 }).notNull(),
-    sqrtPrice: varchar("sqrtPrice", { length: 64 }).notNull(),
-    token0Price: varchar("token0Price", { length: 64 }).notNull(),
-    token1Price: varchar("token1Price", { length: 64 }).notNull(),
-    feeGrowthGlobal0X128: varchar("feeGrowthGlobal0X128", { length: 64 }).notNull(),
-    feeGrowthGlobal1X128: varchar("feeGrowthGlobal1X128", { length: 64 }).notNull(),
-    totalValueLockedUSD: varchar("totalValueLockedUSD", { length: 64 }).notNull(),
+    sqrtPrice: varchar("sqrtPrice", { length: 80 }).notNull(),
+    token0Price: varchar("token0Price", { length: 80 }).notNull(),
+    token1Price: varchar("token1Price", { length: 80 }).notNull(),
+    feeGrowthGlobal0X128: varchar("feeGrowthGlobal0X128", {
+      length: 64,
+    }).notNull(),
+    feeGrowthGlobal1X128: varchar("feeGrowthGlobal1X128", {
+      length: 64,
+    }).notNull(),
+    totalValueLockedUSD: varchar("totalValueLockedUSD", {
+      length: 64,
+    }).notNull(),
     tvlUSD: decimal("tvlUSD", { precision: 128, scale: 32 }).notNull(), // decimal of totalValueLockedUSD
-    txCount: integer('txCount').default(0).notNull(),
-    createdAt: integer("createdAt").notNull(),
+    txCount: integer("txCount").default(0).notNull(),
+    createdAt: bigint("createdAt", { mode: "number" }).notNull(),
   },
   (table) => {
     return {
@@ -112,13 +119,13 @@ export const dbPositions = pgTable(
     tickLower_feeGrowthOutside0X128: varchar(
       "tickLower_feeGrowthOutside0X128",
       {
-        length: 64,
+        length: 80,
       }
     ).notNull(),
     tickLower_feeGrowthOutside1X128: varchar(
       "tickLower_feeGrowthOutside1X128",
       {
-        length: 64,
+        length: 80,
       }
     ).notNull(),
 
@@ -126,32 +133,32 @@ export const dbPositions = pgTable(
     tickUpper_feeGrowthOutside0X128: varchar(
       "tickUpper_feeGrowthOutside0X128",
       {
-        length: 64,
+        length: 80,
       }
     ).notNull(),
     tickUpper_feeGrowthOutside1X128: varchar(
       "tickUpper_feeGrowthOutside1X128",
       {
-        length: 64,
+        length: 80,
       }
     ).notNull(),
 
-    depositedToken0: varchar("depositedToken0", { length: 64 }).notNull(),
-    depositedToken1: varchar("depositedToken1", { length: 64 }).notNull(),
-    liquidity: varchar("liquidity", { length: 64 }).notNull(),
-    createdAt: integer("createdAt").notNull(), // in second
+    depositedToken0: varchar("depositedToken0", { length: 80 }).notNull(),
+    depositedToken1: varchar("depositedToken1", { length: 80 }).notNull(),
+    liquidity: varchar("liquidity", { length: 80 }).notNull(),
+    createdAt: bigint("createdAt", { mode: "number" }).notNull(), // in second
     assetUSD: decimal("assetUSD", { precision: 128, scale: 32 }).notNull(),
     collectedFeesToken0: varchar("collectedFeesToken0", {
-      length: 64,
+      length: 80,
     }).notNull(),
     collectedFeesToken1: varchar("collectedFeesToken1", {
-      length: 64,
+      length: 80,
     }).notNull(),
     feeGrowthInside0LastX128: varchar("feeGrowthInside0LastX128", {
-      length: 64,
+      length: 80,
     }).notNull(),
     feeGrowthInside1LastX128: varchar("feeGrowthInside1LastX128", {
-      length: 64,
+      length: 80,
     }).notNull(),
   },
   (table) => {
@@ -165,6 +172,61 @@ export const dbPositions = pgTable(
   }
 );
 
+export const dbPositionDatas = pgTable(
+  "positionDatas",
+  {
+    id: serial("id").primaryKey(),
+    posTokenId: integer("posTokenId").notNull(), // position NFT tokenId
+    chainId: varchar("chainId", { length: 10 }).default("1"),
+    dex: varchar("dex", { length: 32 }).default("uniswapv3"),
+    poolId: varchar("poolId", { length: 120 }).notNull(),
+    token0: varchar("token0", { length: 120 }),
+    token1: varchar("token1", { length: 120 }),
+    owner: varchar("owner", { length: 120 }),
+    isActive: boolean("isActive").default(true),
+    strategy: varchar("strategy", { length: 32 }),
+    apy: decimal("apy", { precision: 128, scale: 32 }),
+    roi: decimal("roi", { precision: 128, scale: 32 }),
+    unclaimedROI: decimal("unclaimedROI", { precision: 128, scale: 32 }),
+
+    token0Amount: varchar("token0Amount", { length: 80 }).notNull(),
+    token1Amount: varchar("token1Amount", { length: 80 }).notNull(),
+    depositedToken0: varchar("depositedToken0", { length: 80 }).notNull(),
+    depositedToken1: varchar("depositedToken1", { length: 80 }).notNull(),
+    liquidity: varchar("liquidity", { length: 80 }).notNull(),
+    createdAt: bigint("createdAt", { mode: "number" }).notNull(), // in second
+    assetUSD: decimal("assetUSD", { precision: 128, scale: 32 }).notNull(),
+    claimedFee0: varchar("claimedFee0", {
+      length: 80,
+    }).notNull(),
+    claimedFee1: varchar("claimedFee1", {
+      length: 80,
+    }).notNull(),
+    unclaimedFee0: varchar("unclaimedFee0", {
+      length: 80,
+    }).notNull(),
+    unclaimedFee1: varchar("unclaimedFee1", {
+      length: 80,
+    }).notNull(),
+    feeGrowthInside0LastX128: varchar("feeGrowthInside0LastX128", {
+      length: 80,
+    }).notNull(),
+    feeGrowthInside1LastX128: varchar("feeGrowthInside1LastX128", {
+      length: 80,
+    }).notNull(),
+  },
+  (table) => {
+    return {
+      poolIdx: index("pos_data_idx").on(table.poolId, table.chainId),
+      liquidityIdx: index("pos_data_liquidity_idx").on(table.liquidity),
+      tvlIdx: index("pos_data_tvl_idx").on(table.assetUSD),
+      ownerIdx: index("pos_data_owner_idx").on(table.owner),
+      createdIdx: index("pos_data_created_idx").on(table.createdAt),
+    };
+  }
+);
+
 export type DBToken = typeof dbTokens.$inferSelect;
 export type DBPool = typeof dbPools.$inferSelect;
 export type DBPosition = typeof dbPositions.$inferSelect;
+export type DBPositionData = typeof dbPositionDatas.$inferInsert;
