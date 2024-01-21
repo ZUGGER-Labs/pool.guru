@@ -31,8 +31,11 @@ function ComboInput({
   tokens: Token[];
   className?: string;
 }) {
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState("");
+
   return (
-    <Popover.Root>
+    <Popover.Root open={open} onOpenChange={setOpen}>
       <Popover.Trigger asChild>
         <div className="relative flex-1 flex items-center">
           <span className="absolute left-1 text-center w-6">
@@ -68,13 +71,29 @@ function ComboInput({
       </Popover.Trigger>
 
       <Popover.Content
-        className="rounded p-5 w-[260px] bg-white shadow-[0_10px_38px_-10px_hsla(206,22%,7%,.35),0_10px_20px_-15px_hsla(206,22%,7%,.2)] focus:shadow-[0_10px_38px_-10px_hsla(206,22%,7%,.35),0_10px_20px_-15px_hsla(206,22%,7%,.2),0_0_0_2px_theme(colors.violet7)] will-change-[transform,opacity] data-[state=open]:data-[side=top]:animate-slideDownAndFade data-[state=open]:data-[side=right]:animate-slideLeftAndFade data-[state=open]:data-[side=bottom]:animate-slideUpAndFade data-[state=open]:data-[side=left]:animate-slideRightAndFade"
+        asChild
+        align="start"
+        className="calc-token rounded md:w-[450px] p-5 w-full bg-white shadow-[0_10px_38px_-10px_hsla(206,22%,7%,.35),0_10px_20px_-15px_hsla(206,22%,7%,.2)] focus:shadow-[0_10px_38px_-10px_hsla(206,22%,7%,.35),0_10px_20px_-15px_hsla(206,22%,7%,.2),0_0_0_2px_theme(colors.violet7)] will-change-[transform,opacity] data-[state=open]:data-[side=top]:animate-slideDownAndFade data-[state=open]:data-[side=right]:animate-slideLeftAndFade data-[state=open]:data-[side=bottom]:animate-slideUpAndFade data-[state=open]:data-[side=left]:animate-slideRightAndFade"
         sideOffset={5}
       >
         <Command>
           {/* <Command.Input /> */}
           <Command.List className="w-full">
-            <Command.Item>Apple</Command.Item>
+            <Command.Group>
+              <Command.Item
+                onSelect={(currentValue) => {
+                  setValue(currentValue === value ? "" : currentValue);
+                  setOpen(false);
+                }}
+              >
+                <div className="flex justify-between w-full">
+                  <span>Apple</span>
+                  <span>100 pools</span>
+                </div>
+              </Command.Item>
+              <Command.Item>Oracle</Command.Item>
+              <Command.Item>Brew</Command.Item>
+            </Command.Group>
           </Command.List>
         </Command>
       </Popover.Content>
@@ -110,6 +129,7 @@ function Calculator({ tokens }: { tokens: Token[] }) {
               <span>
                 <input
                   value={amount}
+                  onChange={(val) => setAmount(+val)}
                   className="border focus-visible:outline-none pl-5 leading-[46px] text-[#111827] border-black focus:rounded-none focus:border focus:border-[#B7B1A6]"
                   type="number"
                 />
