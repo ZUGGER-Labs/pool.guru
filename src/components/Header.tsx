@@ -13,6 +13,7 @@ import { CiLight } from "react-icons/ci";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useTranslation } from "@/i18n/client";
 import { getLang } from "@/i18n/settings";
+import ConnectButton from "./ConnectButton";
 
 // const Header = ({ t, pathname, lang, searchParams }: HeaderProps) => {
 const Header = () => {
@@ -26,7 +27,7 @@ const Header = () => {
   const navList = [
     {
       url: "/",
-      title: t("Home"),
+      title: t("Calculator"),
       isActive: false,
     },
     {
@@ -51,21 +52,22 @@ const Header = () => {
   });
 
   return (
-    <div className="sticky top-0 z-40 w-full backdrop-blur flex-none transition-colors duration-500 lg:z-50 lg:border-b lg:border-slate-900/10 dark:border-slate-50/[0.06] bg-white/95 supports-backdrop-blur:bg-white/60 dark:bg-transparent">
-      <div className="max-w-5xl mx-auto">
+    <div className="sticky top-0 z-40 w-full backdrop-blur flex-none transition-colors duration-500 lg:z-50 lg:border-b lg:border-slate-900/10 dark:border-slate-50/[0.06] dark:bg-transparent">
+      <div className="mx-auto">
         <div className="py-1 border-b border-slate-900/10 lg:px-8 lg:border-0 dark:border-slate-300/10 px-4">
-          <div className="relative flex items-center">
+          <div className="relative md:min-h-20 flex justify-center items-center">
             <Link
               href={"/" + query}
               className="mr-6 flex-none overflow-hidden md:w-auto"
             >
               {/* <MdCurrencyBitcoin className="w-8 h-8 text-[#F7931A]" /> */}
-              <Image src="/fav.svg" alt="logo" width={32} height={32} />
+              {/* <Image src="/fav.svg" alt="logo" width={32} height={32} /> */}
+              <span className="text-[2rem] font-bold">PoolGuru</span>
             </Link>
 
-            <div className="relative flex items-center ml-6">
+            <div className="hidden md:relative md:flex-1 md:flex md:justify-center md:items-center">
               <nav className="leading-6 font-medium text-primary dark:text-slate-200">
-                <ul className="flex space-x-8 text-[15px]">
+                <ul className="flex space-x-8 text-[1.25rem]">
                   {navList.map((nav, idx) => {
                     return (
                       <li className="space-x-8" key={idx}>
@@ -87,13 +89,12 @@ const Header = () => {
             </div>
 
             <div className="relative flex items-center ml-auto">
-              <div className="flex items-center border-l border-slate-200 ml-6 pl-3 dark:border-slate-800">
-                <button className="ml-3 block">
-                  <CiGlobe className="w-6 h-6 text-blue-600" />
-                </button>
+              <div className="flex items-center ml-6 pl-3 dark:border-slate-800">
                 <button className="ml-3 mr-3 block">
                   <CiLight className="w-6 h-6 text-blue-600" />
                 </button>
+
+                <ConnectButton />
               </div>
             </div>
           </div>
