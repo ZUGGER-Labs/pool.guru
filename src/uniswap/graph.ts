@@ -1,4 +1,10 @@
-import { Pool, PoolVolumeFeeData, Token } from "@/interfaces/uniswap.interface";
+import {
+  Pool,
+  PoolVolumeFeeData,
+  Position,
+  Tick,
+  Token,
+} from "@/interfaces/uniswap.interface";
 import {
   DEX_TYPES,
   getNetworkDexEndpoint,
@@ -30,7 +36,7 @@ const _processTokenInfo = (token: Token) => {
   return token;
 };
 
-const getBulkTokens = async (
+export const getBulkTokens = async (
   endpoint: string,
   tokenAddresses: string[]
 ): Promise<Token[]> => {
@@ -141,7 +147,7 @@ const getPoolVolumeFees24H = async (
     for (let i = 0; i < pools.length; i++) {
       const skip = take * i;
       if (skip > 5000) {
-        break
+        break;
       }
       queires.push(
         _query(
@@ -215,7 +221,56 @@ const getPoolVolumeFees24H = async (
   return npools;
 };
 
-// get uniswap v3 pools
+const getPoolData = async ({
+  chainId,
+  poolAddress,
+}: {
+  chainId: number;
+  poolAddress: string;
+}): Promise<Pool> => {
+  const endpoint = getNetworkDexEndpoint(chainId);
+  const res = await _query(
+    endpoint,
+    `query pool {
+    {
+    pool (id: "${poolAddress}") {
+      id
+      token0 {
+        decimals
+        id
+        name
+        symbol
+      }
+      token1 {
+        decimals
+        id
+        name
+        symbol
+      }
+      feeTier
+      liquidity
+      tick
+      sqrtPrice
+      feesUSD
+      volumeUSD
+      totalValueLockedUSD
+      createdAtTimestamp
+      poolDayData(first: 1, skip: 1, orderBy: date, orderDirection: desc) {
+        date
+        feesUSD
+        volumeUSD
+        open 
+        high
+        low
+        close
+      }
+    }
+  }`
+  );
+  return res.data.pool;
+};
+
+// get uniswap v3 pools & tokens
 const getUniswapV3Pools = async ({
   chainId,
   total,
@@ -247,7 +302,7 @@ const getUniswapV3Pools = async ({
     for (let i = 0; i < max; i++) {
       skip = i * take;
       if (skip > 5000) {
-        break
+        break;
       }
       const res = await _query(
         endpoint,
@@ -256,9 +311,11 @@ const getUniswapV3Pools = async ({
           id
           token0 {
             id
+            decimals
           }
           token1 {
             id
+            decimals
           }
           feeTier
           liquidity
@@ -266,6 +323,9 @@ const getUniswapV3Pools = async ({
           sqrtPrice
           feesUSD
           volumeUSD
+          txCount
+          feeGrowthGlobal0X128
+          feeGrowthGlobal1X128
           totalValueLockedUSD
           createdAtTimestamp
           poolDayData(first: 30, skip: 1, orderBy: date, orderDirection: desc) {
@@ -306,4 +366,99 @@ const getUniswapV3Pools = async ({
   }
 };
 
-export { getUniswapV3Pools };
+// todo: 根据 id 一次只返回100 个数据, 需要把 pool 的数据缓存到 redis 中!
+const getPoolsByIdList = async (chainId: number, idList: string[]) => {
+  const endpoint = getNetworkDexEndpoint(chainId);
+  const idLen = idList.length;
+
+  let pools: Pool[] = [];
+  let ethPriceUSD = "";
+
+  for (let i = 0; i < idLen; i++) {
+    const ids =
+      idList.slice(i*100, (i+1) * 100).reduce((acc, id) => {
+        return acc + `"${id}",`;
+      }, "[") + "]";
+
+      // console.log('ids:', ids)
+    const res = await _query(
+      endpoint,
+      `query pools {
+      bundles {
+        ethPriceUSD
+      }
+      pools (where: {id_in: ${ids} }) {
+        id
+        token0 {
+          decimals
+          derivedETH
+          id
+          symbol
+          name
+        }
+        token1 {
+          decimals
+          derivedETH
+          id
+          symbol
+          name
+        }
+        feeTier
+        liquidity
+        tick
+        sqrtPrice
+        feesUSD
+        volumeUSD
+        feeGrowthGlobal0X128
+        feeGrowthGlobal1X128
+        totalValueLockedUSD
+        createdAtTimestamp
+      }
+    }`
+    );
+
+    if (!res || res.errors || res.pools.length === 0) {
+      break;
+    }
+
+    ethPriceUSD = res.bundles[0].ethPriceUSD;
+    pools = pools.concat(res.pools);
+  }
+
+  return { pools, ethPriceUSD };
+};
+
+
+// const getUniswapV3PoolTicks = async ({
+//   chainId,
+//   pool,
+//   tickLower,
+//   tickUpper,
+// }: {
+//   chainId: number;
+//   pool: Pool;
+//   tickLower?: number;
+//   tickUpper?: number;
+// }): Promise<{
+//   ticks: Tick[];
+// }> => {
+//   const endpoint = getNetworkDexEndpoint(chainId);
+//   const res = await _query(
+//     endpoint,
+//     `query ticks {
+//     bundles {
+//       ethPriceUSD
+//     }
+//     ticks(where: {pool: "${pool.id}", }) {
+
+//     }
+//   }`
+//   );
+//   return res.data.ticks;
+// };
+
+export {
+  getPoolData,
+  getUniswapV3Pools,
+  getPoolsByIdList,
+};

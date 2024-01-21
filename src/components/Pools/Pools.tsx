@@ -39,7 +39,6 @@ function FeeTier({fr, className}: {fr: number | string, className?: string}) {
     return <span className={className}>{ratio}</span>
 }
 
-
 function Pools() {
   const [poolsInfo, setPoolsInfo] = useState<{
     pools: Pool[];
