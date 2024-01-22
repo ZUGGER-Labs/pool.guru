@@ -165,10 +165,14 @@ async function getUniswapv3Pools(
             id
             token0 {
               id
+              name
+              symbol
               decimals
             }
             token1 {
               id
+              name
+              symbol
               decimals
             }
             feeTier
