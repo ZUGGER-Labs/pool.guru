@@ -1,13 +1,159 @@
 import { PageProps } from "@/lib/page";
-import Calculator from '@/components/Calculator/Calculator';
+import Calculator from "@/components/Calculator/Calculator";
 import { Token } from "@/interfaces/uniswap.interface";
 
 export default function Home(pageProps: PageProps) {
-  const tokens: Token[] = [] // getTokens()
-  
+  const tokens: Token[] = [
+    {
+      id: "0x1111",
+      name: "ETH",
+      symbol: "ETH",
+      logoURI: "",
+      decimals: "18",
+      totalValueLockedUSD: "0",
+      volumeUSD: "0",
+      poolCount: 100,
+    },{
+      id: "0x1112",
+      name: "ARB",
+      symbol: "ARB",
+      logoURI: "",
+      decimals: "18",
+      totalValueLockedUSD: "0",
+      volumeUSD: "0",
+      poolCount: 35,
+    },{
+      id: "0x1113",
+      name: "OP",
+      symbol: "OP",
+      logoURI: "",
+      decimals: "18",
+      totalValueLockedUSD: "0",
+      volumeUSD: "0",
+      poolCount: 24,
+    },{
+      id: "0x1114",
+      name: "UNI",
+      symbol: "UNI",
+      logoURI: "",
+      decimals: "18",
+      totalValueLockedUSD: "0",
+      volumeUSD: "0",
+      poolCount: 21,
+    },{
+      id: "0x1115",
+      name: "LINK",
+      symbol: "LINK",
+      logoURI: "",
+      decimals: "18",
+      totalValueLockedUSD: "0",
+      volumeUSD: "0",
+      poolCount: 10,
+    },{
+      id: "0x1116",
+      name: "1INCH",
+      symbol: "1INCH",
+      logoURI: "",
+      decimals: "18",
+      totalValueLockedUSD: "0",
+      volumeUSD: "0",
+      poolCount: 10,
+    },{
+      id: "0x1117",
+      name: "COMP",
+      symbol: "COMP",
+      logoURI: "",
+      decimals: "18",
+      totalValueLockedUSD: "0",
+      volumeUSD: "0",
+      poolCount: 10,
+    },{
+      id: "0x1118",
+      name: "AAVE",
+      symbol: "AAVE",
+      logoURI: "",
+      decimals: "18",
+      totalValueLockedUSD: "0",
+      volumeUSD: "0",
+      poolCount: 10,
+    },{
+      id: "0x1119",
+      name: "CRV",
+      symbol: "CRV",
+      logoURI: "",
+      decimals: "18",
+      totalValueLockedUSD: "0",
+      volumeUSD: "0",
+      poolCount: 10,
+    },{
+      id: "0x1120",
+      name: "LSD",
+      symbol: "LSD",
+      logoURI: "",
+      decimals: "18",
+      totalValueLockedUSD: "0",
+      volumeUSD: "0",
+      poolCount: 10,
+    },{
+      id: "0x1121",
+      name: "SUSHI",
+      symbol: "SUSHI",
+      logoURI: "",
+      decimals: "18",
+      totalValueLockedUSD: "0",
+      volumeUSD: "0",
+      poolCount: 10,
+    },{
+      id: "0x1122",
+      name: "CAKE",
+      symbol: "CAKE",
+      logoURI: "",
+      decimals: "18",
+      totalValueLockedUSD: "0",
+      volumeUSD: "0",
+      poolCount: 10,
+    },{
+      id: "0x1123",
+      name: "VENUS",
+      symbol: "VENUS",
+      logoURI: "",
+      decimals: "18",
+      totalValueLockedUSD: "0",
+      volumeUSD: "0",
+      poolCount: 10,
+    },{
+      id: "0x1124",
+      name: "MDEX",
+      symbol: "MDEX",
+      logoURI: "",
+      decimals: "18",
+      totalValueLockedUSD: "0",
+      volumeUSD: "0",
+      poolCount: 10,
+    },{
+      id: "0x1125",
+      name: "GMX",
+      symbol: "GMX",
+      logoURI: "",
+      decimals: "18",
+      totalValueLockedUSD: "0",
+      volumeUSD: "0",
+      poolCount: 10,
+    },{
+      id: "0x1126",
+      name: "DG",
+      symbol: "DG",
+      logoURI: "",
+      decimals: "18",
+      totalValueLockedUSD: "0",
+      volumeUSD: "0",
+      poolCount: 10,
+    },
+  ]; // getTokens()
+
   return (
     <main className="flex flex-col items-center justify-between p-24 md:max-w-[1600px] m-auto">
       <Calculator tokens={tokens} />
     </main>
-  )
+  );
 }
