@@ -1,15 +1,15 @@
-/*!********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
-  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[11].oneOf[2].use[1]!./node_modules/next/dist/build/webpack/loaders/next-font-loader/index.js??ruleSet[1].rules[11].oneOf[2].use[2]!./node_modules/next/font/google/target.css?{"path":"src/app/layout.tsx","import":"Inter","arguments":[{"subsets":["latin"]}],"variableName":"inter"} ***!
-  \********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/*!**************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[11].oneOf[2].use[1]!./node_modules/next/dist/build/webpack/loaders/next-font-loader/index.js??ruleSet[1].rules[11].oneOf[2].use[2]!./node_modules/next/font/google/target.css?{"path":"src/app/layout.tsx","import":"Roboto_Flex","arguments":[{"subsets":["latin"]}],"variableName":"inter"} ***!
+  \**************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
 @font-face {
-  font-family: '__Inter_Fallback_725fdb';
+  font-family: '__Roboto_Flex_Fallback_22147c';
   src: local("Arial");
-  ascent-override:90.20%;
-  descent-override:22.48%;
+  ascent-override:93.29%;
+  descent-override:24.55%;
   line-gap-override:0.00%;
-  size-adjust:107.40%;
-}@font-face {font-family: '__Inter_Fallback_Fallback_725fdb';src: local("Arial");ascent-override: 90.20%;descent-override: 22.48%;line-gap-override: 0.00%;size-adjust: 107.40%
-}.__className_725fdb {font-family: '__Inter_Fallback_725fdb', '__Inter_Fallback_Fallback_725fdb';font-style: normal
+  size-adjust:99.45%;
+}@font-face {font-family: '__Roboto_Flex_Fallback_Fallback_22147c';src: local("Arial");ascent-override: 93.29%;descent-override: 24.55%;line-gap-override: 0.00%;size-adjust: 99.45%
+}.__className_22147c {font-family: '__Roboto_Flex_Fallback_22147c', '__Roboto_Flex_Fallback_Fallback_22147c';font-style: normal
 }
 /*!*****************************************************************************************************************************************************************************************************************************************************************!*\
   !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[11].oneOf[12].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[11].oneOf[12].use[3]!./src/app/globals.css ***!
@@ -597,9 +597,6 @@ video {
 .w-\[150px\] {
   width: 150px;
 }
-.w-\[260px\] {
-  width: 260px;
-}
 .w-full {
   width: 100%;
 }
@@ -692,9 +689,6 @@ video {
 .bg-white\/95 {
   background-color: rgb(255 255 255 / 0.95);
 }
-.p-1 {
-  padding: 0.25rem;
-}
 .p-24 {
   padding: 6rem;
 }
@@ -703,6 +697,9 @@ video {
 }
 .p-5 {
   padding: 1.25rem;
+}
+.p-1 {
+  padding: 0.25rem;
 }
 .px-4 {
   padding-left: 1rem;
@@ -738,10 +735,6 @@ video {
 .text-center {
   text-align: center;
 }
-.text-2xl {
-  font-size: 1.5rem;
-  line-height: 2rem;
-}
 .text-\[1\.25rem\] {
   font-size: 1.25rem;
 }
@@ -754,6 +747,10 @@ video {
 .text-sm {
   font-size: 0.875rem;
   line-height: 1.25rem;
+}
+.text-2xl {
+  font-size: 1.5rem;
+  line-height: 2rem;
 }
 .font-bold {
   font-weight: 700;
@@ -851,6 +848,31 @@ body {
     rgb(var(--background-start-rgb));
 }
 
+.calc-token [cmdk-item]:first-child {
+  margin-top: 8px;
+}
+.calc-token [cmdk-item] {
+  content-visibility: auto;
+  cursor: pointer;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px;
+  color: #171717;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+  will-change: background,color;
+  transition: all .15s ease;
+  transition-property: none;
+}
+
+.calc-token [cmdk-item][data-selected=true] {
+  background: #ededed;
+  color: #171717;
+}
+
 .hover\:text-blue-500:hover {
   --tw-text-opacity: 1;
   color: rgb(59 130 246 / var(--tw-text-opacity));
@@ -890,6 +912,10 @@ body {
 
   .md\:w-\[43rem\] {
     width: 43rem;
+  }
+
+  .md\:w-\[450px\] {
+    width: 450px;
   }
 
   .md\:w-auto {
@@ -966,4 +992,3 @@ body {
     color: rgb(226 232 240 / var(--tw-text-opacity));
   }
 }
-
