@@ -32,7 +32,7 @@ export default function RootLayout({
           <Header />
         </Suspense>
 
-        <div className="mx-auto p-4">{children}</div>
+        <div className="mx-auto">{children}</div>
         <Toaster />
       <Suspense fallback={<FooterFallback />}>
         <Footer />

@@ -1,0 +1,6 @@
+{
+  "/positions/page": "app/positions/page.js",
+  "/pools/page": "app/pools/page.js",
+  "/page": "app/page.js",
+  "/favicon.ico/route": "app/favicon.ico/route.js"
+}
