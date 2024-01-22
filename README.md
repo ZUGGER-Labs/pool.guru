@@ -34,3 +34,12 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+
+# Issues
+
+20240120
+处理 position 时的问题:
+1. unclaimedFees 值为负数
+unclaimedFees: [ -316969627303695860000000000000000000000000000000, -316969627303695870000000000000000000]
+2. roi 为 NaN
+

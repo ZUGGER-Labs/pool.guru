@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Inter, Roboto_Flex } from 'next/font/google'
 import './globals.css'
 import { Suspense } from 'react'
 import { Toaster } from "react-hot-toast";
@@ -10,7 +10,7 @@ import HeaderFallback from '@/components/HeaderFallback'
 import FooterFallback from '@/components/FooterFallback'
 import { cn } from '@/utils/cn'
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Roboto_Flex({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'Create Next App',
@@ -27,12 +27,12 @@ export default function RootLayout({
 
   return (
     <html lang="en">
-    <body className={cn(inter.className, "min-h-screen")}>
+    <body className={cn(inter.className, "bg-[#FAF4F0] min-h-screen")}>
         <Suspense fallback={<HeaderFallback />}>
           <Header />
         </Suspense>
 
-        <div className="bg-[#f2f2f2] p-4">{children}</div>
+        <div className="mx-auto">{children}</div>
         <Toaster />
       <Suspense fallback={<FooterFallback />}>
         <Footer />

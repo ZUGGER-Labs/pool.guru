@@ -27,6 +27,7 @@ interface TokenDayData {
 }
 
 export interface Token {
+  chainId?: string | number
   id: string;
   name: string;
   symbol: string;
@@ -35,18 +36,30 @@ export interface Token {
   decimals: string;
 
   // For pool overview
-  tokenDayData: TokenDayData[];
+  tokenDayData?: TokenDayData[];
   totalValueLockedUSD: string;
   poolCount: number;
+
+  derivedETH?: number
 }
 
 export interface PoolDayData {
   date: number;
   volumeUSD: string;
+  feesUSD: string
   open: string;
   high: string;
   low: string;
   close: string;
+}
+
+export type PoolVolumeFeeData = {
+  fees24h: string | number
+  volume24h: string | number
+  fees7d: string | number
+  volume7d: string | number
+  fees30d: string | number
+  volume30d: string | number
 }
 
 export interface Pool {
@@ -65,12 +78,18 @@ export interface Pool {
   token0: Token;
   token1: Token;
   volumeUSD: string;
+  feesUSD: string;
+  txCount: string;
   totalValueLockedUSD: string;
   poolDayData: PoolDayData[];
+  
+  volFeeData?: PoolVolumeFeeData
 }
 
 export interface Position {
   id: string;
+  owner?: string;
+  pool?: {id: string};
   tickLower: {
     tickIdx: string;
     feeGrowthOutside0X128: string;
@@ -92,3 +111,49 @@ export interface Position {
   feeGrowthInside0LastX128: string;
   feeGrowthInside1LastX128: string;
 }
+
+export enum PositionStrategy {
+  LONG = "LONG",
+  MIDDLE = "MIDDLE",
+  SHORT = "SHORT",
+}
+
+export interface PositionColumnDataType {
+  key: string;
+  positionId: string;
+  isActive: boolean;
+  strategy: PositionStrategy;
+  roi: number;
+  apr: number;
+  liquidity: bigint;
+  priceRange: {
+    lower: number;
+    upper: number;
+    current: number;
+  };
+  createdAt: number;
+
+  // Additional data
+  maxDailyPriceFluctuation?: number;
+  maxWeeklyPriceFluctuation?: number;
+  token0Amount: number;
+  token1Amount: number;
+  token0Price: number;
+  token1Price: number;
+  totalFeeUSD: number;
+  claimedFee0: number;
+  claimedFee1: number;
+  unclaimedFee0: number;
+  unclaimedFee1: number;
+  hourlyFeeUSD: number;
+
+  // Filtering data
+  unclaimedROI: number;
+
+  // liquidity convert to USD
+  // token0Amount * token0Price(USD) + token1Amount * token1Price(USD)
+  assetUSD: number
+  pool?: Pool
+  position?: Position
+}
+
