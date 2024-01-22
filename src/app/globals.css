@@ -31,3 +31,29 @@ body {
     )
     rgb(var(--background-start-rgb));
 }
+
+.calc-token [cmdk-item]:first-child {
+  margin-top: 8px;
+}
+.calc-token [cmdk-item] {
+  content-visibility: auto;
+  cursor: pointer;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px;
+  color: #171717;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  will-change: background,color;
+  transition: all .15s ease;
+  transition-property: none;
+}
+
+.calc-token [cmdk-item][data-selected=true] {
+  background: #ededed;
+  color: #171717;
+}

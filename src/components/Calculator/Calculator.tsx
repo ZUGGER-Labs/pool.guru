@@ -3,7 +3,8 @@
 import { Token } from "@/interfaces/uniswap.interface";
 import * as Popover from "@radix-ui/react-popover";
 import { Command } from "cmdk";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { AutoComplete } from "../ui/AutoComplete";
 
 function AddIcon() {
   return (
@@ -31,8 +32,22 @@ function ComboInput({
   tokens: Token[];
   className?: string;
 }) {
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState("");
+  const [search, setSearch] = useState("");
+  const ref = useRef<HTMLInputElement>(null);
+
+  const onSearchInput = (evt: React.ChangeEvent<HTMLInputElement>) => {
+    const val = evt.target.value;
+    setSearch(evt.target.value);
+    if (val.trim()) {
+      setOpen(true);
+    }
+    ref.current && ref.current.focus();
+  };
+
   return (
-    <Popover.Root>
+    <Popover.Root open={open} onOpenChange={setOpen}>
       <Popover.Trigger asChild>
         <div className="relative flex-1 flex items-center">
           <span className="absolute left-1 text-center w-6">
@@ -49,7 +64,13 @@ function ComboInput({
               />
             </svg>
           </span>
-          <input className="flex-1 pl-8 focus-visible:outline-none border border-black leading-[46px] min-w-14" />
+          <input
+            value={search}
+            ref={ref}
+            onFocus={() => ref.current?.focus()}
+            onChange={onSearchInput}
+            className="flex-1 pl-8 focus-visible:outline-none border border-black leading-[46px] min-w-14"
+          />
           <span className="absolute right-1 text-center w-6">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -68,13 +89,55 @@ function ComboInput({
       </Popover.Trigger>
 
       <Popover.Content
-        className="rounded p-5 w-[260px] bg-white shadow-[0_10px_38px_-10px_hsla(206,22%,7%,.35),0_10px_20px_-15px_hsla(206,22%,7%,.2)] focus:shadow-[0_10px_38px_-10px_hsla(206,22%,7%,.35),0_10px_20px_-15px_hsla(206,22%,7%,.2),0_0_0_2px_theme(colors.violet7)] will-change-[transform,opacity] data-[state=open]:data-[side=top]:animate-slideDownAndFade data-[state=open]:data-[side=right]:animate-slideLeftAndFade data-[state=open]:data-[side=bottom]:animate-slideUpAndFade data-[state=open]:data-[side=left]:animate-slideRightAndFade"
+        asChild
+        align="start"
+        className="calc-token rounded md:w-[450px] max-h-80 overflow-y-auto p-5 w-full bg-white will-change-[transform,opacity] data-[state=open]:data-[side=top]:animate-slideDownAndFade data-[state=open]:data-[side=right]:animate-slideLeftAndFade data-[state=open]:data-[side=bottom]:animate-slideUpAndFade data-[state=open]:data-[side=left]:animate-slideRightAndFade"
         sideOffset={5}
       >
-        <Command>
+        <Command shouldFilter={false}>
           {/* <Command.Input /> */}
           <Command.List className="w-full">
-            <Command.Item>Apple</Command.Item>
+            <Command.Group>
+              {tokens.map((token) => {
+                const needle = search.trim().toLowerCase();
+                if (needle) {
+                  if (
+                    token.id.toLowerCase() === needle ||
+                    token.symbol.toLowerCase().includes(needle)
+                  ) {
+                    return (
+                      <Command.Item
+                        key={token.id}
+                        onSelect={(currentValue) => {
+                          setValue(currentValue === value ? "" : currentValue);
+                          setOpen(false);
+                        }}
+                      >
+                        <div className="flex justify-between w-full">
+                          <span>{token.symbol}</span>
+                          <span>{token.poolCount} pools</span>
+                        </div>
+                      </Command.Item>
+                    );
+                  }
+                } else {
+                  return (
+                    <Command.Item
+                      key={token.id}
+                      onSelect={(currentValue) => {
+                        setValue(currentValue === value ? "" : currentValue);
+                        setOpen(false);
+                      }}
+                    >
+                      <div className="flex justify-between w-full">
+                        <span>{token.symbol}</span>
+                        <span>{token.poolCount} pools</span>
+                      </div>
+                    </Command.Item>
+                  );
+                }
+              })}
+            </Command.Group>
           </Command.List>
         </Command>
       </Popover.Content>
@@ -99,7 +162,7 @@ function Calculator({ tokens }: { tokens: Token[] }) {
         <div className="">
           <p className="font-bold leading-5">Assets</p>
           <div className="flex flex-row items-center">
-            <ComboInput tokens={tokens} />
+            <AutoComplete tokens={tokens} emptyMessage="" />
             <div className="mx-6">
               <AddIcon />
             </div>
@@ -110,6 +173,7 @@ function Calculator({ tokens }: { tokens: Token[] }) {
               <span>
                 <input
                   value={amount}
+                  onChange={(val) => setAmount(+val)}
                   className="border focus-visible:outline-none pl-5 leading-[46px] text-[#111827] border-black focus:rounded-none focus:border focus:border-[#B7B1A6]"
                   type="number"
                 />
