@@ -1,3 +1,5 @@
+import BigNumber from "bignumber.js";
+
 export interface Network {
   id: string;
   chainId: number;
@@ -77,10 +79,22 @@ export interface Pool {
   // For pool overview
   token0: Token;
   token1: Token;
+  token0Amount?: bigint // for calculate tvl
+  token1Amount?: bigint // for calculate tvl
   volumeUSD: string;
   feesUSD: string;
   txCount: string;
   totalValueLockedUSD: string;
+  tvlContract?: BigNumber
+  apyBy1d?: BigNumber
+  apyBy7d?: BigNumber
+  apyBy30d?: BigNumber
+  volume1D?: string
+  volume7D?: string
+  volume30D?: string
+  avgFee1D?: number
+  avgFee7D?: number
+  avgFee30D?: number
   poolDayData: PoolDayData[];
   
   volFeeData?: PoolVolumeFeeData

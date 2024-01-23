@@ -413,6 +413,15 @@ const getPoolsByIdList = async (chainId: number, idList: string[]) => {
         feeGrowthGlobal1X128
         totalValueLockedUSD
         createdAtTimestamp
+        poolDayData(first: 30, skip: 1, orderBy: date, orderDirection: desc) {
+          date
+          feesUSD
+          volumeUSD
+          open 
+          high
+          low
+          close
+        }
       }
     }`
     );
@@ -428,6 +437,49 @@ const getPoolsByIdList = async (chainId: number, idList: string[]) => {
   return { pools, ethPriceUSD };
 };
 
+// 计算 volume 1d 7d 30d, 以及平均手续费
+// graph 返回的数据中, 如果某一个没有数据, 这一天没有数据记录。
+// 这导致如果某个交易对某天没有数据的话, 最近30条数据可能并不是最近1个月的数据
+function calcPoolVolumeFee(pool: Pool, prev1d: number, prev7d: number, prev30d: number) {
+  const dataLen = pool.poolDayData.length
+  if (dataLen === 0) {
+    pool.avgFee1D = 0
+    pool.avgFee7D = 0
+    pool.avgFee30D = 0
+    // console.log(`pool ${pool.id} has no day data`)
+    return 
+  }
+
+  let fee1d = 0, fee7d = 0, fee30d = 0, d7 = 0, d30 = 0
+  for (let i = 0; i < dataLen; i ++) {
+    const data = pool.poolDayData[i]
+    if (i === 0 && data.date === prev1d) {
+      console.log(`${pool.token0.symbol}/${pool.token1.symbol} prev day feesUSD: ${data.feesUSD}`)
+      fee1d = +data.feesUSD
+    }
+    if (i < 7 && data.date >= prev7d) {
+      fee7d += +data.feesUSD
+      d7 ++
+    }
+    if (i < 30 && data.date >= prev30d) {
+      fee30d += +data.feesUSD
+      d30 ++
+    }
+  }
+
+  if (d7 > 0) {
+    fee7d = fee7d / d7
+  } // else {
+    // console.log(`pool ${pool.token0.symbol}/${pool.token1.symbol} has NO volume in latest 7 days:`, prev7d)
+  //}
+  if (d30 > 0) {
+    fee30d = fee30d / d30
+  }
+
+  pool.avgFee1D = fee1d
+  pool.avgFee7D = fee7d
+  pool.avgFee30D = fee30d
+}
 
 // const getUniswapV3PoolTicks = async ({
 //   chainId,
@@ -461,4 +513,5 @@ export {
   getPoolData,
   getUniswapV3Pools,
   getPoolsByIdList,
+  calcPoolVolumeFee
 };
