@@ -10,7 +10,7 @@ import { Command as CommandPrimitive } from "cmdk";
 import { useState, useRef, useCallback, type KeyboardEvent } from "react";
 
 import { Skeleton } from "./skeleton";
-import { cn } from "@/utils/cn";
+import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
 import { Token } from "@/interfaces/uniswap.interface";
 
