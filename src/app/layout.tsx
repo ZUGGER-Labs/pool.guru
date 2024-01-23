@@ -31,9 +31,7 @@ export default function RootLayout({
         <Suspense fallback={<HeaderFallback />}>
           <Header />
         </Suspense>
-
-        <div className="mx-auto">{children}</div>
-        <Toaster />
+        <div className="mx-auto min-h-[calc(100vh-176px)]">{children}</div>
       <Suspense fallback={<FooterFallback />}>
         <Footer />
       </Suspense>
