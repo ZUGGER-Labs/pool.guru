@@ -8,7 +8,7 @@ import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import HeaderFallback from '@/components/HeaderFallback'
 import FooterFallback from '@/components/FooterFallback'
-import { cn } from '@/utils/cn'
+import { cn } from '@/lib/utils'
 
 const inter = Roboto_Flex({ subsets: ['latin'] })
 

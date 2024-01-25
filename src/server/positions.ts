@@ -82,17 +82,32 @@ async function refreshPoolPositions(
 
     // 插入新的数据
     // await tx.insert(dbPositions).values(posData as any);
-    for (let i = 0; i < posData.length; i ++) {
-      const item = posData[i]
+    for (let i = 0; i < posData.length; i++) {
+      const item = posData[i];
       try {
-        await tx.insert(dbPositionDatas).values(item)
+        await tx.insert(dbPositionDatas).values(item);
       } catch (err) {
-        console.log('idx=%d data:', i, item)
-        console.error(err)
-        throw err
+        console.log("idx=%d data:", i, item);
+        console.error(err);
+        throw err;
       }
     }
   });
+}
+
+async function getEthPriceUSD() {
+  const client = getGraphClient(1, false);
+  const res = await client.query({
+    query: gql`
+      query pools {
+        bundles {
+          ethPriceUSD
+        }
+      }
+    `,
+  });
+
+  return res.data.bundles[0].ethPriceUSD;
 }
 
 // 查询并处理单个 pool 的 positions
@@ -182,12 +197,15 @@ async function getPoolPostions(chainId: number, pool: Pool) {
 
   return { ethPriceUSD, positions };
 }
-
+/*
 (async function () {
-  const ethusdc = await getUniswapv3PoolById(1, '0x88e6a0c2ddd26feeb64f039a2c41296fcb3f5640')
+  const ethusdc = await getUniswapv3PoolById(
+    1,
+    "0x88e6a0c2ddd26feeb64f039a2c41296fcb3f5640"
+  );
   console.log(`eth/usdc pool: ${ethusdc.id}`);
 
   await refreshPoolPositions(1, ethusdc);
 })();
-
-export { getPoolPostions, refreshPoolPositions };
+*/
+export { getPoolPostions, refreshPoolPositions, getEthPriceUSD };

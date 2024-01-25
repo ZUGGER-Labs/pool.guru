@@ -38,12 +38,12 @@
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-  will-change: background,color;
-  transition: all .15s ease;
+  will-change: background, color;
+  transition: all 0.15s ease;
   transition-property: none;
 }
 
-.calc-token [cmdk-item][data-selected=true] {
+.calc-token [cmdk-item][data-selected="true"] {
   background: #ededed;
   color: #171717;
 }

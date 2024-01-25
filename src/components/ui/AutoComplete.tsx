@@ -10,7 +10,7 @@ import { Command as CommandPrimitive } from "cmdk";
 import { useState, useRef, useCallback, type KeyboardEvent } from "react";
 
 import { Skeleton } from "./skeleton";
-import { cn } from "@/utils/cn";
+import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
 import { Token } from "@/interfaces/uniswap.interface";
 
@@ -57,7 +57,8 @@ export const AutoComplete = ({
       // This is not a default behaviour of the <input /> field
       if (event.key === "Enter" && input.value !== "") {
         const optionToSelect = tokens.find(
-          (option) => option.symbol === input.value || option.id === input.value
+          (option) => option.id === input.value
+          // (option) => option.symbol === input.value || option.id === input.value
         );
         if (optionToSelect) {
           setSelected(optionToSelect);
@@ -79,7 +80,7 @@ export const AutoComplete = ({
 
   const handleSelectOption = useCallback(
     (selectedOption: Token) => {
-      setInputValue(selectedOption.id);
+      setInputValue(selectedOption.symbol);
 
       setSelected(selectedOption);
       onValueChange?.(selectedOption);
@@ -125,12 +126,12 @@ export const AutoComplete = ({
                 <CommandGroup>
                   {tokens.map((option) => {
                     const isSelected =
-                      selected?.symbol === option.symbol ||
+                      // selected?.symbol === option.symbol ||
                       selected?.id === option.id;
                     return (
                       <CommandItem
                         key={option.id}
-                        value={option.symbol}
+                        value={option.id}
                         onMouseDown={(event) => {
                           event.preventDefault();
                           event.stopPropagation();
@@ -141,7 +142,7 @@ export const AutoComplete = ({
                           !isSelected ? "pl-8" : null
                         )}
                       >
-                        <div className="flex flex-row justify-between items-center">
+                        <div className="flex flex-row justify-between items-center w-full" title={option.id}>
                           <span className="flex flex-row items-center">
                             {isSelected ? <Check className="w-4" /> : null}
                             {option.symbol}

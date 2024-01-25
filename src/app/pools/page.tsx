@@ -1,11 +1,13 @@
-import Link from "next/link"
+import TopPool from "@/components/Pool/TopPool";
+import Link from "next/link";
 
 // Pools List
 function Pools() {
-
-    return <>
-    <Link href="/pools/0x88e6a0c2ddd26feeb64f039a2c41296fcb3f5640">ETH/USDC</Link>
-    </>
+  return (
+    <main className="flex flex-col items-center justify-between p-24 md:max-w-[1600px] m-auto">
+      <TopPool />
+    </main>
+  );
 }
 
-export default Pools
+export default Pools;
