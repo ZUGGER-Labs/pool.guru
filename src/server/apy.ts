@@ -1,10 +1,11 @@
 import { Pool } from "@/interfaces/uniswap.interface";
-import { getTokenPools } from "./pools";
+import { getTokenPools, getUniswapv3Pools } from "./pools";
 import { getEthPriceUSD } from "./positions";
 import { getPoolTokens } from "./tvl";
 import BigNumber from "bignumber.js";
 import { calcPoolVolumeFee } from "@/uniswap/graph";
 import dayjs from "dayjs";
+import { ChainId } from "@uniswap/sdk-core";
 const utc = require('dayjs/plugin/utc');  // 引入 UTC 插件
 dayjs.extend(utc);  // 使用 UTC 插件
 
@@ -16,11 +17,16 @@ function isNull(a: any): boolean {
 async function getTokenPairsByApy(tokenId: string, chainId: number) {
   const tvlUSD = 5000;
   const pools = await getTokenPools(chainId, tokenId, tvlUSD);
-  const ethPriceUSD = await getEthPriceUSD();
 
   console.log(
-    `token ${tokenId} pools with TVL>${tvlUSD} count: ${pools.length}; ethPriceUSD: ${ethPriceUSD}`
+    `token ${tokenId} pools with TVL>${tvlUSD} count: ${pools.length}`
   );
+
+  return calcPoolApy(chainId, pools, tvlUSD)
+}
+
+async function calcPoolApy(chainId: number, pools: Pool[], tvlUSD: number) {
+  const ethPriceUSD = await getEthPriceUSD();
 
   // 获取 pool 的 tvl
   await getPoolTokens(chainId, pools);
@@ -75,16 +81,19 @@ async function getTokenPairsByApy(tokenId: string, chainId: number) {
 }
 
 (async () => {
+  const chainId = ChainId.MAINNET
+  const tvlUSD = 500
   // console.log('start of today:', dayjs.utc().unix(), dayjs.utc().startOf('day').unix(), dayjs.utc().unix()-dayjs.utc().startOf('day').unix())
-  const nzpools = await getTokenPairsByApy(
-    "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-    1
-  );
+  const nzpools = 
+    // await getTokenPairsByApy("0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",56);
+    await calcPoolApy(chainId, await getUniswapv3Pools(chainId, 0, tvlUSD), tvlUSD)
+  
+  console.log(`pools in ${chainId}: ${nzpools.length}`)
 
   const top20 = nzpools.slice(0, 20);
   for (let p of top20) {
     console.log(
-      `${p.id} ${p.token0.symbol}/${p.token1.symbol} apy1d=${p.apyBy1d} apy7d=${p.apyBy7d} apy30d=${p.apyBy30d} fee1d=${p.apyBy1d} fee7d=${p.avgFee7D} tvl=${p.tvlContract}`
+      `${p.id} ${p.token0.symbol}/${p.token1.symbol} apy1d=${p.apyBy1d} apy7d=${p.apyBy7d} apy30d=${p.apyBy30d} fee1d=${p.avgFee1D} fee7d=${p.avgFee7D} tvl=${p.tvlContract}`
     );
   }
 

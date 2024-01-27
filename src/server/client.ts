@@ -25,6 +25,7 @@ export const blockClient = new ApolloClient({
 
 export const client = new ApolloClient({
   uri: 'https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3?source=uniswap',
+  // uri: 'https://api.thegraph.com/subgraphs/name/messari/uniswap-v3-ethereum',
   cache: new InMemoryCache({
     typePolicies: {
       Token: {

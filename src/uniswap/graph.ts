@@ -468,12 +468,12 @@ function calcPoolVolumeFee(pool: Pool, prev1d: number, prev7d: number, prev30d: 
   }
 
   if (d7 > 0) {
-    fee7d = fee7d / d7
+    fee7d = fee7d / 7
   } // else {
     // console.log(`pool ${pool.token0.symbol}/${pool.token1.symbol} has NO volume in latest 7 days:`, prev7d)
   //}
   if (d30 > 0) {
-    fee30d = fee30d / d30
+    fee30d = fee30d / 30
   }
 
   pool.avgFee1D = fee1d
