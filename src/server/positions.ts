@@ -12,6 +12,7 @@ import { and, eq } from "drizzle-orm";
 import { processPositions } from "@/uniswap/position";
 import { getPoolInfos, getUniswapv3PoolById, getUniswapv3Pools } from "./pools";
 import { CHAIN_NAME } from "@/lib/network";
+import getWETH from "./weth";
 
 function toPositionData(
   chainId: number,
@@ -97,17 +98,21 @@ async function refreshPoolPositions(
 
 async function getEthPriceUSD() {
   const client = getGraphClient(1, false);
+  const weth = getWETH(1)
   const res = await client.query({
     query: gql`
-      query pools {
-        bundles {
-          ethPriceUSD
+      query token($id: String!) {
+        token(id: $id) {
+          lastPriceUSD
         }
       }
     `,
+    variables: {
+      id: weth
+    }
   });
 
-  return res.data.bundles[0].ethPriceUSD;
+  return res.data.token.lastPriceUSD;
 }
 
 // 查询并处理单个 pool 的 positions

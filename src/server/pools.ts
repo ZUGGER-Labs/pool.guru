@@ -3,7 +3,7 @@ import _ from "lodash";
 import { getUniswapV3Pools } from "@/uniswap/graph";
 import { db } from "@/db/db";
 import { getGraphClient } from "./client";
-import { Token, Pool } from "@/interfaces/uniswap.interface";
+import { Token, Pool, LiquidityPool } from "@/interfaces/uniswap.interface";
 import { QueryOptions, gql } from "@apollo/client";
 import { ChainId } from "@uniswap/sdk-core";
 import { DBPool, dbPools } from "@/db/schema";
@@ -131,7 +131,7 @@ async function getUniswapv3PoolById(chainId: number, poolId: string) {
 
   return res.data.pool;
 }
-
+/*
 // pools query 的 or 条件没法用
 async function getTokenPools(
   chainId: number,
@@ -148,56 +148,34 @@ async function getTokenPools(
         $volUSD: BigDecimal!
         $tokenId: String!
       ) {
-        pools(
+        liquidityPools(
           first: 1000,
           orderBy: totalValueLockedUSD
           orderDirection: desc
           where: {
-            liquidity_gt: 0
             totalValueLockedUSD_gte: $tvlUSD
-            volumeUSD_gt: $volUSD
             token0: $tokenId
           }
         ) {
           id
-          token0 {
+          inputTokens {
             id
-            name
             symbol
             decimals
-            derivedETH
+            lastPriceUSD
           }
-          token1 {
-            id
-            name
-            symbol
-            decimals
-            derivedETH
-          }
-          feeTier
-          liquidity
+          totalLiquidity
+          totalLiquidityUSD
           tick
-          sqrtPrice
-          feesUSD
-          volumeUSD
-          txCount
-          feeGrowthGlobal0X128
-          feeGrowthGlobal1X128
           totalValueLockedUSD
-          createdAtTimestamp
-          poolDayData(
-            first: 30
-            skip: 1
-            orderBy: date
-            orderDirection: desc
-          ) {
-            date
-            feesUSD
-            volumeUSD
-            open
-            high
-            low
-            close
+          dailySnapshots(first: 30, orderBy: day, orderDirection: desc) {
+            dailyVolumeUSD
+            dailyTotalRevenueUSD
+            dailyVolumeByTokenUSD
+            day
+            totalValueLockedUSD
+            totalLiquidity
+            dailySupplySideRevenueUSD
           }
         }
       }
@@ -215,7 +193,7 @@ async function getTokenPools(
         $volUSD: BigDecimal!
         $tokenId: String!
       ) {
-        pools(
+        liquidityPools(
           first: 1000,
           orderBy: totalValueLockedUSD
           orderDirection: desc
@@ -252,19 +230,14 @@ async function getTokenPools(
           feeGrowthGlobal1X128
           totalValueLockedUSD
           createdAtTimestamp
-          poolDayData(
-            first: 30
-            skip: 1
-            orderBy: date
-            orderDirection: desc
-          ) {
-            date
-            feesUSD
-            volumeUSD
-            open
-            high
-            low
-            close
+          dailySnapshots(first: 30, orderBy: day, orderDirection: desc) {
+            dailyVolumeUSD
+            dailyTotalRevenueUSD
+            dailyVolumeByTokenUSD
+            day
+            totalValueLockedUSD
+            totalLiquidity
+            dailySupplySideRevenueUSD
           }
         }
       }
@@ -288,17 +261,17 @@ async function getTokenPools(
 
   return pools.sort((a, b) => +b.totalValueLockedUSD - +a.totalValueLockedUSD);
 }
+*/
 
 // 按照 tvl 排序的 pools, 从 graph 接口获取数据
-async function getUniswapv3Pools(
+async function getUniswapv3LiquidityPools(
   chainId: number,
   total: number = 0,
   tvlUSD: number = 5000,
-  volUSD = 0
-) {
+): Promise<LiquidityPool[]> {
   const take = total === 0 ? 1000 : total > 1000 ? 1000 : total;
   const client = getGraphClient(chainId, false);
-  let pools: Pool[] = [];
+  let pools: LiquidityPool[] = [];
   const queries: QueryOptions[] = [];
 
   for (let i = 0; ; i++) {
@@ -312,58 +285,36 @@ async function getUniswapv3Pools(
           $take: Int!
           $skip: Int!
           $tvlUSD: BigDecimal!
-          $volUSD: BigDecimal!
         ) {
-          pools(
+          liquidityPools(
             first: $take
             skip: $skip
             orderBy: totalValueLockedUSD
             orderDirection: desc
             where: {
-              liquidity_gt: 0
               totalValueLockedUSD_gte: $tvlUSD
-              volumeUSD_gte: $volUSD
             }
           ) {
             id
-            token0 {
-              id
-              name
-              symbol
-              decimals
-              derivedETH
-            }
-            token1 {
-              id
-              name
-              symbol
-              decimals
-              derivedETH
-            }
-            feeTier
-            liquidity
             tick
-            sqrtPrice
-            feesUSD
-            volumeUSD
-            txCount
-            feeGrowthGlobal0X128
-            feeGrowthGlobal1X128
             totalValueLockedUSD
-            createdAtTimestamp
-            poolDayData(
-              first: 1
-              skip: 1
-              orderBy: date
-              orderDirection: desc
-            ) {
-              date
-              feesUSD
-              volumeUSD
-              open
-              high
-              low
-              close
+            inputTokens {
+              id
+              symbol
+              decimals
+              lastPriceUSD
+            }
+            dailySnapshots(first: 30, orderBy: day, orderDirection: desc) {
+              dailyVolumeUSD
+              dailyTotalRevenueUSD
+              dailyVolumeByTokenUSD
+              day
+              totalValueLockedUSD
+              totalLiquidity
+              dailySupplySideRevenueUSD
+            }
+            fees(orderBy: feePercentage, orderDirection: desc, first: 1) {
+              feePercentage
             }
           }
         }
@@ -372,7 +323,6 @@ async function getUniswapv3Pools(
         take: take,
         skip: take * i,
         tvlUSD: tvlUSD,
-        volUSD: volUSD,
       },
     });
     if (total > 0 && (i + 1) * take > total) {
@@ -389,15 +339,16 @@ async function getUniswapv3Pools(
   }
   const resList = await Promise.all(queries.map((q) => client.query(q)));
   for (let res of resList) {
-    if (res.errors || !res.data || res.data.pools.length === 0) {
+    if (res.errors || !res.data || res.data.liquidityPools.length === 0) {
+      console.log('query pool failed:', res.errors)
       continue;
     }
-    pools = pools.concat(res.data.pools);
+    pools = pools.concat(res.data.liquidityPools);
   }
   // console.log(
   //   `getPools: chainId=${chainId} tvlUSD_gt=${tvlUSD} pools=${pools.length}`
   // );
-  return pools;
+  return pools
 }
 
 // 保存 pool 到数据库中, 如果已存在, 更新
@@ -485,11 +436,10 @@ export interface PoolRoutineOpts {
 async function chainPoolsRoutine(chainId: number, opts: PoolRoutineOpts) {
   const rc = await getRedis();
   const tm1 = new Date().getTime();
-  const items = await getUniswapv3Pools(
+  const items = await getUniswapv3LiquidityPools(
     chainId,
     opts.total,
     opts.tvlUSD,
-    opts.volUSD
   );
   const graphPools = _.keyBy(items, (item) => item.id);
   const redisPools = await hgetPools(rc, chainId);
@@ -553,9 +503,9 @@ function runPoolRoutine(chains: { [key: number]: PoolRoutineOpts }) {
 
 export {
   chainPoolKey,
-  getUniswapv3Pools,
+  getUniswapv3LiquidityPools,
   getPoolInfos,
   runPoolRoutine,
   getUniswapv3PoolById,
-  getTokenPools,
+  // getTokenPools,
 };
