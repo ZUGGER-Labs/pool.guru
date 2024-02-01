@@ -7,14 +7,21 @@ export interface PageProps {
 
 export function buildURI(
   pathname: string,
-  query: ReadonlyURLSearchParams | URLSearchParams | { [key: string]: string | string[] | undefined },
+  query:
+    | ReadonlyURLSearchParams
+    | URLSearchParams
+    | { [key: string]: string | string[] | undefined },
   key?: string,
-  val?: string
+  val?: string | null
 ) {
-  let nq = new URLSearchParams(query as any)
+  let nq = new URLSearchParams(query as any);
   if (key) {
-    nq.set(key, val!)
+    if (val) {
+      nq.set(key, val!);
+    } else {
+      nq.delete(key);
+    }
   }
-  const qs = nq.toString()
-  return (qs === '') ? pathname : pathname + '?' + qs
+  const qs = nq.toString();
+  return qs === "" ? pathname : pathname + "?" + qs;
 }

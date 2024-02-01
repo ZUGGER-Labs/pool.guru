@@ -263,6 +263,74 @@ async function getTokenPools(
 }
 */
 
+async function getPoolPrice(chainId: number, pools: LiquidityPool[], hours: number[]) {
+    const client = getGraphClient(chainId)
+
+    if (hours.length > 100) {
+      throw new Error('too many hours')
+    }
+
+    if (pools.length > 5000) {
+      throw new Error('too many pools')
+    }
+
+    const take = 100
+  const queries: QueryOptions[] = [];
+  for (let i = 0; ; i ++) {
+    if (i * 100 > 5000) {
+      // max
+      break
+    }
+
+    queries.push({
+      query: gql`
+        query pools(
+          $take: Int!
+          $skip: Int!
+          $tvlUSD: BigDecimal!
+        ) {
+          liquidityPoolHourlySnapshots (
+            first: $take
+            skip: $skip
+            orderBy: totalValueLockedUSD
+            orderDirection: desc
+            where: {
+              totalValueLockedUSD_gte: $tvlUSD
+            }
+          ) {
+            id
+            tick
+            totalValueLockedUSD
+            inputTokens {
+              id
+              symbol
+              decimals
+              lastPriceUSD
+            }
+            dailySnapshots(first: 30, orderBy: day, orderDirection: desc) {
+              dailyVolumeUSD
+              dailyTotalRevenueUSD
+              dailyVolumeByTokenUSD
+              day
+              totalValueLockedUSD
+              totalLiquidity
+              dailySupplySideRevenueUSD
+            }
+            fees(orderBy: feePercentage, orderDirection: desc, first: 1) {
+              feePercentage
+            }
+          }
+        }
+      `,
+      variables: {
+        take: take,
+        skip: take * i,
+        tvlUSD: tvlUSD,
+      },
+    });
+  }
+}
+
 // 按照 tvl 排序的 pools, 从 graph 接口获取数据
 async function getUniswapv3LiquidityPools(
   chainId: number,
@@ -507,5 +575,6 @@ export {
   getPoolInfos,
   runPoolRoutine,
   getUniswapv3PoolById,
+  getPoolPrice,
   // getTokenPools,
 };

@@ -137,6 +137,9 @@ export interface LiquidityPool {
   avgFee1D?: number
   avgFee7D?: number
   avgFee30D?: number
+  impermanentLoss1d?: BigNumber
+  impermanentLoss7d?: BigNumber
+  impermanentLoss30d?: BigNumber
   // poolDayData: PoolDayData[];
   dailySnapshots: PoolDailyData[];
   fees: {feePercentage: string}[]

@@ -1,3 +1,5 @@
+'use client';
+
 import { Pool } from "@/interfaces/uniswap.interface"
 import { useState } from "react"
 
