@@ -105,9 +105,7 @@ export interface Pool {
   avgFee1D?: number
   avgFee7D?: number
   avgFee30D?: number
-  // poolDayData: PoolDayData[];
-  dailySnapshots: PoolDailyData[];
-  fees: {feePercentage: string}[]
+  poolDayData: PoolDayData[];
   
   volFeeData?: PoolVolumeFeeData
 }

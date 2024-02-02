@@ -10,7 +10,7 @@ import { db } from "@/db/db";
 import { DBPositionData, dbPositionDatas, dbPositions } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
 import { processPositions } from "@/uniswap/position";
-import { getPoolInfos, getUniswapv3PoolById, getUniswapv3Pools } from "./pools";
+import { getPoolInfos, getUniswapv3PoolById } from "./pools";
 import { CHAIN_NAME } from "@/lib/network";
 import getWETH from "./weth";
 
@@ -97,7 +97,7 @@ async function refreshPoolPositions(
 }
 
 async function getEthPriceUSD() {
-  const client = getGraphClient(1, false);
+  const client = getGraphClient(1, 'uniswap');
   const weth = getWETH(1)
   const res = await client.query({
     query: gql`
@@ -117,7 +117,7 @@ async function getEthPriceUSD() {
 
 // 查询并处理单个 pool 的 positions
 async function getPoolPostions(chainId: number, pool: Pool) {
-  const client = getGraphClient(chainId, false);
+  const client = getGraphClient(chainId, 'uniswap');
   let positions: Position[] = [];
   let ethPriceUSD = 0;
 
