@@ -51,8 +51,8 @@ function calcOutOfRange(
 // price_to_sqrtp(5000)
 // > 5602277097478614198912276234240
 
-function priceToSqrtPrice(price: number) {
-  return BigNumber(Math.sqrt(price)).times(q96);
+function priceToSqrtPrice(price: number | string | BigNumber) {
+  return BigNumber(price).sqrt().times(q96);
 }
 
 // 根据 tick 修正后的价格
@@ -162,25 +162,25 @@ function calcX(x1: BigNumber, midTick: number, delta: number) {
 
 // calculate liquidity by token X, current price and price range
 function calcLiquidityX(
-  cprice: number,
-  range: number[],
-  amountX: string | null | undefined,
+  cprice: number | string | BigNumber,
+  range: (number | string | BigNumber)[],
+  amountX: number | string | BigNumber,
   decimals = [18, 18]
 ) {
-  if (cprice > range[1]) {
+  if (BigNumber(cprice).gt(range[1])) {
     // current price great than price range, all liquidity is provide by token Y (ex. usd)
     console.assert(
-      !amountX || amountX === "0",
+      BigNumber(amountX).eq(0),
       "cprice great than price range, amountX should be 0"
     );
     return bnZero;
   }
-  if (!amountX) {
+  if (BigNumber(amountX).eq(0)) {
     throw new Error("amount X should great than 0");
   }
 
   let spl: BigNumber;
-  if (cprice < range[0]) {
+  if (BigNumber(cprice).lt(range[0])) {
     // current price out of range
     console.log(
       "calcLiquidityX: current price less than low price range, use low price range"
@@ -201,24 +201,24 @@ function calcLiquidityX(
 
 // calculate liquidity by token Y, current price and price range
 function calcLiquidityY(
-  cprice: number,
-  range: number[],
-  amountY: string | null | undefined,
+  cprice: number | string | BigNumber,
+  range: (number | string | BigNumber)[],
+  amountY: number | string | BigNumber,
   decimals = [18, 18]
 ) {
   // L = amountY / [sqrt(ph) - sqrt(l)]
-  if (cprice < range[0]) {
+  if (BigNumber(cprice).lt(range[0])) {
     // current price less than price range, all liquidity is provide by token X (ex. ETH)
     const errmsg = `cprice ${cprice} less than price range([${range[0]}, ${range[1]}]), amountY should be 0`;
-    console.assert(!amountY || amountY === "0", errmsg);
+    console.assert(BigNumber(amountY).eq(0), errmsg);
     return bnZero;
   }
 
-  if (!amountY) {
+  if (BigNumber(amountY).eq(0)) {
     throw new Error("amount Y should great than 0");
   }
   let sph: BigNumber;
-  if (cprice > range[1]) {
+  if (BigNumber(cprice).gt(range[1])) {
     // current price out of range
     console.log(
       "calcLiquidityY: current price great than high price range, use high price range"
@@ -237,9 +237,9 @@ function calcLiquidityY(
 
 // calculate liquidity by current price, price range and token amount
 function calcLiquidity(
-  cprice: number,
-  range: number[],
-  tokenAmount: string[],
+  cprice: number | string | BigNumber,
+  range: (number | string | BigNumber)[],
+  tokenAmount: (number | string | BigNumber)[],
   decimals = [18, 18]
 ): BigNumber {
   // if (tokenAmount[0] && tokenAmount[1]) {
@@ -265,12 +265,12 @@ function calcLiquidity(
 // calculate token amount at new price
 function calcTokenAmountAtPrice(
   l: BigNumber,
-  price: number,
-  range: number[],
+  price: number | string | BigNumber,
+  range: (number | string | BigNumber)[],
   decimals = [18, 18]
 ) {
   // l = l.times(q96)
-  if (price >= range[1]) {
+  if (BigNumber(price).gte(range[1])) {
     price = range[1];
     // price rise up, all x sell to y
     const amountX = bnZero;
@@ -280,7 +280,7 @@ function calcTokenAmountAtPrice(
       .div(bn10.pow(decimals[1]));
     return [amountX, amountY];
   }
-  if (price <= range[0]) {
+  if (BigNumber(price).lte(range[0])) {
     // price go down, all y buy to x
     price = range[0];
     const amountY = bnZero;
@@ -314,12 +314,12 @@ function calcTokenAmountAtPrice(
 }
 
 function calcPriceRangeLower(
-  cprice: number,
-  upper: number,
-  tokenAmount: string[],
+  cprice: number | string | BigNumber,
+  upper: number | string | BigNumber,
+  tokenAmount: (number | string | BigNumber)[],
   decimals = [18, 18]
 ): BigNumber {
-  if (cprice >= upper) {
+  if (BigNumber(cprice).gte(upper)) {
     throw new Error("current price great than upper price");
   }
 
@@ -342,12 +342,12 @@ function calcPriceRangeLower(
 }
 
 function calcPriceRangeUpper(
-  cprice: number,
-  lower: number,
-  tokenAmount: string[],
+  cprice: number | string | BigNumber,
+  lower: number | string | BigNumber,
+  tokenAmount: (number | string | BigNumber)[],
   decimals = [18, 18]
 ) {
-  if (cprice <= lower) {
+  if (BigNumber(cprice).lte(lower)) {
     throw new Error("current price less than lower price");
   }
 
@@ -378,16 +378,16 @@ function calcPriceRangeUpper(
 // nprice: 新价格
 // range: LP的价格区间
 // tokenAmount: 当前token数量, 可以只提供一种
-function calcPriceChangeTokenAmount(
-  cprice: number,
-  nprice: number,
-  range: number[],
-  tokenAmount: string[],
+function calcTokenAmountOnPriceChange(
+  cprice: number | string | BigNumber,
+  nprice: number | string | BigNumber,
+  range: (number | string | BigNumber)[],
+  tokenAmount: (number | string | BigNumber)[],
   decimals = [18, 18]
 ) {
-  const l = calcLiquidity(cprice, range, tokenAmount);
+  const l = calcLiquidity(cprice, range, tokenAmount, decimals);
 
-  return calcTokenAmountAtPrice(l, nprice, range);
+  return calcTokenAmountAtPrice(l, nprice, range, decimals);
 }
 
 // y2:
@@ -459,7 +459,7 @@ console.log(
 );
 // console.log('price range upper:', calcPriceRangeUpper(2000, 2222, tokenAmounts, decimals))
 console.log(
-  calcPriceChangeTokenAmount(
+  calcTokenAmountOnPriceChange(
     2000,
     1800,
     [1800, 2222],
@@ -468,7 +468,7 @@ console.log(
   )
 );
 console.log(
-  calcPriceChangeTokenAmount(
+  calcTokenAmountOnPriceChange(
     2000,
     2222,
     [1800, 2222],
@@ -517,7 +517,7 @@ delta: 890  0.00002214623670168481
 export {
   priceToSqrtPrice,
   getSqrtRatioAtTick,
-  calcPriceChangeTokenAmount,
+  calcTokenAmountOnPriceChange,
   calcLiquidity,
   calcLiquidityX,
   calcLiquidityY,
