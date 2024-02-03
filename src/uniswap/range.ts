@@ -94,7 +94,7 @@ function getSqrtRatioAtTick(tick: number) {
   return BigNumber(tickBasePrice).pow(tick).sqrt().times(q96);
 }
 
-console.log(calcOutOfRange(2300, 2200, 1000, 100));
+// console.log('calcOutOfRange:', calcOutOfRange(2300, 2200, 1000, 100));
 
 function equation(delta: any, y2: any, y: any, tickMid: any) {
   const base = tickBasePrice;
@@ -258,7 +258,7 @@ function calcLiquidity(
 
   if (!l1) return l0;
 
-  console.log(`liquidity x: ${l0}, liquidity y: ${l1}`);
+  // console.log(`liquidity x: ${l0}, liquidity y: ${l1}`);
   return l0.gt(l1) ? l1 : l0;
 }
 
@@ -444,7 +444,14 @@ function findBestDelta(
   );
 }
 
-findBestDelta(42191, 41000, 500, 100, "BNB");
+// findBestDelta(42191, 41000, 500, 100, "BNB");
+
+// const tokenAmounts = ["0.25", "1500"]; // 0.836144305852
+// const decimals = [18, 18];
+// console.log('price range upper:', calcPriceRangeUpper(2000, 1400, tokenAmounts, decimals))
+
+// console.log(calcTokenAmountOnPriceChange(2000, 1800, [1400, 2236], tokenAmounts))
+// //console.log()
 
 /*
 const tokenAmounts = ["0.5", "1000"];0.836144305852

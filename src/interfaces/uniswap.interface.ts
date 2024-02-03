@@ -140,7 +140,19 @@ export interface LiquidityPool {
   impermanentLoss30d?: BigNumber
   // poolDayData: PoolDayData[];
   dailySnapshots: PoolDailyData[];
+  poolDayData?: PoolDayData[];
   fees: {feePercentage: string}[]
+
+  price?: PriceOpenClose
+}
+
+export type PriceOpenClose = {
+  open1D: string | BigNumber;
+  close1D: string | BigNumber;
+  open7D: string | BigNumber;
+  close7D: string | BigNumber;
+  open30D: string | BigNumber
+  close30D: string | BigNumber
 }
 
 export interface Position {

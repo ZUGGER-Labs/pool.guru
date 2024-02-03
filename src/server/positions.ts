@@ -12,7 +12,7 @@ import { and, eq } from "drizzle-orm";
 import { processPositions } from "@/uniswap/position";
 import { getPoolInfos, getUniswapv3PoolById } from "./pools";
 import { CHAIN_NAME } from "@/lib/network";
-import getWETH from "./weth";
+import { getWETH } from "../uniswap/wrapper";
 
 function toPositionData(
   chainId: number,
@@ -97,7 +97,7 @@ async function refreshPoolPositions(
 }
 
 async function getEthPriceUSD() {
-  const client = getGraphClient(1, 'uniswap');
+  const client = getGraphClient(1, 'messari');
   const weth = getWETH(1)
   const res = await client.query({
     query: gql`

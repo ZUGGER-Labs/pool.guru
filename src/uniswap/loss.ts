@@ -54,9 +54,10 @@ function impermanentLossV2(
 // pricet1: token y price at T1
 // 假设 price0 时刻的流动性为 1:1, 且到 price1 时 out of range
 function impermanentLossV3(
-  pricet0: string,
-  pricet1: string,
-  quote: "token0" | "token1"
+  pricet0: string | BigNumber | number,
+  pricet1: string | BigNumber | number,
+  quote: "token0" | "token1",
+  decimals = [18, 18]
 ) {
   const price0t0 = BigNumber(pricet0)
   const price0t1 = BigNumber(pricet1)
@@ -67,18 +68,13 @@ function impermanentLossV3(
   }
   
   const price1t0 = bn1.div(price0t0);
-  const price1t1 = bn1.div(price1t0);
+  const price1t1 = bn1.div(price0t1);
   let priceRangeLower: BigNumber // 与 pricet1 对应的另一端的价格
   let priceRangeUpper: BigNumber
-
 
   const a0t0 = BigNumber(1);
   const a1t0 = BigNumber(price0t0);
   const amountT0 = [a0t0, a1t0]
-
-  if (price0t1.gt(price0t0)) {
-  } else {
-  }
 
   // a0t0*a1t0 = a0t1*a1t1
   // price0t1 = a1t1/a0t1
@@ -87,13 +83,13 @@ function impermanentLossV3(
   if (price0t0.lt(price0t1)) {
     // price rise
     priceRangeUpper = price0t1
-    priceRangeLower = calcPriceRangeLower(pricet0, price0t1, amountT0)
+    priceRangeLower = calcPriceRangeLower(pricet0, price0t1, amountT0, decimals)
   } else {
     // price fall
-    priceRangeUpper = calcPriceRangeUpper(pricet0, price0t1, amountT0)
+    priceRangeUpper = calcPriceRangeUpper(pricet0, price0t1, amountT0, decimals)
     priceRangeLower = price0t1
   }
-  const amountT1 = calcTokenAmountOnPriceChange(price0t0, price0t1, [priceRangeLower, priceRangeUpper], amountT0)
+  const amountT1 = calcTokenAmountOnPriceChange(price0t0, price0t1, [priceRangeLower, priceRangeUpper], amountT0, decimals)
   const a0t1 = amountT1[0]
   const a1t1 = amountT1[1]
 
@@ -103,17 +99,25 @@ function impermanentLossV3(
   let totalt0 = BigNumber(0),
     totalt1 = BigNumber(0);
   if (quote === "token0") {
-    totalt0 = a0t0.plus(a1t0.times(price1t0));
-    totalt1 = a0t1.plus(a1t1.times(price1t1));
+    totalt0 = a0t0.plus(a1t0.div(price0t0));
+    totalt1 = a0t1.plus(a1t1.div(price0t1));
   } else {
     totalt0 = a1t0.plus(a0t0.times(price0t0));
     totalt1 = a1t1.plus(a0t1.times(price0t1));
   }
 
-  return totalt1.minus(totalt0).div(totalt0);
+  const loss = totalt1.minus(totalt0).div(totalt0);
+
+  console.log(`price range: [${priceRangeLower}, ${priceRangeUpper}]`)
+  console.log(`price change from ${pricet0} to ${pricet1}`)
+  console.log(`token initial: ${a0t0} ${a1t0}`)
+  console.log(`token change to: ${a0t1} ${a1t1}`)
+  console.log(`quote=${quote} total change: ${totalt0} ${totalt1}`)
+  console.log(`priceT0: ${pricet0} priceT1: ${pricet1} loss=${loss}`)
+  return loss
 }
 
-const loss = impermanentLossV3("2000", "1800", "token1");
-console.log("loss:", loss);
+// const loss = impermanentLossV3("2000", "1800", "token1");
+// console.log("loss:", loss);
 
 export { impermanentLossV2, impermanentLossV3 };

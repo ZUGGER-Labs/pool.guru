@@ -3,7 +3,13 @@ import _ from "lodash";
 import { getUniswapV3Pools } from "@/uniswap/graph";
 import { db } from "@/db/db";
 import { getGraphClient } from "./client";
-import { Token, Pool, LiquidityPool } from "@/interfaces/uniswap.interface";
+import {
+  Token,
+  Pool,
+  LiquidityPool,
+  PoolDayData,
+  PriceOpenClose,
+} from "@/interfaces/uniswap.interface";
 import { QueryOptions, gql } from "@apollo/client";
 import { ChainId } from "@uniswap/sdk-core";
 import { DBPool, dbPools } from "@/db/schema";
@@ -12,6 +18,7 @@ import getRedis from "./redis";
 import { RedisClientType } from "redis";
 import { CHAIN_NAME, DEX_TYPES } from "@/lib/network";
 import { now } from "./utils";
+import BigNumber from "bignumber.js";
 
 function chainPoolKey(chainId: number): string {
   const RedisPoolsKey = "pools";
@@ -263,23 +270,10 @@ async function getTokenPools(
 }
 */
 
-// 从uniswap 获取的k线数据得到价格
-async function getPoolPrice(
-  chainId: number,
-  pools: LiquidityPool[],
-  hours: number[]
-) {
+// 从 uniswap 获取的k线数据得到价格
+async function getPoolPrice(chainId: number, pools: LiquidityPool[]) {
   const client = getGraphClient(chainId, "uniswap");
 
-  if (hours.length > 100) {
-    throw new Error("too many hours");
-  }
-
-  if (pools.length > 5000) {
-    throw new Error("too many pools");
-  }
-
-  const take = 100;
   const queries: QueryOptions[] = [];
   for (let i = 0; ; i++) {
     if (i * 100 > 5000) {
@@ -289,43 +283,122 @@ async function getPoolPrice(
 
     queries.push({
       query: gql`
-        query pools($take: Int!, $skip: Int!, $tvlUSD: BigDecimal!) {
-          liquidityPoolHourlySnapshots(
-            first: $take
-            skip: $skip
-            orderBy: totalValueLockedUSD
-            orderDirection: desc
-            where: { totalValueLockedUSD_gte: $tvlUSD }
-          ) {
+        query pools($ids: [ID!]) {
+          pools(where: { id_in: $ids }) {
+            poolDayData(
+              first: 31
+              skip: 1
+              orderBy: date
+              orderDirection: desc
+            ) {
+              open
+              close
+              high
+              low
+              date
+            }
             id
-            tick
-            totalValueLockedUSD
-            inputTokens {
-              id
-              symbol
-              decimals
-              lastPriceUSD
-            }
-            dailySnapshots(first: 30, orderBy: day, orderDirection: desc) {
-              dailyVolumeUSD
-              dailyTotalRevenueUSD
-              dailyVolumeByTokenUSD
-              day
-              totalValueLockedUSD
-              totalLiquidity
-              dailySupplySideRevenueUSD
-            }
-            fees(orderBy: feePercentage, orderDirection: desc, first: 1) {
-              feePercentage
-            }
           }
         }
       `,
       variables: {
-        take: take,
-        skip: take * i,
+        ids: pools.slice(i * 100, (i + 1) * 100).map((p) => p.id),
       },
     });
+    if ((i + 1) * 100 > pools.length) break;
+  }
+  // console.log(pools.slice(0 * 100, (0 + 1) * 100).map((p) => p.id))
+  // console.log('queries:', queries)
+
+  const resList = await Promise.all(queries.map((q) => client.query(q)));
+  const prices: { [key: string]: PoolDayData[] } = {};
+  for (let resp of resList) {
+    if (resp.errors || !resp.data) {
+      console.log("query pool day data failed:", resp.errors);
+      continue;
+    }
+    // console.log('resp:', resp)
+
+    for (let item of resp.data.pools) {
+      for (let i = 0; i < item.poolDayData.length-1; i ++) {
+        item.poolDayData[i].open = item.poolDayData[i + 1].close;
+      }
+      prices[item.id] = item.poolDayData;
+      console.log('got pool poolDayData', item.id)
+    }
+  }
+
+  for (let p of pools) {
+    if (prices[p.id]) {
+      p.poolDayData = prices[p.id];
+    }
+  }
+}
+
+// 昨天开盘价 收盘价
+// 7天开盘价 收盘价
+// 30天开盘价 收盘价
+function calcPoolPrice(
+  pools: LiquidityPool[],
+  prev1d: number,
+  prev7d: number,
+  prev30d: number
+) {
+  for (let pool of pools) {
+    if (pool.poolDayData) {
+      let price: PriceOpenClose = {} as PriceOpenClose
+      const dataLen = pool.poolDayData.length
+      for (let i = 0; i < dataLen; i ++) {
+        const item = pool.poolDayData[i]
+        const day = item.date/86400
+        if (day === prev1d) {
+          // console.log('day price:', item)
+          price.open1D = item.open
+          price.close1D = item.close
+          price.close30D = item.close
+          price.close7D = item.close
+        } else {
+          const z0 = pool.poolDayData[0]
+          const day = z0.date/86400
+          if (day >= prev7d) {
+            price.close7D = z0.close
+            price.close30D = z0.close
+          } else if (day >= prev30d) {
+            price.close30D = z0.close
+          }
+        }
+        
+        if (day === prev7d) {
+          price.open7D = item.open
+        } else if (price.open7D === undefined && day < prev7d) {
+          price.open7D = item.close
+        }
+
+        if (day === prev30d) {
+          price.open30D = item.open
+        } else if (price.open30D === undefined && day < prev30d) {
+          price.open30D = item.close
+        }
+      }
+
+      pool.price = price // toReciprocal(price) as PriceOpenClose
+    } else {
+      console.log(`pool ${pool.id} has no poolDayData`)
+    }
+  }
+}
+
+
+// uniswap 价格似乎是倒数
+function toReciprocal(price: PriceOpenClose) {
+  const bn1 = BigNumber(1)
+  return {
+    open1D: price.open1D ? bn1.div(price.open1D) : undefined,
+    close1D: price.close1D ? bn1.div(price.close1D) : undefined,
+    open7D: price.open7D ? bn1.div(price.open7D) : undefined,
+    close7D: price.close7D ? bn1.div(price.close7D) : undefined,
+    open30D: price.open30D ? bn1.div(price.open30D) : undefined,
+    close30D: price.close30D ? bn1.div(price.close30D) : undefined,
   }
 }
 
@@ -340,6 +413,7 @@ async function getUniswapv3LiquidityPools(
   let pools: LiquidityPool[] = [];
   const queries: QueryOptions[] = [];
 
+  // console.log('client:', client)
   for (let i = 0; ; i++) {
     if (i * take > 5000) {
       // skip cannot > 5000
@@ -388,26 +462,18 @@ async function getUniswapv3LiquidityPools(
     if (total > 0 && (i + 1) * take > total) {
       break;
     }
-    // console.log("res:", res);
-    // if (res.errors || !res.data || res.data.pools.length === 0) {
-    //   break;
-    // }
-    // pools = pools.concat(res.data.pools);
-    // if (total > 0 && pools.length >= total) {
-    //   break;
-    // }
   }
   const resList = await Promise.all(queries.map((q) => client.query(q)));
-  for (let res of resList) {
-    if (res.errors || !res.data || res.data.liquidityPools.length === 0) {
-      console.log("query pool failed:", res.errors);
+  for (let i = 0; i < resList.length; i++) {
+    const res = resList[i];
+    if (res.errors || !res.data) {
+      console.log("query pool failed:", i, res);
       continue;
     }
-    pools = pools.concat(res.data.liquidityPools);
+    if (res.data.liquidityPools.length > 0)
+      pools = pools.concat(res.data.liquidityPools);
   }
-  // console.log(
-  //   `getPools: chainId=${chainId} tvlUSD_gt=${tvlUSD} pools=${pools.length}`
-  // );
+
   return pools;
 }
 
@@ -577,5 +643,6 @@ export {
   runPoolRoutine,
   getUniswapv3PoolById,
   getPoolPrice,
+  calcPoolPrice,
   // getTokenPools,
 };
