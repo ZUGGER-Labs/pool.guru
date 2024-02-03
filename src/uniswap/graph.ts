@@ -1,4 +1,5 @@
 import {
+  LiquidityPool,
   Pool,
   PoolVolumeFeeData,
   Position,
@@ -221,6 +222,7 @@ const getPoolVolumeFees24H = async (
   return npools;
 };
 
+/*
 const getPoolData = async ({
   chainId,
   poolAddress,
@@ -269,6 +271,7 @@ const getPoolData = async ({
   );
   return res.data.pool;
 };
+*/
 
 // get uniswap v3 pools & tokens
 const getUniswapV3Pools = async ({
@@ -440,8 +443,8 @@ const getPoolsByIdList = async (chainId: number, idList: string[]) => {
 // 计算 volume 1d 7d 30d, 以及平均手续费
 // graph 返回的数据中, 如果某一个没有数据, 这一天没有数据记录。
 // 这导致如果某个交易对某天没有数据的话, 最近30条数据可能并不是最近1个月的数据
-function calcPoolVolumeFee(pool: Pool, prev1d: number, prev7d: number, prev30d: number) {
-  const dataLen = pool.poolDayData.length
+function calcPoolVolumeFee(pool: LiquidityPool, prev1d: number, prev7d: number, prev30d: number) {
+  const dataLen = pool.dailySnapshots.length
   if (dataLen === 0) {
     pool.avgFee1D = 0
     pool.avgFee7D = 0
@@ -452,17 +455,18 @@ function calcPoolVolumeFee(pool: Pool, prev1d: number, prev7d: number, prev30d: 
 
   let fee1d = 0, fee7d = 0, fee30d = 0, d7 = 0, d30 = 0
   for (let i = 0; i < dataLen; i ++) {
-    const data = pool.poolDayData[i]
-    if (i === 0 && data.date === prev1d) {
-      console.log(`${pool.token0.symbol}/${pool.token1.symbol} prev day feesUSD: ${data.feesUSD}`)
-      fee1d = +data.feesUSD
+    const data = pool.dailySnapshots[i]
+    if (i === 0 && data.day === prev1d) {
+      // console.log('pool:', pool)
+      // console.log(`${pool.inputTokens[0].symbol}/${pool.inputTokens[1].symbol} prev day feesUSD: ${data.dailySupplySideRevenueUSD}`)
+      fee1d = +data.dailySupplySideRevenueUSD
     }
-    if (i < 7 && data.date >= prev7d) {
-      fee7d += +data.feesUSD
+    if (i < 7 && data.day >= prev7d) {
+      fee7d += +data.dailySupplySideRevenueUSD
       d7 ++
     }
-    if (i < 30 && data.date >= prev30d) {
-      fee30d += +data.feesUSD
+    if (i < 30 && data.day >= prev30d) {
+      fee30d += +data.dailySupplySideRevenueUSD
       d30 ++
     }
   }
@@ -475,6 +479,7 @@ function calcPoolVolumeFee(pool: Pool, prev1d: number, prev7d: number, prev30d: 
   if (d30 > 0) {
     fee30d = fee30d / 30
   }
+  // const fr = pool.feeTier
 
   pool.avgFee1D = fee1d
   pool.avgFee7D = fee7d
@@ -510,7 +515,7 @@ function calcPoolVolumeFee(pool: Pool, prev1d: number, prev7d: number, prev30d: 
 // };
 
 export {
-  getPoolData,
+  // getPoolData,
   getUniswapV3Pools,
   getPoolsByIdList,
   calcPoolVolumeFee

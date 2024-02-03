@@ -30,7 +30,7 @@ token: {
 function insertTokens(chainId: number) {}
 
 async function queryTokens(chainId: number, tokenIds: string[]) {
-  const client = getGraphClient(chainId, false);
+  const client = getGraphClient(chainId, 'uniswap');
 
   const res = await client.query({
     query: gql`

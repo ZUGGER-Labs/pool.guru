@@ -55,6 +55,16 @@ export interface PoolDayData {
   close: string;
 }
 
+export interface PoolDailyData {
+  dailyVolumeUSD: string // "16526422.90186559656843213099466",
+  dailyTotalRevenueUSD: string // "49579.26870559678970529639298403",
+  dailyVolumeByTokenUSD?: string[],
+  day: number,
+  totalValueLockedUSD: string, // "218991647.2802760685152789455778981",
+  totalLiquidity: string, // "1743527678474047750",
+  dailySupplySideRevenueUSD: string //
+}
+
 export type PoolVolumeFeeData = {
   fees24h: string | number
   volume24h: string | number
@@ -85,7 +95,7 @@ export interface Pool {
   feesUSD: string;
   txCount: string;
   totalValueLockedUSD: string;
-  tvlContract?: BigNumber
+  // tvlContract?: BigNumber
   apyBy1d?: BigNumber
   apyBy7d?: BigNumber
   apyBy30d?: BigNumber
@@ -98,6 +108,39 @@ export interface Pool {
   poolDayData: PoolDayData[];
   
   volFeeData?: PoolVolumeFeeData
+}
+
+export interface LiquidityPool {
+  id: string;
+  feeTier: string;
+  tick: string;
+  sqrtPrice?: string;
+  token0Price: string;
+  token1Price: string;
+  feeGrowthGlobal0X128?: string;
+  feeGrowthGlobal1X128?: string;
+  activeLiquidity: string
+  totalLiquidity: string
+
+  // For pool overview
+  inputTokens: Token[];
+  totalValueLockedUSD: string;
+  // tvlContract?: BigNumber
+  apyBy1d?: BigNumber
+  apyBy7d?: BigNumber
+  apyBy30d?: BigNumber
+  volume1D?: string
+  volume7D?: string
+  volume30D?: string
+  avgFee1D?: number
+  avgFee7D?: number
+  avgFee30D?: number
+  impermanentLoss1d?: BigNumber
+  impermanentLoss7d?: BigNumber
+  impermanentLoss30d?: BigNumber
+  // poolDayData: PoolDayData[];
+  dailySnapshots: PoolDailyData[];
+  fees: {feePercentage: string}[]
 }
 
 export interface Position {
