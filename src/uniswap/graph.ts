@@ -440,6 +440,10 @@ const getPoolsByIdList = async (chainId: number, idList: string[]) => {
   return { pools, ethPriceUSD };
 };
 
+function calcPoolPrice() {
+
+}
+
 // 计算 volume 1d 7d 30d, 以及平均手续费
 // graph 返回的数据中, 如果某一个没有数据, 这一天没有数据记录。
 // 这导致如果某个交易对某天没有数据的话, 最近30条数据可能并不是最近1个月的数据
