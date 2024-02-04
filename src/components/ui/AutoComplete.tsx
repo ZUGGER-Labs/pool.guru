@@ -142,7 +142,10 @@ export const AutoComplete = ({
                           !isSelected ? "pl-8" : null
                         )}
                       >
-                        <div className="flex flex-row justify-between items-center w-full" title={option.id}>
+                        <div
+                          className="flex flex-row justify-between items-center w-full"
+                          title={option.id}
+                        >
                           <span className="flex flex-row items-center">
                             {isSelected ? <Check className="w-4" /> : null}
                             {option.symbol}
@@ -155,7 +158,7 @@ export const AutoComplete = ({
                 </CommandGroup>
               ) : null}
               {!isLoading ? (
-                <CommandPrimitive.Empty className="select-none rounded-sm px-2 py-3 text-sm text-center">
+                <CommandPrimitive.Empty className="select-none px-2 py-3 text-base text-center">
                   {emptyMessage}
                 </CommandPrimitive.Empty>
               ) : null}
