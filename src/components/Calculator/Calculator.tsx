@@ -25,6 +25,27 @@ function AddIcon() {
   );
 }
 
+const useNumStrState = (defaultVal = ''): [string, (val: string) => void] => {
+  const removeLeadingZeros = (s: string) => {
+    const oldLen = s.length;
+    s = s.replace(/^0+/, '');
+    if (s.length === 0 && oldLen > 0) {
+      s = '0';
+    }
+    return s;
+  }
+
+  defaultVal = removeLeadingZeros(defaultVal);
+  const [numVal, setNumVal] = useState(defaultVal);
+
+  const handleChange = (val: string) => {
+    val = val.replace(/[^\d]/g, '');
+    val = removeLeadingZeros(val);
+    setNumVal(val);
+  }
+  return [numVal, handleChange];
+}
+
 function ComboInput({
   tokens,
   className,
@@ -146,35 +167,34 @@ function ComboInput({
 }
 
 function Calculator({ tokens }: { tokens: Token[] }) {
-  const [amount, setAmount] = useState(1000);
+  const [amount, setAmount] = useNumStrState('1000');;
   return (
     <div>
       <div className="mx-auto flex flex-col justify-center items-center">
         <h1 className="text-[2rem] font-bold leading-10">Yield Calculator</h1>
-        <p className="leading-10 text-black/60">
+        <p className="leading-10 text-black/60 text-center">
           Finds the best DeFi pool for the selected assets and estimates the
           returns based on an investment amount and the historical metrics of
           the pool
         </p>
       </div>
 
-      <div className="mx-auto w-full md:w-[43rem]">
+      <div className="mx-auto w-full md:w-[43rem] mt-4">
         <div className="">
-          <p className="font-bold leading-5">Assets</p>
+          <p className="font-bold leading-5 mb-2">Assets</p>
           <div className="flex flex-row items-center">
-            <AutoComplete tokens={tokens} emptyMessage="" />
+            <AutoComplete tokens={tokens} emptyMessage="No results found" />
             <div className="mx-6">
               <AddIcon />
             </div>
             <div className="relative w-[150px] flex items-center">
-              <span className="absolute left-0 w-6 text-center text-[#B1B1B1]">
+              <span className="absolute w-6 text-center text-[#B1B1B1]">
                 $
               </span>
               <span>
                 <input
-                  value={amount}
-                  onChange={(val) => setAmount(+val)}
-                  className="border focus-visible:outline-none pl-5 leading-[46px] text-[#111827] border-black focus:rounded-none focus:border focus:border-[#B7B1A6]"
+                  value={amount} onChange={e => setAmount(e.target.value)}
+                  className="border focus-visible:outline-none pl-6 leading-[48px] border-[#B7B1A6] focus:border focus:border-black"
                   type="number"
                 />
               </span>
