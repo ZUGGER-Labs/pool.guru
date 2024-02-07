@@ -41,6 +41,7 @@ export const AutoComplete = ({
   const [isOpen, setOpen] = useState(false);
   const [selected, setSelected] = useState<Token | null>(null);
   const [inputValue, setInputValue] = useState<string>(value?.label || "");
+  const [filteredTokens, setFilteredTokens] = useState<Token[]>([]);
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent<HTMLDivElement>) => {
@@ -54,18 +55,6 @@ export const AutoComplete = ({
         setOpen(true);
       }
 
-      // This is not a default behaviour of the <input /> field
-      if (event.key === "Enter" && input.value !== "") {
-        const optionToSelect = tokens.find(
-          (option) => option.id === input.value
-          // (option) => option.symbol === input.value || option.id === input.value
-        );
-        if (optionToSelect) {
-          setSelected(optionToSelect);
-          onValueChange?.(optionToSelect);
-        }
-      }
-
       if (event.key === "Escape") {
         input.blur();
       }
@@ -75,11 +64,26 @@ export const AutoComplete = ({
 
   const handleBlur = useCallback(() => {
     setOpen(false);
-    setInputValue(selected?.id || "");
+    setInputValue(selected?.symbol || "");
   }, [selected]);
+
+  const handleInputChange = (newValue: string) => {
+    const inputValue = newValue.trim();
+    setInputValue(inputValue);
+  
+    const matchedTokens = tokens.filter(option =>
+      option.symbol.toLowerCase().includes(inputValue.toLowerCase())
+    );
+    // console.log(matchedTokens)
+  
+    setFilteredTokens(matchedTokens);
+    console.log(filteredTokens)
+  };
+  
 
   const handleSelectOption = useCallback(
     (selectedOption: Token) => {
+      console.log(selectedOption)
       setInputValue(selectedOption.symbol);
 
       setSelected(selectedOption);
@@ -103,7 +107,11 @@ export const AutoComplete = ({
         <CommandInput
           ref={inputRef}
           value={inputValue}
-          onValueChange={isLoading ? undefined : setInputValue}
+          // onValueChange={isLoading ? undefined : setInputValue}
+          onValueChange={isLoading ? undefined : handleInputChange
+            // (newValue) => {
+            // handleInputChange({ target: { value: newValue } } as React.ChangeEvent<HTMLInputElement>);
+          }
           onBlur={handleBlur}
           onFocus={() => setOpen(true)}
           placeholder={placeholder}
@@ -122,12 +130,9 @@ export const AutoComplete = ({
                   </div>
                 </CommandPrimitive.Loading>
               ) : null}
-              {tokens.length > 0 && !isLoading ? (
+              {filteredTokens.length > 0 && !isLoading ? (
                 <CommandGroup>
-                  {tokens.map((option) => {
-                    const isSelected =
-                      // selected?.symbol === option.symbol ||
-                      selected?.id === option.id;
+                  {filteredTokens.map((option) => {
                     return (
                       <CommandItem
                         key={option.id}
@@ -138,19 +143,28 @@ export const AutoComplete = ({
                         }}
                         onSelect={() => handleSelectOption(option)}
                         className={cn(
-                          "flex items-center gap-2 w-full",
-                          !isSelected ? "pl-8" : null
+                          "flex items-center gap-2 w-full"
+                          // !isSelected ? "pl-8" : null
                         )}
                       >
                         <div
-                          className="flex flex-row justify-between items-center w-full"
+                          className="flex flex-row items-center w-full gap-2"
                           title={option.id}
                         >
-                          <span className="flex flex-row items-center">
-                            {isSelected ? <Check className="w-4" /> : null}
+                          <img
+                            src={option.logoURI}
+                            className="w-6 h-6"
+                            alt="Icon"
+                          ></img>
+                          <span className="flex flex-row items-center h-7 text-base font-medium justify-between w-full">
+                            {/* {isSelected ? <Check className="w-4" /> : null} */}
                             {option.symbol}
                           </span>
-                          <span>{option.poolCount} pools</span>
+                          <div className="flex rounded-full bg-gray-200 h-28px px-2 items-center">
+                            <span className="text-center text-base italic font-light whitespace-nowrap">
+                              {option.poolCount} pools
+                            </span>
+                          </div>
                         </div>
                       </CommandItem>
                     );
