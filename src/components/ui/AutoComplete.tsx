@@ -5,7 +5,7 @@ import {
   CommandItem,
   CommandList,
   CommandInput,
-} from "./command";
+} from "@/components/ui/command";
 import { Command as CommandPrimitive } from "cmdk";
 import { useState, useRef, useCallback, type KeyboardEvent } from "react";
 
@@ -17,10 +17,9 @@ import { Token } from "@/interfaces/uniswap.interface";
 export type Option = Record<"value" | "label", string> & Record<string, string>;
 
 type AutoCompleteProps = {
-  //   options: Option[]
-  tokens: Token[];
+  options: Token[];
   emptyMessage: string;
-  value?: Option;
+  value?: Token;
   onValueChange?: (value: Token) => void;
   isLoading?: boolean;
   disabled?: boolean;
@@ -28,7 +27,7 @@ type AutoCompleteProps = {
 };
 
 export const AutoComplete = ({
-  tokens,
+  options,
   placeholder,
   emptyMessage,
   value,
@@ -39,9 +38,8 @@ export const AutoComplete = ({
   const inputRef = useRef<HTMLInputElement>(null);
 
   const [isOpen, setOpen] = useState(false);
-  const [selected, setSelected] = useState<Token | null>(null);
-  const [inputValue, setInputValue] = useState<string>(value?.label || "");
-  const [filteredTokens, setFilteredTokens] = useState<Token[]>([]);
+  const [selected, setSelected] = useState<Token>(value as Token);
+  const [inputValue, setInputValue] = useState<string>(value?.symbol || "");
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent<HTMLDivElement>) => {
@@ -55,35 +53,32 @@ export const AutoComplete = ({
         setOpen(true);
       }
 
+      // This is not a default behaviour of the <input /> field
+      if (event.key === "Enter" && input.value !== "") {
+        const optionToSelect = options.find(
+          (option) =>
+            option.symbol === input.value || option.name === input.value
+        );
+        if (optionToSelect) {
+          setSelected(optionToSelect);
+          onValueChange?.(optionToSelect);
+        }
+      }
+
       if (event.key === "Escape") {
         input.blur();
       }
     },
-    [isOpen, tokens, onValueChange]
+    [isOpen, options, onValueChange]
   );
 
   const handleBlur = useCallback(() => {
     setOpen(false);
-    setInputValue(selected?.symbol || "");
+    setInputValue(selected?.symbol);
   }, [selected]);
-
-  const handleInputChange = (newValue: string) => {
-    const inputValue = newValue.trim();
-    setInputValue(inputValue);
-  
-    const matchedTokens = tokens.filter(option =>
-      option.symbol.toLowerCase().includes(inputValue.toLowerCase())
-    );
-    // console.log(matchedTokens)
-  
-    setFilteredTokens(matchedTokens);
-    console.log(filteredTokens)
-  };
-  
 
   const handleSelectOption = useCallback(
     (selectedOption: Token) => {
-      console.log(selectedOption)
       setInputValue(selectedOption.symbol);
 
       setSelected(selectedOption);
@@ -107,11 +102,7 @@ export const AutoComplete = ({
         <CommandInput
           ref={inputRef}
           value={inputValue}
-          // onValueChange={isLoading ? undefined : setInputValue}
-          onValueChange={isLoading ? undefined : handleInputChange
-            // (newValue) => {
-            // handleInputChange({ target: { value: newValue } } as React.ChangeEvent<HTMLInputElement>);
-          }
+          onValueChange={isLoading ? undefined : setInputValue}
           onBlur={handleBlur}
           onFocus={() => setOpen(true)}
           placeholder={placeholder}
@@ -130,22 +121,21 @@ export const AutoComplete = ({
                   </div>
                 </CommandPrimitive.Loading>
               ) : null}
-              {filteredTokens.length > 0 && !isLoading ? (
+              {options.length > 0 && !isLoading ? (
                 <CommandGroup>
-                  {filteredTokens.map((option) => {
+                  {options.map((option) => {
                     return (
                       <CommandItem
                         key={option.id}
-                        value={option.id}
+                        value={
+                          option.symbol + " " + option.id + " " + option.name
+                        }
                         onMouseDown={(event) => {
                           event.preventDefault();
                           event.stopPropagation();
                         }}
                         onSelect={() => handleSelectOption(option)}
-                        className={cn(
-                          "flex items-center gap-2 w-full"
-                          // !isSelected ? "pl-8" : null
-                        )}
+                        className={cn("flex items-center gap-2 w-full")}
                       >
                         <div
                           className="flex flex-row items-center w-full gap-2"
@@ -157,7 +147,6 @@ export const AutoComplete = ({
                             alt="Icon"
                           ></img>
                           <span className="flex flex-row items-center h-7 text-base font-medium justify-between w-full">
-                            {/* {isSelected ? <Check className="w-4" /> : null} */}
                             {option.symbol}
                           </span>
                           <div className="flex rounded-full bg-gray-200 h-28px px-2 items-center">
@@ -172,7 +161,7 @@ export const AutoComplete = ({
                 </CommandGroup>
               ) : null}
               {!isLoading ? (
-                <CommandPrimitive.Empty className="select-none px-2 py-3 text-base text-center">
+                <CommandPrimitive.Empty className="select-none rounded-sm px-2 py-3 text-sm text-center">
                   {emptyMessage}
                 </CommandPrimitive.Empty>
               ) : null}
