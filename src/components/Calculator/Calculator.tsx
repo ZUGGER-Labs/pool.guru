@@ -77,7 +77,7 @@ function Calculator({ tokens }: { tokens: Token[] }) {
           <p className="font-bold leading-5 mb-2">Assets</p>
           <div className="flex flex-row items-center">
             <AutoComplete
-              tokens={tokens}
+              options={tokens}
               emptyMessage="No results found"
               onValueChange={handleAddAsset}
             />
