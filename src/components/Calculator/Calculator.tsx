@@ -84,13 +84,13 @@ function Calculator({ tokens }: { tokens: Token[] }) {
             <div className="mx-6">
               <AddIcon />
             </div>
-            <div className="relative w-[150px] flex items-center">
+            <div className="relative flex items-center">
               <span className="absolute w-6 text-center text-[#B1B1B1]">$</span>
               <span>
                 <input
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
-                  className="border focus-visible:outline-none pl-6 leading-[48px] border-[#B7B1A6] focus:border focus:border-black"
+                  className="w-[150px] border focus-visible:outline-none pl-6 leading-[48px] border-[#B7B1A6] focus:border focus:border-black"
                   type="number"
                 />
               </span>
@@ -98,18 +98,55 @@ function Calculator({ tokens }: { tokens: Token[] }) {
           </div>
         </div>
 
-        <div className="mt-4">
+        <div className="mt-6 mb-2">
           <p className="font-bold leading-5 mb-2">Selected assets</p>
-          <div className="flex flex-wrap">
+          <div className="flex flex-col items-center gap-8">
             {[...selectedAssets].map((asset, index) => (
-              <div key={asset.id} className="flex items-center mr-2 mb-2">
-                <span>{asset.symbol}</span>
+              <div key={asset.id} className="flex w-[688px] p-4 border border-black bg-white items-center gap-6">
+                <div className="flex flex-col items-center justify-center gap-2 w-[90px]">
+                  <div className="flex flex-row items-center gap-2">
+                    <img
+                      src={asset.logoURI}
+                      className="w-6 h-6"
+                      alt="Icon"
+                    ></img>
+                    <span className="flex flex-row text-base font-semibold w-full">
+                      {asset.symbol}
+                    </span>
+                  </div>
+                  <div className="flex rounded-full bg-gray-200 h-28px px-2 items-center">
+                    <span className="text-center text-base italic font-light whitespace-nowrap">
+                      {asset.poolCount} pools
+                    </span>
+                  </div>
+                </div>
+                <div className="flex flex-col items-center justify-center gap-2 w-[90px]">
+                  <span className="text-gray-400 text-base">Price</span>
+                  <span className="text-base">2.45K</span>
+                </div>
+                <div className="flex flex-col items-center justify-center gap-2 w-[90px]">
+                  <span className="text-gray-400 text-base">Change 7d</span>
+                  <span className="text-green-500 text-base"> + 4.12% </span>
+                </div>
+                <div className="flex flex-col items-center justify-center gap-2 w-[270px]">
+                  <span className="text-gray-400 text-base">Trend 7d</span>
+                  <span className="text-green-500 text-center h-7"> + 4.12% </span>
+                </div>
+                <button
+                  onClick={() => handleRemoveAsset(asset)}
+                >
+                  <img
+                      src="/Rounded-edge.svg"
+                      className="w-6 h-6"
+                    ></img>
+                </button>
+                {/* <span>{asset.symbol}</span>
                 <button
                   className="ml-2 text-red-500"
                   onClick={() => handleRemoveAsset(asset)}
                 >
                   X
-                </button>
+                </button> */}
               </div>
             ))}
           </div>
