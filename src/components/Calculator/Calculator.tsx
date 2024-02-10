@@ -98,11 +98,14 @@ function Calculator({ tokens }: { tokens: Token[] }) {
           </div>
         </div>
 
-        <div className="mt-6 mb-2">
+        { selectedAssets.size > 0 ? <div className="mt-6">
           <p className="font-bold leading-5 mb-2">Selected assets</p>
-          <div className="flex flex-col items-center gap-8">
+          <div className="flex flex-col items-center gap-2">
             {[...selectedAssets].map((asset, index) => (
-              <div key={asset.id} className="flex w-[688px] p-4 border border-black bg-white items-center gap-6">
+              <div
+                key={asset.id}
+                className="flex w-[688px] p-4 border border-black bg-white items-center gap-6"
+              >
                 <div className="flex flex-col items-center justify-center gap-2 w-[90px]">
                   <div className="flex flex-row items-center gap-2">
                     <img
@@ -130,29 +133,22 @@ function Calculator({ tokens }: { tokens: Token[] }) {
                 </div>
                 <div className="flex flex-col items-center justify-center gap-2 w-[270px]">
                   <span className="text-gray-400 text-base">Trend 7d</span>
-                  <span className="text-green-500 text-center h-7"> + 4.12% </span>
+                  <span className="text-green-500 text-center h-7">
+                    {" "}
+                    + 4.12%{" "}
+                  </span>
                 </div>
-                <button
-                  onClick={() => handleRemoveAsset(asset)}
-                >
-                  <img
-                      src="/Rounded-edge.svg"
-                      className="w-6 h-6"
-                    ></img>
+                <button onClick={() => handleRemoveAsset(asset)}>
+                  <img src="/Rounded-edge.svg" className="w-6 h-6"></img>
                 </button>
-                {/* <span>{asset.symbol}</span>
-                <button
-                  className="ml-2 text-red-500"
-                  onClick={() => handleRemoveAsset(asset)}
-                >
-                  X
-                </button> */}
               </div>
             ))}
           </div>
-        </div>
+        </div> : null}
 
-        <button>Calculate</button>
+        <button className="flex w-[688px] mt-6 p-2.5 justify-center items-center border-2 border-black bg-yellow-300">
+          <span className="text-center text-base font-bold">Calculate</span>
+        </button>
       </div>
 
       <div></div>
