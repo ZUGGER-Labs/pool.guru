@@ -1,15 +1,12 @@
 
 // in server, start main.ts
 
-import { getDailyChainPools } from "./apy"
+import { dailyPoolDataRoutine, hourlyPoolDataRoutine } from "./poolData"
 
 async function main() {
     const chains = [1]
-    for (let chainId of chains) {
-        await getDailyChainPools(chainId)
-    }
-
-    
+    hourlyPoolDataRoutine(chains)
+    dailyPoolDataRoutine(chains)
 }
 
 main()
