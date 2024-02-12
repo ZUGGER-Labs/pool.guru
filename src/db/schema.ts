@@ -51,11 +51,12 @@ export const dbPoolData = pgTable(
   {
     id: serial("id").primaryKey(),
     chainId: integer("chainId").default(1),
-    poolType: varchar("poolType").default("uniswapv3"),
+    dex: varchar("poolType").default("uniswapv3"),
     interval: integer("interval").notNull(),
     poolId: varchar("poolId", { length: 120 }).notNull(),
-    date: bigint("date", { mode: "number" }).notNull(),
-    day: integer('day').default(0),
+    periodStartUnix: bigint("periodStartUnix", { mode: "number" }).notNull(),
+    hour: integer('hour').default(0),
+    date: integer('date').default(0), // ex 20240209
     open: decimal("open").notNull(),
     high: decimal("high").notNull(),
     low: decimal("low").notNull(),
@@ -114,7 +115,7 @@ export const dbPoolData = pgTable(
         table.chainId,
         table.poolId,
         table.interval,
-        table.date
+        table.hour
       ),
       poolIdIdx: index("chain_pool_id_idx").on(table.poolId),
       poolIdx: index("chain_pool_idx").on(table.poolId, table.chainId),
@@ -134,6 +135,7 @@ export const dbPoolDayData = pgTable(
     interval: integer("interval").notNull(),
     poolId: varchar("poolId", { length: 120 }).notNull(),
     date: bigint("date", { mode: "number" }).notNull(),
+    day: integer('day').default(0),
     open: decimal("open").notNull(),
     high: decimal("high").notNull(),
     low: decimal("low").notNull(),
@@ -191,7 +193,6 @@ export const dbPoolDayData = pgTable(
       klineDayIdx: uniqueIndex("pool_day_kline_idx").on(
         table.chainId,
         table.poolId,
-        table.interval,
         table.date
       ),
       poolIdIdx: index("chain_pool_id_day_idx").on(table.poolId),
@@ -394,3 +395,6 @@ export type DBToken = typeof dbTokens.$inferSelect;
 export type DBPool = typeof dbPools.$inferSelect;
 export type DBPosition = typeof dbPositions.$inferSelect;
 export type DBPositionData = typeof dbPositionDatas.$inferInsert;
+
+export type DBPoolData = typeof dbPoolData.$inferInsert;
+export type DBPoolDayData = typeof dbPoolDayData.$inferInsert;
