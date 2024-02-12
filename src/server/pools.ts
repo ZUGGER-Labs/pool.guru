@@ -629,6 +629,14 @@ function runPoolRoutine(chains: { [key: number]: PoolRoutineOpts }) {
   }
 }
 
+async function getDailyPoolData(chainId: number) {
+
+}
+
+async function getHourlyPoolData(chainId: number) {
+
+}
+
 // runPoolRoutine({
 //   1: {},
 //   [ChainId.BASE]: {interval: 5000},
@@ -645,4 +653,6 @@ export {
   getPoolPrice,
   calcPoolPrice,
   // getTokenPools,
+  getDailyPoolData,
+  getHourlyPoolData,
 };
