@@ -1,6 +1,6 @@
 {
-  "id": "f288ccf7-5c20-4825-b413-ddb1651304eb",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "201c1de3-2bb8-4ddf-a70b-ecd41daa23fb",
+  "prevId": "f2b03265-c920-4322-b937-02d0889f6121",
   "version": "5",
   "dialect": "pg",
   "tables": {
@@ -94,6 +94,13 @@
           "primaryKey": false,
           "notNull": true
         },
+        "day": {
+          "name": "day",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        },
         "open": {
           "name": "open",
           "type": "numeric",
@@ -120,6 +127,12 @@
         },
         "feesUSD": {
           "name": "feesUSD",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "protocolFeesUSD": {
+          "name": "protocolFeesUSD",
           "type": "numeric",
           "primaryKey": false,
           "notNull": true
@@ -196,6 +209,215 @@
           "type": "varchar(20)",
           "primaryKey": false,
           "notNull": false
+        },
+        "blockNumber": {
+          "name": "blockNumber",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "closedPositionCount": {
+          "name": "closedPositionCount",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "cumulativeDepositCount": {
+          "name": "cumulativeDepositCount",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "cumulativeSwapCount": {
+          "name": "cumulativeSwapCount",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "depositCount": {
+          "name": "depositCount",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "cumulativeWithdrawCount": {
+          "name": "cumulativeWithdrawCount",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "withdrawCount": {
+          "name": "withdrawCount",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "openPositionCount": {
+          "name": "openPositionCount",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "positionCount": {
+          "name": "positionCount",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "tick": {
+          "name": "tick",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "swapCount": {
+          "name": "swapCount",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "activeLiquidity": {
+          "name": "activeLiquidity",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cumulativeProtocolSideRevenueUSD": {
+          "name": "cumulativeProtocolSideRevenueUSD",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cumulativeSupplySideRevenueUSD": {
+          "name": "cumulativeSupplySideRevenueUSD",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cumulativeTotalRevenueUSD": {
+          "name": "cumulativeTotalRevenueUSD",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cumulativeVolumeUSD": {
+          "name": "cumulativeVolumeUSD",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "protocolSideRevenueUSD": {
+          "name": "protocolSideRevenueUSD",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "supplySideRevenueUSD": {
+          "name": "supplySideRevenueUSD",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "totalRevenueUSD": {
+          "name": "totalRevenueUSD",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "totalLiquidity": {
+          "name": "totalLiquidity",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "totalValueLockedUSD": {
+          "name": "totalValueLockedUSD",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "volumeByTokenAmount0": {
+          "name": "volumeByTokenAmount0",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "volumeByTokenUSD0": {
+          "name": "volumeByTokenUSD0",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "inputTokenBalances0": {
+          "name": "inputTokenBalances0",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "inputTokenBalancesUSD0": {
+          "name": "inputTokenBalancesUSD0",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cumulativeVolumeByTokenAmount0": {
+          "name": "cumulativeVolumeByTokenAmount0",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cumulativeVolumeByTokenUSD0": {
+          "name": "cumulativeVolumeByTokenUSD0",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "volumeByTokenAmount1": {
+          "name": "volumeByTokenAmount1",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "volumeByTokenUSD1": {
+          "name": "volumeByTokenUSD1",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "inputTokenBalances1": {
+          "name": "inputTokenBalances1",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "inputTokenBalancesUSD1": {
+          "name": "inputTokenBalancesUSD1",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cumulativeVolumeByTokenAmount1": {
+          "name": "cumulativeVolumeByTokenAmount1",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cumulativeVolumeByTokenUSD1": {
+          "name": "cumulativeVolumeByTokenUSD1",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
         }
       },
       "indexes": {
@@ -208,6 +430,13 @@
             "date"
           ],
           "isUnique": true
+        },
+        "chain_pool_id_idx": {
+          "name": "chain_pool_id_idx",
+          "columns": [
+            "poolId"
+          ],
+          "isUnique": false
         },
         "chain_pool_idx": {
           "name": "chain_pool_idx",
@@ -308,6 +537,12 @@
           "primaryKey": false,
           "notNull": true
         },
+        "protocolFeesUSD": {
+          "name": "protocolFeesUSD",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
         "tvlUSD": {
           "name": "tvlUSD",
           "type": "numeric",
@@ -380,6 +615,215 @@
           "type": "varchar(20)",
           "primaryKey": false,
           "notNull": false
+        },
+        "blockNumber": {
+          "name": "blockNumber",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "closedPositionCount": {
+          "name": "closedPositionCount",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "cumulativeDepositCount": {
+          "name": "cumulativeDepositCount",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "cumulativeSwapCount": {
+          "name": "cumulativeSwapCount",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "depositCount": {
+          "name": "depositCount",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "cumulativeWithdrawCount": {
+          "name": "cumulativeWithdrawCount",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "withdrawCount": {
+          "name": "withdrawCount",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "openPositionCount": {
+          "name": "openPositionCount",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "positionCount": {
+          "name": "positionCount",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "tick": {
+          "name": "tick",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "swapCount": {
+          "name": "swapCount",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "activeLiquidity": {
+          "name": "activeLiquidity",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cumulativeProtocolSideRevenueUSD": {
+          "name": "cumulativeProtocolSideRevenueUSD",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cumulativeSupplySideRevenueUSD": {
+          "name": "cumulativeSupplySideRevenueUSD",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cumulativeTotalRevenueUSD": {
+          "name": "cumulativeTotalRevenueUSD",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cumulativeVolumeUSD": {
+          "name": "cumulativeVolumeUSD",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "protocolSideRevenueUSD": {
+          "name": "protocolSideRevenueUSD",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "supplySideRevenueUSD": {
+          "name": "supplySideRevenueUSD",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "totalRevenueUSD": {
+          "name": "totalRevenueUSD",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "totalLiquidity": {
+          "name": "totalLiquidity",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "totalValueLockedUSD": {
+          "name": "totalValueLockedUSD",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "volumeByTokenAmount0": {
+          "name": "volumeByTokenAmount0",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "volumeByTokenUSD0": {
+          "name": "volumeByTokenUSD0",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "inputTokenBalances0": {
+          "name": "inputTokenBalances0",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "inputTokenBalancesUSD0": {
+          "name": "inputTokenBalancesUSD0",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cumulativeVolumeByTokenAmount0": {
+          "name": "cumulativeVolumeByTokenAmount0",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cumulativeVolumeByTokenUSD0": {
+          "name": "cumulativeVolumeByTokenUSD0",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "volumeByTokenAmount1": {
+          "name": "volumeByTokenAmount1",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "volumeByTokenUSD1": {
+          "name": "volumeByTokenUSD1",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "inputTokenBalances1": {
+          "name": "inputTokenBalances1",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "inputTokenBalancesUSD1": {
+          "name": "inputTokenBalancesUSD1",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cumulativeVolumeByTokenAmount1": {
+          "name": "cumulativeVolumeByTokenAmount1",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cumulativeVolumeByTokenUSD1": {
+          "name": "cumulativeVolumeByTokenUSD1",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
         }
       },
       "indexes": {
@@ -392,6 +836,13 @@
             "date"
           ],
           "isUnique": true
+        },
+        "chain_pool_id_day_idx": {
+          "name": "chain_pool_id_day_idx",
+          "columns": [
+            "poolId"
+          ],
+          "isUnique": false
         },
         "chain_pool_day_idx": {
           "name": "chain_pool_day_idx",

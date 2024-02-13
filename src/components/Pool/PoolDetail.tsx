@@ -1,6 +1,6 @@
 "use client";
 
-import { Pool } from "@/interfaces/uniswap.interface";
+import { LiquidityPool, Pool } from "@/interfaces/uniswap.interface";
 import { FEE_TIER_TO_TICK_SPACING, PoolTickData, TickProcessed, fetchTicksSurroundingPrice } from "@/uniswap/tick";
 import { formatAmount } from "@/utils/format";
 import { Token, CurrencyAmount } from "@uniswap/sdk-core";
@@ -38,15 +38,14 @@ const toFeeAmount = (feeTier: string): FeeAmount => {
 }
 
 function PoolDetail({
-  chainId,
   poolData,
 }: {
-  chainId: number;
-  poolData: Pool;
+  poolData: LiquidityPool;
 }) {
+  const chainId = poolData.chainId || 1
   const poolAddress = poolData.id
-  const token0 = new Token(chainId, poolData.token0.id, +poolData.token0.decimals)
-  const token1 = new Token(chainId, poolData.token1.id, +poolData.token1.decimals)
+  const token0 = new Token(chainId, poolData.inputTokens[0].id, +poolData.inputTokens[0].decimals)
+  const token1 = new Token(chainId, poolData.inputTokens[0].id, +poolData.inputTokens[1].decimals)
   const feeTier = poolData.feeTier
 
   const [tickData, setTickData] = useState<PoolTickData | null>(null);

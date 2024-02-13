@@ -111,6 +111,7 @@ export interface Pool {
 }
 
 export interface LiquidityPool {
+  chainId?: number
   id: string;
   feeTier: string;
   tick: string;

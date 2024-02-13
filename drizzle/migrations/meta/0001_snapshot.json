@@ -1,6 +1,6 @@
 {
-  "id": "f288ccf7-5c20-4825-b413-ddb1651304eb",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "f2b03265-c920-4322-b937-02d0889f6121",
+  "prevId": "f288ccf7-5c20-4825-b413-ddb1651304eb",
   "version": "5",
   "dialect": "pg",
   "tables": {
@@ -209,6 +209,13 @@
           ],
           "isUnique": true
         },
+        "chain_pool_id_idx": {
+          "name": "chain_pool_id_idx",
+          "columns": [
+            "poolId"
+          ],
+          "isUnique": false
+        },
         "chain_pool_idx": {
           "name": "chain_pool_idx",
           "columns": [
@@ -392,6 +399,13 @@
             "date"
           ],
           "isUnique": true
+        },
+        "chain_pool_id_day_idx": {
+          "name": "chain_pool_id_day_idx",
+          "columns": [
+            "poolId"
+          ],
+          "isUnique": false
         },
         "chain_pool_day_idx": {
           "name": "chain_pool_day_idx",

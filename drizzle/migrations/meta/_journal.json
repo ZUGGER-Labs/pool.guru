@@ -5,8 +5,29 @@
     {
       "idx": 0,
       "version": "5",
-      "when": 1705755476393,
-      "tag": "0000_stale_toro",
+      "when": 1707208355372,
+      "tag": "0000_next_shotgun",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1707209047232,
+      "tag": "0001_real_the_anarchist",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1707291002365,
+      "tag": "0002_curved_shockwave",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1707721464635,
+      "tag": "0003_curved_skullbuster",
       "breakpoints": true
     }
   ]

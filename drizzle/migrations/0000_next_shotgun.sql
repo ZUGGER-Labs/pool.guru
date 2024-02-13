@@ -10,13 +10,71 @@ CREATE TABLE IF NOT EXISTS "networks" (
 CREATE TABLE IF NOT EXISTS "poolData" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"chainId" integer DEFAULT 1,
+	"poolType" varchar DEFAULT 'uniswapv3',
+	"interval" integer NOT NULL,
 	"poolId" varchar(120) NOT NULL,
 	"date" bigint NOT NULL,
-	"open" varchar(32) NOT NULL,
-	"high" varchar(32) NOT NULL,
-	"low" varchar(32) NOT NULL,
-	"close" varchar(32) NOT NULL,
-	"volumeUSD" varchar(32) NOT NULL
+	"open" numeric NOT NULL,
+	"high" numeric NOT NULL,
+	"low" numeric NOT NULL,
+	"close" numeric NOT NULL,
+	"feesUSD" numeric NOT NULL,
+	"tvlUSD" numeric NOT NULL,
+	"token0Price" numeric NOT NULL,
+	"token1Price" numeric NOT NULL,
+	"volToken0" numeric NOT NULL,
+	"volToken1" numeric NOT NULL,
+	"sqrtPrice" varchar(120),
+	"liquidity" varchar(120),
+	"feeGrowthGlobal0X128" varchar(120),
+	"feeGrowthGlobal1X128" varchar(120),
+	"txCount" integer DEFAULT 0,
+	"volumeUSD" varchar(32) NOT NULL,
+	"startAt" varchar(20)
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "poolDayData" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"chainId" integer DEFAULT 1,
+	"poolType" varchar DEFAULT 'uniswapv3',
+	"interval" integer NOT NULL,
+	"poolId" varchar(120) NOT NULL,
+	"date" bigint NOT NULL,
+	"open" numeric NOT NULL,
+	"high" numeric NOT NULL,
+	"low" numeric NOT NULL,
+	"close" numeric NOT NULL,
+	"feesUSD" numeric NOT NULL,
+	"tvlUSD" numeric NOT NULL,
+	"token0Price" numeric NOT NULL,
+	"token1Price" numeric NOT NULL,
+	"volToken0" numeric NOT NULL,
+	"volToken1" numeric NOT NULL,
+	"sqrtPrice" varchar(120),
+	"liquidity" varchar(120),
+	"feeGrowthGlobal0X128" varchar(120),
+	"feeGrowthGlobal1X128" varchar(120),
+	"txCount" integer DEFAULT 0,
+	"volumeUSD" varchar(32) NOT NULL,
+	"startAt" varchar(20)
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "poolInfo" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"poolId" varchar(120) NOT NULL,
+	"chainId" integer DEFAULT 1,
+	"dex" varchar(32) DEFAULT 'uniswapv3',
+	"feeTier" integer NOT NULL,
+	"token0" varchar(120) NOT NULL,
+	"token1" varchar(120) NOT NULL,
+	"token0Vname" varchar(120) DEFAULT '',
+	"token1Vname" varchar(120) DEFAULT '',
+	"token0Id" varchar(120) NOT NULL,
+	"token1Id" varchar(120) NOT NULL,
+	"symbol" varchar(120) NOT NULL,
+	"token0Decimals" integer NOT NULL,
+	"token1Decimals" integer NOT NULL,
+	"createdAt" bigint NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "pools" (
@@ -100,6 +158,7 @@ CREATE TABLE IF NOT EXISTS "tokens" (
 	"tokenId" varchar(120) NOT NULL,
 	"chainId" integer DEFAULT 1,
 	"name" varchar NOT NULL,
+	"vname" varchar DEFAULT '',
 	"symbol" varchar NOT NULL,
 	"logoURI" varchar(300),
 	"decimals" integer DEFAULT 18,
@@ -107,8 +166,16 @@ CREATE TABLE IF NOT EXISTS "tokens" (
 	"desc" text
 );
 --> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "pool_kline_idx" ON "poolData" ("chainId","poolId","interval","date");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "chain_pool_idx" ON "poolData" ("poolId","chainId");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "date_idx" ON "poolData" ("date");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "interval" ON "poolData" ("interval");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "pool_day_kline_idx" ON "poolDayData" ("chainId","poolId","interval","date");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "chain_pool_day_idx" ON "poolDayData" ("poolId","chainId");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "date_day_idx" ON "poolDayData" ("date");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "pool_info_idx" ON "poolInfo" ("poolId","chainId");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "token0_id_idx" ON "poolInfo" ("token0Id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "token1_id_idx" ON "poolInfo" ("token0Id");--> statement-breakpoint
 CREATE UNIQUE INDEX IF NOT EXISTS "pool_idx" ON "pools" ("poolId","chainId");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "pool_liquidity_idx" ON "pools" ("liquidity");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "pool_tvl_idx" ON "pools" ("tvlUSD");--> statement-breakpoint
