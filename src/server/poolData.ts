@@ -13,6 +13,7 @@ import _ from "lodash";
 import { DBPoolData, DBPoolDayData } from "@/db/schema";
 import dayjs from "dayjs";
 import { insertDailyPoolData, insertHourlyPoolData } from "./db";
+import BigNumber from "bignumber.js";
 
 async function queryAll(
   client: ApolloClient<any>,
@@ -288,15 +289,15 @@ async function fetchHourlyPoolData(
   //     `hour: ${hour}, messariData: ${messariData.length} uniswapData: ${uniswapData.length}`
   //   );
   //   printPool(messariData, ethusdc);
-  //   printPool(uniswapData, ethusdc);
+    // printPool(uniswapData, ethusdc);
   const messariMap: { [key: string]: any } = {};
   for (let item of messariData) {
     messariMap[item.pool.id] = item;
   }
-  const startAt = dayjs(uniswapData[0].periodStartUnix).format(
+  const startAt = dayjs(uniswapData[0].periodStartUnix*1000).format(
     "YYYY-MM-DDTHH:mm"
   );
-  const date = dayjs(uniswapData[0].periodStartUnix).format("YYYYMMDD");
+  const date = dayjs(uniswapData[0].periodStartUnix*1000).format("YYYYMMDD");
   const data: DBPoolData[] = [];
   for (let item of uniswapData) {
     const mItem = messariMap[item.pool.id];
@@ -314,6 +315,8 @@ async function fetchHourlyPoolData(
         high: item.high,
         low: item.low,
         close: item.close,
+        // 小时没有数据
+        avgPrice: item.volumeToken1 === '0' ? '0': BigNumber(item.volumeToken0).div(item.volumeToken1).toString(),
         feesUSD: item.feesUSD,
         protocolFeesUSD: mItem.hourlyProtocolSideRevenueUSD,
         tvlUSD: item.tvlUSD,
@@ -386,10 +389,10 @@ async function fetchDailyPoolData(
   for (let item of messariData) {
     messariMap[item.pool.id] = item;
   }
-  const startAt = dayjs(uniswapData[0].periodStartUnix).format(
+  const startAt = dayjs(uniswapData[0].periodStartUnix*1000).format(
     "YYYY-MM-DDTHH:mm"
   );
-  const date = dayjs(uniswapData[0].periodStartUnix).format("YYYYMMDD");
+  const date = dayjs(uniswapData[0].periodStartUnix*1000).format("YYYYMMDD");
   const data: DBPoolDayData[] = [];
   for (let item of uniswapData) {
     const mItem = messariMap[item.pool.id];
@@ -406,6 +409,7 @@ async function fetchDailyPoolData(
         high: item.high,
         low: item.low,
         close: item.close,
+        avgPrice: item.volumeToken1 === '0' ? '0': BigNumber(item.volumeToken0).div(item.volumeToken1).toString(),
         feesUSD: item.feesUSD,
         protocolFeesUSD: mItem.hourlyProtocolSideRevenueUSD,
         tvlUSD: item.tvlUSD,
@@ -556,7 +560,7 @@ async function dailyPoolDataRoutine(chainIds: number[]) {
 })();
 */
 
-hourlyPoolDataRoutine([1])
+// hourlyPoolDataRoutine([1])
 
 export {
   fetchHourlyPoolData,
