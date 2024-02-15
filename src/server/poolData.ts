@@ -15,7 +15,7 @@ import dayjs from "dayjs";
 import { insertDailyPoolData, insertHourlyPoolData } from "./db";
 import BigNumber from "bignumber.js";
 
-async function queryAll(
+export async function queryAll(
   client: ApolloClient<any>,
   query: DocumentNode | TypedDocumentNode<any, any>,
   variable: OperationVariables,

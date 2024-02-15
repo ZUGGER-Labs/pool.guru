@@ -43,6 +43,8 @@ export interface Token {
   poolCount: number;
 
   derivedETH?: number
+  priceUSD?: number
+  alias?: string
 }
 
 export interface PoolDayData {

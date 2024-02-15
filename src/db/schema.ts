@@ -45,6 +45,16 @@ export const dbTokens = pgTable(
   }
 );
 
+export const tokenAlias = pgTable('token_alias', {
+  id: varchar('id', {length: 120}).notNull(),   // token contract address
+  chainId: integer('chainId').default(1).notNull(),
+  alias: varchar('alias').notNull(),
+}, (table) => {
+  return {
+    tokenAliasIdx: uniqueIndex('token_alias_idx').on(table.id, table.chainId),
+  }
+})
+
 // hourly
 export const dbPoolData = pgTable(
   "poolData",
