@@ -1,8 +1,11 @@
 // in server, start main.ts
 
-import { hourlyPoolDataRoutine } from "./poolData";
-import express, { Express, Request, Response } from "express";
+import express, { Express } from "express";
+
+// import { hourlyPoolDataRoutine } from "./poolData";
 import { loopTokenPrice } from "./price";
+
+import { tokenHandler } from "./handler/token";
 
 async function startBackend() {
   const chains = [1];
@@ -10,15 +13,13 @@ async function startBackend() {
   loopTokenPrice(chains)
 }
 
-const tokenHandler = async (req: Request, res: Response) => {
-
-}
-
 async function startHTTPServer(port?: number | string) {
   port = port ? +port : 5050;
   const app: Express = express();
+  app.use(express.json()) 
 
   app.post('/token', tokenHandler)
+
   app.listen(port, () => {
     console.log(`HTTP API listening on port ${port}`);
   });
