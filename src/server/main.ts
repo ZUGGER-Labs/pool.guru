@@ -6,11 +6,13 @@ import express, { Express } from "express";
 import { loopTokenPrice } from "./price";
 
 import { tokenHandler } from "./handler/token";
+import { loopPoolsRoutines } from "./pools";
 
 async function startBackend() {
   const chains = [1];
 //   hourlyPoolDataRoutine(chains);
   loopTokenPrice(chains)
+  loopPoolsRoutines(chains)
 }
 
 async function startHTTPServer(port?: number | string) {

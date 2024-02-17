@@ -7,7 +7,7 @@ import getRedis from "./redis";
 import { RedisClientType } from "@redis/client";
 import dayjs from "dayjs";
 import { getTokenAlias } from "@/lib/token";
-import { now } from "./utils";
+import { now, sleep } from "./utils";
 import _ from "lodash";
 import { db } from "@/db/db";
 import { DBTokenOHCL, dbTokenOHCL } from "@/db/schema";
@@ -42,8 +42,6 @@ async function fetchUniswapTokenPrice(
   );
 }
 
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-
 async function tokenPriceRoutine(chainId: number) {
   let blockNumber = await getLatestBlockNumber(chainId);
   console.log(`${now()} chain ${chainId} latest block: ${blockNumber}`);
@@ -57,6 +55,7 @@ async function tokenPriceRoutine(chainId: number) {
       const prices = await fetchUniswapTokenPrice(chainId, blockNumber);
       const aliasMap = await getTokenAlias(chainId);
       const blocks = await getBlockTimestamp(chainId, blockNumber);
+      console.log(`${now()} chainId: ${chainId} blockNumber: ${blockNumber}`);
 
       for (let item of prices) {
         // save to redis

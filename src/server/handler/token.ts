@@ -19,7 +19,8 @@ export const tokenHandler = async (req: Request, res: Response) => {
 
   switch (route) {
     case TokenMethodInfo7d:
-      const data = getTokenInfo(chainId, symbol, tokenId);
+      const data = await getTokenInfo(chainId, symbol, tokenId);
+      console.log('token info:', data)
       responseData(data, res)
       return;
   }

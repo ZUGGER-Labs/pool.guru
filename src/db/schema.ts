@@ -245,16 +245,19 @@ export const dbPoolInfo = pgTable(
     poolId: varchar("poolId", { length: 120 }).notNull(),
     chainId: integer("chainId").default(1),
     dex: varchar("dex", { length: 32 }).default("uniswapv3"),
-    feeTier: integer("feeTier").notNull(),
+    feeTier: varchar("feeTier").notNull(),
     token0: varchar("token0", { length: 120 }).notNull(),
-    token1: varchar("token1", { length: 120 }).notNull(),
+    token1: varchar("token1", { length: 120 }).notNull(), // name
+    token0Symbol: varchar("token0Symbol", { length: 120 }).notNull(),
+    token1Symbol: varchar("token1Symbol", { length: 120 }).notNull(),
     token0Vname: varchar("token0Vname", { length: 120 }).default(""),
     token1Vname: varchar("token1Vname", { length: 120 }).default(""),
-    token0Id: varchar("token0Id", { length: 120 }).notNull(),
+    token0Id: varchar("token0Id", { length: 120 }).notNull(), // id
     token1Id: varchar("token1Id", { length: 120 }).notNull(),
     symbol: varchar("symbol", { length: 120 }).notNull(),
     token0Decimals: integer("token0Decimals").notNull(),
     token1Decimals: integer("token1Decimals").notNull(),
+    createdBlock: integer('createdBlock').notNull(),
     createdAt: bigint("createdAt", { mode: "number" }).notNull(),
   },
   (table) => {
@@ -262,6 +265,8 @@ export const dbPoolInfo = pgTable(
       poolInfoIdx: uniqueIndex("pool_info_idx").on(table.poolId, table.chainId),
       token0Idx: index("token0_id_idx").on(table.token0Id),
       token1Idx: index("token1_id_idx").on(table.token0Id),
+      token0VnameIdx: index("token0_vname_idx").on(table.token0Vname),
+      token1VanmeIdx: index("token1_vname_idx").on(table.token1Vname),
     };
   }
 );
@@ -428,7 +433,8 @@ export const dbPositionData = pgTable(
 );
 
 export type DBToken = typeof dbTokens.$inferSelect;
-export type DBPool = typeof dbPools.$inferSelect;
+export type DBPools = typeof dbPools.$inferSelect;
+export type DBPoolInfo = typeof dbPoolInfo.$inferInsert;
 export type DBPosition = typeof dbPositions.$inferSelect;
 export type DBPositionData = typeof dbPositionData.$inferInsert;
 

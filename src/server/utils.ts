@@ -6,3 +6,5 @@ export const now = () => {
 
   return dayjs().format('YYYY-MM-DDTHH:mm:ss')
 };
+
+export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));

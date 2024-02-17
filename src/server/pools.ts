@@ -12,13 +12,15 @@ import {
 } from "@/interfaces/uniswap.interface";
 import { QueryOptions, gql } from "@apollo/client";
 import { ChainId } from "@uniswap/sdk-core";
-import { DBPool, dbPools } from "@/db/schema";
-import { and, eq } from "drizzle-orm";
+import { DBPoolInfo, DBPools, dbPoolInfo, dbPools } from "@/db/schema";
+import { and, desc, eq } from "drizzle-orm";
 import getRedis from "./redis";
 import { RedisClientType } from "redis";
 import { CHAIN_NAME, DEX_TYPES } from "@/lib/network";
-import { now } from "./utils";
+import { now, sleep } from "./utils";
 import BigNumber from "bignumber.js";
+import { queryAll } from "./poolData";
+import { getTokenAlias } from "@/lib/token";
 
 function chainPoolKey(chainId: number): string {
   const RedisPoolsKey = "pools";
@@ -29,7 +31,7 @@ function toDBPool(
   chainId: number,
   pool: Pool,
   dex: string = "uniswapv3"
-): DBPool {
+): DBPools {
   return {
     poolId: pool.id,
     chainId: chainId,
@@ -48,10 +50,10 @@ function toDBPool(
     tvlUSD: pool.totalValueLockedUSD, // decimal of totalValueLockedUSD
     createdAt: +pool.createdAtTimestamp,
     txCount: +pool.txCount,
-  } as DBPool;
+  } as DBPools;
 }
 
-function fromDBPool(p: DBPool): Pool {
+function fromDBPool(p: DBPools): Pool {
   return {
     id: p.poolId,
     feeTier: p.feeTier + "",
@@ -320,11 +322,11 @@ async function getPoolPrice(chainId: number, pools: LiquidityPool[]) {
     // console.log('resp:', resp)
 
     for (let item of resp.data.pools) {
-      for (let i = 0; i < item.poolDayData.length-1; i ++) {
+      for (let i = 0; i < item.poolDayData.length - 1; i++) {
         item.poolDayData[i].open = item.poolDayData[i + 1].close;
       }
       prices[item.id] = item.poolDayData;
-      console.log('got pool poolDayData', item.id)
+      console.log("got pool poolDayData", item.id);
     }
   }
 
@@ -346,52 +348,51 @@ function calcPoolPrice(
 ) {
   for (let pool of pools) {
     if (pool.poolDayData) {
-      let price: PriceOpenClose = {} as PriceOpenClose
-      const dataLen = pool.poolDayData.length
-      for (let i = 0; i < dataLen; i ++) {
-        const item = pool.poolDayData[i]
-        const day = item.date/86400
+      let price: PriceOpenClose = {} as PriceOpenClose;
+      const dataLen = pool.poolDayData.length;
+      for (let i = 0; i < dataLen; i++) {
+        const item = pool.poolDayData[i];
+        const day = item.date / 86400;
         if (day === prev1d) {
           // console.log('day price:', item)
-          price.open1D = item.open
-          price.close1D = item.close
-          price.close30D = item.close
-          price.close7D = item.close
+          price.open1D = item.open;
+          price.close1D = item.close;
+          price.close30D = item.close;
+          price.close7D = item.close;
         } else {
-          const z0 = pool.poolDayData[0]
-          const day = z0.date/86400
+          const z0 = pool.poolDayData[0];
+          const day = z0.date / 86400;
           if (day >= prev7d) {
-            price.close7D = z0.close
-            price.close30D = z0.close
+            price.close7D = z0.close;
+            price.close30D = z0.close;
           } else if (day >= prev30d) {
-            price.close30D = z0.close
+            price.close30D = z0.close;
           }
         }
-        
+
         if (day === prev7d) {
-          price.open7D = item.open
+          price.open7D = item.open;
         } else if (price.open7D === undefined && day < prev7d) {
-          price.open7D = item.close
+          price.open7D = item.close;
         }
 
         if (day === prev30d) {
-          price.open30D = item.open
+          price.open30D = item.open;
         } else if (price.open30D === undefined && day < prev30d) {
-          price.open30D = item.close
+          price.open30D = item.close;
         }
       }
 
-      pool.price = price // toReciprocal(price) as PriceOpenClose
+      pool.price = price; // toReciprocal(price) as PriceOpenClose
     } else {
-      console.log(`pool ${pool.id} has no poolDayData`)
+      console.log(`pool ${pool.id} has no poolDayData`);
     }
   }
 }
 
-
 // uniswap 价格似乎是倒数
 function toReciprocal(price: PriceOpenClose) {
-  const bn1 = BigNumber(1)
+  const bn1 = BigNumber(1);
   return {
     open1D: price.open1D ? bn1.div(price.open1D) : undefined,
     close1D: price.close1D ? bn1.div(price.close1D) : undefined,
@@ -399,7 +400,7 @@ function toReciprocal(price: PriceOpenClose) {
     close7D: price.close7D ? bn1.div(price.close7D) : undefined,
     open30D: price.open30D ? bn1.div(price.open30D) : undefined,
     close30D: price.close30D ? bn1.div(price.close30D) : undefined,
-  }
+  };
 }
 
 // 按照 tvl 排序的 pools, 从 messari graph 接口获取数据
@@ -629,12 +630,159 @@ function runPoolRoutine(chains: { [key: number]: PoolRoutineOpts }) {
   }
 }
 
+// 更新 pool 的信息
+async function fetchPools(chainId: number, blockNumber: number) {
+  const client = getGraphClient(chainId, "messari");
+
+  const res = await client.query({
+    query: gql`
+      query liquidityPools($blockNumber: BigInt!) {
+        liquidityPools(
+          where: { createdBlockNumber_gt: $blockNumber }
+          first: 1000
+          orderBy: createdBlockNumber
+          orderDirection: asc
+        ) {
+          id
+          inputTokens {
+            id
+            decimals
+            name
+            symbol
+          }
+          createdTimestamp
+          createdBlockNumber
+          fees {
+            feeType
+            feePercentage
+          }
+          symbol
+        }
+      }
+    `,
+    variables: { blockNumber: blockNumber },
+  });
+  if (res.errors || !res.data) {
+    console.log("query pool failed:", res);
+    return [];
+  }
+  // console.log(key, res.data[key])
+  const pools = res.data["liquidityPools"];
+  if (pools.length < 1000) {
+    return pools;
+  }
+  // 移除最后一个 block number 创建的 pools, 下次从这个 block 开始继续查询
+  let lastBlockNumber = pools[pools.length - 1].createdBlockNumber;
+  let index = pools.length - 2;
+  for (; index >= 0; index--) {
+    if (pools[index].createdBlockNumber !== lastBlockNumber) break;
+  }
+  return pools.slice(0, index + 1);
+}
+
+async function insertPoolInfo(
+  chainId: number,
+  pools: any[],
+  dex = "uniswapv3"
+) {
+  const aliasMap = await getTokenAlias(chainId);
+
+  const values: DBPoolInfo[] = [];
+  for (let pool of pools) {
+    let feeTier: string = "";
+    for (let item of pool.fees) {
+      if (item.feeType.indexOf("TRADING_FEE") !== -1) {
+        // FIXED_TRADING_FEE
+        feeTier = item.feePercentage;
+      }
+    }
+    const token0 = pool.inputTokens[0];
+    const token1 = pool.inputTokens[1];
+    const token0Vname = aliasMap[token0.id.toLowerCase()] || "";
+    const token1Vname = aliasMap[token1.id.toLowerCase()] || "";
+    values.push({
+      poolId: pool.id.toLowerCase(),
+      chainId: chainId,
+      dex: dex,
+      feeTier: feeTier,
+      token0: token0.name.slice(0, 100),
+      token1: token1.name.slice(0, 100), // name
+      token0Symbol: token0.symbol.slice(0, 100),
+      token1Symbol: token1.symbol.slice(0, 100),
+      token0Vname: token0Vname,
+      token1Vname: token1Vname,
+      token0Id: token0.id.toLowerCase(), // id
+      token1Id: token1.id.toLowerCase(),
+      symbol: pool.symbol.slice(0, 100),
+      token0Decimals: token0.decimals,
+      token1Decimals: token1.decimals,
+      createdBlock: pool.createdBlockNumber,
+      createdAt: pool.createdTimestamp,
+    });
+  }
+
+  await db.insert(dbPoolInfo).values(values);
+  console.log(
+    `${now()} insert chain ${chainId} ${dex} new created pools: ${
+      values.length
+    } pools`
+  );
+}
+
+async function getPoolLastBlockNumber() {
+  const records = await db
+    .select({
+      createdBlock: dbPoolInfo.createdBlock,
+    })
+    .from(dbPoolInfo)
+    .orderBy(desc(dbPoolInfo.createdBlock))
+    .limit(1);
+  if (records.length === 0) return 0;
+
+  return +records[0].createdBlock;
+}
+
+async function loopPoolsRoutine(chainId: number) {
+  let lastBlockNumber: number = await getPoolLastBlockNumber();
+
+  console.log(`${now()} loopPoolsRoutine: get chain ${chainId} new pools from ${lastBlockNumber}`)
+
+  for (; true; ) {
+    const pools = await fetchPools(chainId, lastBlockNumber);
+    if (pools.length === 0) {
+      await sleep(60000);
+      continue;
+    }
+    // insert
+    try {
+      await insertPoolInfo(chainId, pools, "uniswapv3");
+      for (let pool of pools) {
+        if (+pool.createdBlockNumber > lastBlockNumber) {
+          lastBlockNumber = +pool.createdBlockNumber;
+        }
+      }
+    } catch (err){
+      console.log(`${now()} insert pools failed:`, err)
+      await sleep(60000);
+    }
+  }
+}
+
+async function loopPoolsRoutines(chainIds: number[]) {
+  for (let chainId of chainIds) {
+    loopPoolsRoutine(chainId)
+  }
+}
+
+// console.log((await fetchPools(1, 12444815)).length);
+// console.log(await getPoolLastBlockNumber());
 // runPoolRoutine({
 //   1: {},
 //   [ChainId.BASE]: {interval: 5000},
 //   [ChainId.BNB]: {interval: 5000},
 // })
 // getPools(1, 0, 5000)
+// loopPoolsRoutine(1)
 
 export {
   chainPoolKey,
@@ -644,5 +792,7 @@ export {
   getUniswapv3PoolById,
   getPoolPrice,
   calcPoolPrice,
+  loopPoolsRoutine,
+  loopPoolsRoutines,
   // getTokenPools,
 };
