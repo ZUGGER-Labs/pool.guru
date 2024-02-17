@@ -1,6 +1,7 @@
 import { gql } from "@apollo/client";
 import { getGraphClient } from "./client";
 import { queryAll } from "./poolData";
+import { now } from "./utils";
 
 export async function getLatestBlockNumber(chainId: number): Promise<number> {
   const client = getGraphClient(chainId, "block");
@@ -41,7 +42,7 @@ export async function getBlockTimestamp(chainId: number, block: number) {
           orderDirection: asc
           first: 1000
           skip: $skip
-          where: { number_gt: $blockNumber }
+          where: { number_gte: $blockNumber }
         ) {
           number
           timestamp
@@ -52,13 +53,14 @@ export async function getBlockTimestamp(chainId: number, block: number) {
     "blocks"
   );
 
-  if (!blocks || blocks.length === 0) {
-    console.log(`query chain ${chainId} block timestamp: empty data`);
+  if (!blocks) {
+    console.log(`getBlockTimestamp: query chain ${chainId} block after ${block} timestamp failed: null data`);
     return [];
   }
 
+  // console.log(`${now()} getBlockTimestamp: query chain ${chainId} block after ${block}: ${blocks.length}`)
   return blocks;
 }
 
 // console.log(await getLatestBlockNumber(1))
-console.log((await getBlockTimestamp(1, 190000)).length)
+// console.log((await getBlockTimestamp(1, 190000)).length)

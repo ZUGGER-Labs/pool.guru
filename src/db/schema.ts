@@ -81,7 +81,7 @@ export const dbTokenOHCL = pgTable(
 
 // hourly
 export const dbPoolData = pgTable(
-  "poolData",
+  "pool_data",
   {
     id: serial("id").primaryKey(),
     chainId: integer("chainId").default(1),
@@ -162,7 +162,7 @@ export const dbPoolData = pgTable(
 
 // daily
 export const dbPoolDayData = pgTable(
-  "poolDayData",
+  "pool_day_data",
   {
     id: serial("id").primaryKey(),
     chainId: integer("chainId").default(1),
@@ -239,7 +239,7 @@ export const dbPoolDayData = pgTable(
 );
 
 export const dbPoolInfo = pgTable(
-  "poolInfo",
+  "pool_info",
   {
     id: serial("id").primaryKey(),
     poolId: varchar("poolId", { length: 120 }).notNull(),
@@ -373,8 +373,8 @@ export const dbPositions = pgTable(
   }
 );
 
-export const dbPositionDatas = pgTable(
-  "positionDatas",
+export const dbPositionData = pgTable(
+  "position_data",
   {
     id: serial("id").primaryKey(),
     posTokenId: integer("posTokenId").notNull(), // position NFT tokenId
@@ -430,7 +430,7 @@ export const dbPositionDatas = pgTable(
 export type DBToken = typeof dbTokens.$inferSelect;
 export type DBPool = typeof dbPools.$inferSelect;
 export type DBPosition = typeof dbPositions.$inferSelect;
-export type DBPositionData = typeof dbPositionDatas.$inferInsert;
+export type DBPositionData = typeof dbPositionData.$inferInsert;
 
 export type DBPoolData = typeof dbPoolData.$inferInsert;
 export type DBPoolDayData = typeof dbPoolDayData.$inferInsert;

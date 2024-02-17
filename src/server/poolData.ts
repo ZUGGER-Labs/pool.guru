@@ -269,7 +269,7 @@ const ethusdc = "0x88e6a0c2ddd26feeb64f039a2c41296fcb3f5640";
 function printPool(data: unknown[], poolId: string) {
   for (let item of data) {
     if ((item as any).pool.id === poolId) {
-      console.log(item);
+      console.log('pool:', item);
     }
   }
 }
