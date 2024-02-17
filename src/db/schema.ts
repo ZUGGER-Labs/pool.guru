@@ -11,6 +11,7 @@ import {
   boolean,
   json,
   decimal,
+  bigserial,
 } from "drizzle-orm/pg-core";
 
 export const dbNetworks = pgTable("networks", {
@@ -54,6 +55,29 @@ export const tokenAlias = pgTable('token_alias', {
     tokenAliasIdx: uniqueIndex('token_alias_idx').on(table.id, table.chainId),
   }
 })
+
+export const dbTokenOHCL = pgTable(
+  'token_ohcl', {
+    // id: bigserial("id", { mode: 'number' }).primaryKey(),
+    chainId: integer("chainId").notNull().default(1),
+    dex: varchar("poolType").default("uniswapv3").notNull(),
+    interval: integer("interval").notNull(),
+    tokenId: varchar("tokenId", { length: 120 }).notNull(),
+    hour: integer('hour').notNull().default(0),
+    startTs: integer('startTs').notNull().default(0),
+    date: varchar('date', { length: 20 }).notNull().default(''), // ex 2024-02-09-1200
+    open: decimal("open").notNull(),
+    high: decimal("high").notNull(),
+    low: decimal("low").notNull(),
+    close: decimal("close").notNull(),
+  }, (table) => {
+    return {
+      tokenOHCLHourIdx: index('token_ohcl_hour_idx').on(table.hour),
+      tokenOHCLTsIdx: index('token_ohcl_ts_idx').on(table.startTs),
+      tokenOHCLTokenIdx: index('token_ohcl_token_idx').on(table.tokenId),
+    }
+  }
+)
 
 // hourly
 export const dbPoolData = pgTable(
@@ -410,3 +434,4 @@ export type DBPositionData = typeof dbPositionDatas.$inferInsert;
 
 export type DBPoolData = typeof dbPoolData.$inferInsert;
 export type DBPoolDayData = typeof dbPoolDayData.$inferInsert;
+export type DBTokenOHCL = typeof dbTokenOHCL.$inferSelect;

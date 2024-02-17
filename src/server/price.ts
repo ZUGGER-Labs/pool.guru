@@ -2,13 +2,15 @@ import { gql } from "@apollo/client";
 
 import { getGraphClient } from "./client";
 import { queryAll } from "./poolData";
-import { getLatestBlockNumber } from "./block";
+import { getBlockTimestamp, getLatestBlockNumber } from "./block";
 import getRedis from "./redis";
 import { RedisClientType } from "@redis/client";
-import { db } from "@/db/db";
-import { tokenAlias } from "@/db/schema";
-import { eq } from "drizzle-orm";
 import dayjs from "dayjs";
+import { getTokenAlias } from "@/lib/token";
+import { now } from "./utils";
+import _ from "lodash";
+import { db } from "@/db/db";
+import { DBTokenOHCL, dbTokenOHCL } from "@/db/schema";
 
 async function fetchUniswapTokenPrice(
   chainId: number,
@@ -23,6 +25,8 @@ async function fetchUniswapTokenPrice(
           where: { lastPriceUSD_gt: "0", lastPriceBlockNumber_gt: $block }
           skip: $skip
           first: 1000
+          orderBy: lastPriceBlockNumber
+          orderDirection: asc
         ) {
           id
           decimals
@@ -40,25 +44,15 @@ async function fetchUniswapTokenPrice(
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-async function getTokenAlias(chainId: number) {
-  const records = await db.query.tokenAlias.findMany({
-    where: eq(tokenAlias.chainId, chainId),
-  });
-  const aliases: { [key: string]: string } = {};
-
-  for (let record of records) {
-    aliases[record.id] = record.alias;
-  }
-  return aliases;
-}
-
 async function tokenPriceRoutine(chainId: number) {
   let blockNumber = await getLatestBlockNumber(chainId);
   const rc = await getRedis();
+  let currentHour = Math.floor(new Date().getTime() / 1000 / 3600);
+  const blocks = await getBlockTimestamp(chainId, blockNumber);
 
   for (; true; ) {
-    const now = dayjs().format('YYYY-MM-DDTHH:mm:ss')
-    console.log(`${now} chainId: ${chainId} blockNumber: ${blockNumber}`)
+    const now = dayjs().format("YYYY-MM-DDTHH:mm:ss");
+    console.log(`${now} chainId: ${chainId} blockNumber: ${blockNumber}`);
     const prices = await fetchUniswapTokenPrice(chainId, blockNumber);
     const aliasMap = await getTokenAlias(chainId);
 
@@ -70,8 +64,110 @@ async function tokenPriceRoutine(chainId: number) {
       refreshRedisTokenPrice(chainId, rc, item, aliasMap);
     }
 
-    await sleep(60000);
+    await refreshRedisTokenOHCL(chainId, rc, prices, blocks);
+
+    const hour = Math.floor(new Date().getTime() / 1000 / 3600);
+    if (hour > currentHour) {
+      // sync token ohcl to DB
+      await syncTokenOHCL(chainId, rc, hour)
+      currentHour = hour
+    }
+
+    // 30 second
+    await sleep(30000);
   }
+}
+
+async function syncTokenOHCL(chainId: number,
+  rc: RedisClientType<any, any, any>,
+  currentHour: number) {
+  const blockHour = await rc.get(`tokenOHCLHour-${chainId}`)
+  console.log(`${now()} syncTokenOHCL: blockHour=${blockHour} currentHour=${currentHour}`)
+  const minHour = blockHour ? (+blockHour > currentHour ? currentHour : +blockHour) : currentHour
+
+  const ohclHours= await rc.keys(`tokenOHCL-${chainId}-*`)
+  for (let hourKey of ohclHours) {
+    const hour = +hourKey.split('-')[2]
+    if (hour < minHour-1) {
+      const ohclMap = await rc.hGetAll(hourKey)
+      const ohclList = _.values(ohclMap)
+      await insertTokenOHCL(chainId, ohclList)
+
+      await rc.del(hourKey)
+    }
+  }
+}
+
+async function insertTokenOHCL(chainId: number, ohclList: any[]) {
+  const values: DBTokenOHCL[] = []
+
+  for (let ohcl of ohclList) {
+    values.push({
+      chainId: chainId,
+    dex: "uniswapv3",
+    interval: 3600,
+    tokenId: ohcl.id,
+    hour: ohcl.hour,
+    startTs: (+ohcl.hour) * 3600,
+    date: dayjs(3600*(+ohcl.hour)).format('YYYY-MM-DD-HHmm'), // ex 2024-02-09-1200
+    open: ohcl.open,
+    high: ohcl.high,
+    low: ohcl.low,
+    close: ohcl.close,
+    })
+  }
+  await db.insert(dbTokenOHCL).values(values)
+}
+
+async function refreshRedisTokenOHCL(
+  chainId: number,
+  rc: RedisClientType<any, any, any>,
+  prices: any[],
+  blocks: { number: string; timestamp: string }[]
+) {
+  // key: block number, value: hour
+  const blocksHour: { [key: string]: number } = {};
+  for (let block of blocks) {
+    blocksHour[block.number] = toHour(block.timestamp);
+  }
+
+  const currentHour = toHour(new Date().getTime() / 1000);
+  for (let item of prices) {
+    let hour = blocksHour[item.lastPriceBlockNumber];
+    if (!hour) {
+      console.log(`${now()} not found chain ${chainId} block ${item.lastPriceBlockNumber} hour, set to current hour ${currentHour}`)
+      hour = currentHour;
+    }
+    const key = `tokenOHCL-${chainId}-${hour}`;
+
+    let ohcl: any = await rc.hGet(key, item.id);
+    if (ohcl) {
+      let last = +item.lastPriceUSD;
+      if (+ohcl.high < last) {
+        ohcl.high = item.lastPriceUSD;
+      }
+      if (+ohcl.low > last) {
+        ohcl.low = item.lastPriceUSD;
+      }
+      ohcl.close = item.lastPriceUSD;
+    } else {
+      ohcl = {
+        id: item.id,
+        hour: hour,
+        open: item.lastPriceUSD,
+        high: item.lastPriceUSD,
+        low: item.lastPriceUSD,
+        close: item.lastPriceUSD,
+      };
+    }
+
+    await rc.hSet(key, item.id, ohcl);
+    await rc.set(`tokenOHCLHour-${chainId}`, hour)
+  }
+}
+
+function toHour(second: number | string) {
+  return Math.floor(+second / 3600);
 }
 
 async function refreshRedisTokenPrice(
@@ -85,7 +181,11 @@ async function refreshRedisTokenPrice(
   if (alias) {
     await rc.hSet("tokenPrice-" + chainId, alias, item.lastPriceUSD);
   }
-  console.log(`refresh token ${item.id} ${alias ? alias: ''} price to ${item.lastPriceUSD}`)
+  console.log(
+    `refresh token ${item.id} ${alias ? alias : ""} price to ${
+      item.lastPriceUSD
+    }`
+  );
 }
 
 async function loopTokenPrice(chainIds: number[]) {
@@ -94,6 +194,6 @@ async function loopTokenPrice(chainIds: number[]) {
   }
 }
 
-loopTokenPrice([1])
+loopTokenPrice([1]);
 
 export { fetchUniswapTokenPrice, loopTokenPrice };
