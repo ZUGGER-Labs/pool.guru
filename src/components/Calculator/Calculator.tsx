@@ -5,6 +5,7 @@ import * as Popover from "@radix-ui/react-popover";
 import { Command } from "cmdk";
 import { useRef, useState } from "react";
 import { AutoComplete } from "../ui/AutoComplete";
+import { query } from "@/utils/query";
 
 function AddIcon() {
   return (
@@ -46,14 +47,38 @@ const useNumStrState = (defaultVal = ""): [string, (val: string) => void] => {
   return [numVal, handleChange];
 };
 
+interface ITokenOHCL {
+  tokenId: string;
+  high: string | number;
+  close: string | number;
+  open: string | number;
+  low: string | number;
+  startTs: string | number;
+  hour: number;
+}
+
+interface ITokenInfo7D {
+  latestPrice: string | number;
+  prices7d: ITokenOHCL[];
+  change7d: string | number;
+}
+const fetchTokenInfo = async (tokenId: string) => {
+  console.log('fetchTokenInfo:', tokenId)
+  return await query("/token/info7d", { tokenId });
+};
+
 function Calculator({ tokens }: { tokens: Token[] }) {
   const [amount, setAmount] = useNumStrState("1000");
   const [selectedAssets, setSelectedAssets] = useState<Set<Token>>(new Set());
+  const [token0Info, setToken0Info] = useState<ITokenInfo7D>();
 
-  const handleAddAsset = (selectedOption: Token) => {
+  const handleAddAsset = async (selectedOption: Token) => {
     const newSelectedAssets = new Set(selectedAssets);
     newSelectedAssets.add(selectedOption);
     setSelectedAssets(newSelectedAssets);
+    const info = await fetchTokenInfo(selectedOption.id)
+    console.log('tokenInfo:', info)
+    setToken0Info(info)
   };
 
   const handleRemoveAsset = (asset: Token) => {
@@ -74,7 +99,9 @@ function Calculator({ tokens }: { tokens: Token[] }) {
 
       <div className="mx-auto w-full md:w-[43rem] mt-4">
         <div className="flex flex-row">
-          <p className="font-bold leading-5 mb-2 text-left  w-[538px]">Assets</p>
+          <p className="font-bold leading-5 mb-2 text-left  w-[538px]">
+            Assets
+          </p>
           <p className="font-bold leading-5 mb-2">Deposit Amount</p>
         </div>
         <div className="flex flex-row items-center">
