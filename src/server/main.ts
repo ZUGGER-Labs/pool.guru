@@ -5,7 +5,7 @@ import express, { Express } from "express";
 // import { hourlyPoolDataRoutine } from "./poolData";
 import { loopTokenPrice } from "./price";
 
-import { tokenHandler } from "./handler/token";
+import { tokenHandler, tokenInfo7dHandler } from "./handler/token";
 import { loopPoolsRoutines } from "./pools";
 
 async function startBackend() {
@@ -20,7 +20,8 @@ async function startHTTPServer(port?: number | string) {
   const app: Express = express();
   app.use(express.json()) 
 
-  app.post('/token', tokenHandler)
+  // app.post('/token', tokenHandler)
+  app.post('/token/info7d', tokenInfo7dHandler)
 
   app.listen(port, () => {
     console.log(`HTTP API listening on port ${port}`);

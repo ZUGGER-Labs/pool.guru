@@ -7,10 +7,9 @@ import { responseData, responseError } from "./utils";
 export const tokenHandler = async (req: Request, res: Response) => {
   let { route, symbol, tokenId, chainId } = await req.body;
 
-  console.log('req.body:', req.body)
-  if ((!symbol) && (!tokenId)) {
-    responseError(1000, 'invalid param', res)
-    return
+  if (!symbol && !tokenId) {
+    responseError(1000, "invalid param", res);
+    return;
   }
 
   if (!chainId) {
@@ -20,10 +19,28 @@ export const tokenHandler = async (req: Request, res: Response) => {
   switch (route) {
     case TokenMethodInfo7d:
       const data = await getTokenInfo(chainId, symbol, tokenId);
-      console.log('token info:', data)
-      responseData(data, res)
+      console.log("token info:", data);
+      responseData(data, res);
       return;
   }
 
-  responseError(1001, 'unknown route', res)
+  responseError(1001, "unknown route", res);
+};
+
+export const tokenInfo7dHandler = async (req: Request, res: Response) => {
+  let { symbol, tokenId, chainId } = await req.body;
+
+  if (!symbol && !tokenId) {
+    responseError(1000, "invalid param", res);
+    return;
+  }
+
+  if (!chainId) {
+    chainId = 1;
+  }
+
+  const data = await getTokenInfo(chainId, symbol, tokenId);
+  console.log("token info:", data);
+  responseData(data, res);
+  return;
 };
