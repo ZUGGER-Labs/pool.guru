@@ -131,7 +131,7 @@ async function getPoolTokens(chainId: number, pools: Pool[], maxPerCall = 500) {
     }
   }
 
-  console.log(res.length);
+  console.log('getPoolTokens:', res.length);
 }
 
 // (async function () {

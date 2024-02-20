@@ -11,6 +11,7 @@ import {
   boolean,
   json,
   decimal,
+  bigserial,
 } from "drizzle-orm/pg-core";
 
 export const dbNetworks = pgTable("networks", {
@@ -45,9 +46,42 @@ export const dbTokens = pgTable(
   }
 );
 
+export const tokenAlias = pgTable('token_alias', {
+  id: varchar('id', {length: 120}).notNull(),   // token contract address
+  chainId: integer('chainId').default(1).notNull(),
+  alias: varchar('alias').notNull(),
+}, (table) => {
+  return {
+    tokenAliasIdx: uniqueIndex('token_alias_idx').on(table.id, table.chainId),
+  }
+})
+
+export const dbTokenOHCL = pgTable(
+  'token_ohcl', {
+    // id: bigserial("id", { mode: 'number' }).primaryKey(),
+    chainId: integer("chainId").notNull().default(1),
+    dex: varchar("poolType").default("uniswapv3").notNull(),
+    interval: integer("interval").notNull(),
+    tokenId: varchar("tokenId", { length: 120 }).notNull(),
+    hour: integer('hour').notNull().default(0),
+    startTs: integer('startTs').notNull().default(0),
+    date: varchar('date', { length: 20 }).notNull().default(''), // ex 2024-02-09-1200
+    open: decimal("open").notNull(),
+    high: decimal("high").notNull(),
+    low: decimal("low").notNull(),
+    close: decimal("close").notNull(),
+  }, (table) => {
+    return {
+      tokenOHCLHourIdx: index('token_ohcl_hour_idx').on(table.hour),
+      tokenOHCLTsIdx: index('token_ohcl_ts_idx').on(table.startTs),
+      tokenOHCLTokenIdx: index('token_ohcl_token_idx').on(table.tokenId),
+    }
+  }
+)
+
 // hourly
 export const dbPoolData = pgTable(
-  "poolData",
+  "pool_data",
   {
     id: serial("id").primaryKey(),
     chainId: integer("chainId").default(1),
@@ -61,6 +95,7 @@ export const dbPoolData = pgTable(
     high: decimal("high").notNull(),
     low: decimal("low").notNull(),
     close: decimal("close").notNull(),
+    avgPrice: decimal("avgPrice").default('0').notNull(),
     feesUSD: decimal("feesUSD").notNull(),
     protocolFeesUSD: decimal("protocolFeesUSD").notNull(),
     tvlUSD: decimal("tvlUSD").notNull(),
@@ -127,7 +162,7 @@ export const dbPoolData = pgTable(
 
 // daily
 export const dbPoolDayData = pgTable(
-  "poolDayData",
+  "pool_day_data",
   {
     id: serial("id").primaryKey(),
     chainId: integer("chainId").default(1),
@@ -140,6 +175,7 @@ export const dbPoolDayData = pgTable(
     high: decimal("high").notNull(),
     low: decimal("low").notNull(),
     close: decimal("close").notNull(),
+    avgPrice: decimal("avgPrice").default('0').notNull(),
     feesUSD: decimal("feesUSD").notNull(),
     protocolFeesUSD: decimal("protocolFeesUSD").notNull(),
     tvlUSD: decimal("tvlUSD").notNull(),
@@ -203,22 +239,25 @@ export const dbPoolDayData = pgTable(
 );
 
 export const dbPoolInfo = pgTable(
-  "poolInfo",
+  "pool_info",
   {
     id: serial("id").primaryKey(),
     poolId: varchar("poolId", { length: 120 }).notNull(),
     chainId: integer("chainId").default(1),
     dex: varchar("dex", { length: 32 }).default("uniswapv3"),
-    feeTier: integer("feeTier").notNull(),
+    feeTier: varchar("feeTier").notNull(),
     token0: varchar("token0", { length: 120 }).notNull(),
-    token1: varchar("token1", { length: 120 }).notNull(),
+    token1: varchar("token1", { length: 120 }).notNull(), // name
+    token0Symbol: varchar("token0Symbol", { length: 120 }).notNull(),
+    token1Symbol: varchar("token1Symbol", { length: 120 }).notNull(),
     token0Vname: varchar("token0Vname", { length: 120 }).default(""),
     token1Vname: varchar("token1Vname", { length: 120 }).default(""),
-    token0Id: varchar("token0Id", { length: 120 }).notNull(),
+    token0Id: varchar("token0Id", { length: 120 }).notNull(), // id
     token1Id: varchar("token1Id", { length: 120 }).notNull(),
     symbol: varchar("symbol", { length: 120 }).notNull(),
     token0Decimals: integer("token0Decimals").notNull(),
     token1Decimals: integer("token1Decimals").notNull(),
+    createdBlock: integer('createdBlock').notNull(),
     createdAt: bigint("createdAt", { mode: "number" }).notNull(),
   },
   (table) => {
@@ -226,6 +265,8 @@ export const dbPoolInfo = pgTable(
       poolInfoIdx: uniqueIndex("pool_info_idx").on(table.poolId, table.chainId),
       token0Idx: index("token0_id_idx").on(table.token0Id),
       token1Idx: index("token1_id_idx").on(table.token0Id),
+      token0VnameIdx: index("token0_vname_idx").on(table.token0Vname),
+      token1VanmeIdx: index("token1_vname_idx").on(table.token1Vname),
     };
   }
 );
@@ -337,8 +378,8 @@ export const dbPositions = pgTable(
   }
 );
 
-export const dbPositionDatas = pgTable(
-  "positionDatas",
+export const dbPositionData = pgTable(
+  "position_data",
   {
     id: serial("id").primaryKey(),
     posTokenId: integer("posTokenId").notNull(), // position NFT tokenId
@@ -392,9 +433,11 @@ export const dbPositionDatas = pgTable(
 );
 
 export type DBToken = typeof dbTokens.$inferSelect;
-export type DBPool = typeof dbPools.$inferSelect;
+export type DBPools = typeof dbPools.$inferSelect;
+export type DBPoolInfo = typeof dbPoolInfo.$inferInsert;
 export type DBPosition = typeof dbPositions.$inferSelect;
-export type DBPositionData = typeof dbPositionDatas.$inferInsert;
+export type DBPositionData = typeof dbPositionData.$inferInsert;
 
 export type DBPoolData = typeof dbPoolData.$inferInsert;
 export type DBPoolDayData = typeof dbPoolDayData.$inferInsert;
+export type DBTokenOHCL = typeof dbTokenOHCL.$inferSelect;

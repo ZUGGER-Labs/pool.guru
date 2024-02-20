@@ -29,6 +29,48 @@
       "when": 1707721464635,
       "tag": "0003_curved_skullbuster",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1707877731962,
+      "tag": "0004_jittery_smiling_tiger",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1707997969455,
+      "tag": "0005_striped_fabian_cortez",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1708144154171,
+      "tag": "0006_special_ultimatum",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1708158099492,
+      "tag": "0007_tough_fixer",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1708171119962,
+      "tag": "0008_youthful_shiva",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "5",
+      "when": 1708172141728,
+      "tag": "0009_orange_shinko_yamashiro",
+      "breakpoints": true
     }
   ]
 }

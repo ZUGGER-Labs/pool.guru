@@ -1,12 +1,36 @@
-
 // in server, start main.ts
 
-import { dailyPoolDataRoutine, hourlyPoolDataRoutine } from "./poolData"
+import express, { Express } from "express";
 
-async function main() {
-    const chains = [1]
-    hourlyPoolDataRoutine(chains)
-    dailyPoolDataRoutine(chains)
+// import { hourlyPoolDataRoutine } from "./poolData";
+import { loopTokenPrice } from "./price";
+
+import { tokenHandler, tokenInfo7dHandler } from "./handler/token";
+import { loopPoolsRoutines } from "./pools";
+
+async function startBackend() {
+  const chains = [1];
+//   hourlyPoolDataRoutine(chains);
+  loopTokenPrice(chains)
+  loopPoolsRoutines(chains)
 }
 
-main()
+async function startHTTPServer(port?: number | string) {
+  port = port ? +port : 5050;
+  const app: Express = express();
+  app.use(express.json()) 
+
+  // app.post('/token', tokenHandler)
+  app.post('/token/info7d', tokenInfo7dHandler)
+
+  app.listen(port, () => {
+    console.log(`HTTP API listening on port ${port}`);
+  });
+}
+
+async function main() {
+  startBackend();
+  startHTTPServer(process.env.SERVER_LISTEN_PORT);
+}
+
+main();

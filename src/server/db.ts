@@ -6,6 +6,7 @@ import {
   dbPoolDayData,
 } from "@/db/schema";
 import dayjs from "dayjs";
+import { now } from "./utils";
 
 async function insertHourlyPoolData(items: DBPoolData[]) {
   try {
@@ -23,7 +24,7 @@ async function insertDailyPoolData(items: DBPoolDayData[]) {
     const now = dayjs().format("YYYY-MM-DDTHH:mm:ss");
     console.log(`${now} inserted daily pool data: ${items.length}`);
   } catch (err) {
-    console.log("insertDailyPoolData:", err);
+    console.log(`${now()} insertDailyPoolData:`, err);
   }
 }
 
