@@ -58,12 +58,12 @@ interface ITokenOHCL {
 }
 
 interface ITokenInfo7D {
-  latestPrice: string | number;
+  latestPrice: number | string;
   prices7d: ITokenOHCL[];
   change7d: string | number;
 }
 const fetchTokenInfo = async (tokenId: string) => {
-  console.log('fetchTokenInfo:', tokenId)
+  console.log("fetchTokenInfo:", tokenId);
   return await query("/token/info7d", { tokenId });
 };
 
@@ -76,9 +76,9 @@ function Calculator({ tokens }: { tokens: Token[] }) {
     const newSelectedAssets = new Set(selectedAssets);
     newSelectedAssets.add(selectedOption);
     setSelectedAssets(newSelectedAssets);
-    const info = await fetchTokenInfo(selectedOption.id)
-    console.log('tokenInfo:', info)
-    setToken0Info(info)
+    const info = await fetchTokenInfo(selectedOption.id);
+    console.log("tokenInfo:", info);
+    setToken0Info(info);
   };
 
   const handleRemoveAsset = (asset: Token) => {
@@ -86,6 +86,28 @@ function Calculator({ tokens }: { tokens: Token[] }) {
     newSelectedAssets.delete(asset);
     setSelectedAssets(newSelectedAssets);
   };
+
+  function formatPrice(num: number | string | undefined) {
+    if (typeof num === "string") {
+      num = parseFloat(num);
+    }
+    if (!num) {
+      return 0;
+    }
+    if (num >= 1000) {
+      return (num / 1000).toString().slice(0, 4) + "k";
+    } else {
+      return num.toString().slice(0, 4);
+    }
+  }
+
+  function formatChange7d(num: number | string | undefined) {
+    if (typeof num === "string") {
+      num = parseFloat(num);
+    }
+    return num ? (num * 100).toFixed(2) + "%" : 0;
+  }
+
   return (
     <div>
       <div className="mx-auto flex flex-col justify-center items-center">
@@ -155,11 +177,15 @@ function Calculator({ tokens }: { tokens: Token[] }) {
                   </div>
                   <div className="flex flex-col items-center justify-center gap-2 w-[90px]">
                     <span className="text-gray-400 text-base">Price</span>
-                    <span className="text-base">2.45K</span>
+                    <span className="text-base">
+                      {formatPrice(token0Info?.latestPrice)}
+                    </span>
                   </div>
                   <div className="flex flex-col items-center justify-center gap-2 w-[90px]">
                     <span className="text-gray-400 text-base">Change 7d</span>
-                    <span className="text-green-500 text-base"> + 4.12% </span>
+                    <span className={token0Info?.change7d > 0 ? 'text-green-500 text-base' : 'text-red-500 text-base'}>
+  {formatChange7d(token0Info?.change7d)}
+</span>
                   </div>
                   <div className="flex flex-col items-center justify-center gap-2 w-[270px]">
                     <span className="text-gray-400 text-base">Trend 7d</span>
