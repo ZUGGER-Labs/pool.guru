@@ -28,6 +28,16 @@ interface TokenDayData {
   priceUSD: string;
 }
 
+interface ITokenOHCL {
+  tokenId: string;
+  high: string | number;
+  close: string | number;
+  open: string | number;
+  low: string | number;
+  startTs: string | number;
+  hour: number;
+}
+
 export interface Token {
   chainId?: string | number
   id: string;
@@ -45,6 +55,11 @@ export interface Token {
   derivedETH?: number
   priceUSD?: number
   alias?: string
+
+  // For select assests
+  latestPrice: number;
+  prices7d: ITokenOHCL[];
+  change7d: number;
 }
 
 export interface PoolDayData {

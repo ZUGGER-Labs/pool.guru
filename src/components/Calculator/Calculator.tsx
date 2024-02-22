@@ -6,25 +6,35 @@ import { Command } from "cmdk";
 import { useRef, useState } from "react";
 import { AutoComplete } from "../ui/AutoComplete";
 import { query } from "@/utils/query";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  Area,
+  AreaChart,
+} from "recharts";
 
-function AddIcon() {
-  return (
-    <div className="rounded-full border border-black w-10 h-10 flex justify-center items-center bg-[#FFE600]">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        fill="none"
-      >
-        <path
-          d="M10.8425 24V0H13.1575V24H10.8425ZM0 13.1664V10.8336H24V13.1664H0Z"
-          fill="black"
-        />
-      </svg>
-    </div>
-  );
-}
+const AddIcon: React.FC = () => (
+  <div className="rounded-full border border-black w-10 h-10 flex justify-center items-center bg-[#FFE600]">
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+    >
+      <path
+        d="M10.8425 24V0H13.1575V24H10.8425ZM0 13.1664V10.8336H24V13.1664H0Z"
+        fill="black"
+      />
+    </svg>
+  </div>
+);
 
 const useNumStrState = (defaultVal = ""): [string, (val: string) => void] => {
   const removeLeadingZeros = (s: string) => {
@@ -47,42 +57,32 @@ const useNumStrState = (defaultVal = ""): [string, (val: string) => void] => {
   return [numVal, handleChange];
 };
 
-interface ITokenOHCL {
-  tokenId: string;
-  high: string | number;
-  close: string | number;
-  open: string | number;
-  low: string | number;
-  startTs: string | number;
-  hour: number;
-}
-
-interface ITokenInfo7D {
-  latestPrice: number | string;
-  prices7d: ITokenOHCL[];
-  change7d: string | number;
-}
 const fetchTokenInfo = async (tokenId: string) => {
-  console.log("fetchTokenInfo:", tokenId);
   return await query("/token/info7d", { tokenId });
 };
 
 function Calculator({ tokens }: { tokens: Token[] }) {
   const [amount, setAmount] = useNumStrState("1000");
   const [selectedAssets, setSelectedAssets] = useState<Set<Token>>(new Set());
-  const [token0Info, setToken0Info] = useState<ITokenInfo7D>();
+  const newSelectedAssets = new Set(selectedAssets);
 
   const handleAddAsset = async (selectedOption: Token) => {
-    const newSelectedAssets = new Set(selectedAssets);
+    const info = await fetchTokenInfo(selectedOption.id);
+    const transformedPrices = info.prices7d.map((item: { open: string }) => ({
+      price: parseFloat(item.open),
+    }));
+    selectedOption = {
+      ...selectedOption,
+      latestPrice: info.latestPrice,
+      prices7d: transformedPrices,
+      change7d: info.change7d,
+    };
+    console.log("tokenInfo:", selectedOption);
     newSelectedAssets.add(selectedOption);
     setSelectedAssets(newSelectedAssets);
-    const info = await fetchTokenInfo(selectedOption.id);
-    console.log("tokenInfo:", info);
-    setToken0Info(info);
   };
 
   const handleRemoveAsset = (asset: Token) => {
-    const newSelectedAssets = new Set(selectedAssets);
     newSelectedAssets.delete(asset);
     setSelectedAssets(newSelectedAssets);
   };
@@ -178,21 +178,33 @@ function Calculator({ tokens }: { tokens: Token[] }) {
                   <div className="flex flex-col items-center justify-center gap-2 w-[90px]">
                     <span className="text-gray-400 text-base">Price</span>
                     <span className="text-base">
-                      {formatPrice(token0Info?.latestPrice)}
+                      {formatPrice(asset.latestPrice)}
                     </span>
                   </div>
                   <div className="flex flex-col items-center justify-center gap-2 w-[90px]">
                     <span className="text-gray-400 text-base">Change 7d</span>
-                    <span className={token0Info?.change7d > 0 ? 'text-green-500 text-base' : 'text-red-500 text-base'}>
-  {formatChange7d(token0Info?.change7d)}
-</span>
+                    <span
+                      className={
+                        asset.change7d > 0
+                          ? "text-green-500 text-base"
+                          : "text-red-500 text-base"
+                      }
+                    >
+                      {formatChange7d(asset.change7d)}
+                    </span>
                   </div>
                   <div className="flex flex-col items-center justify-center gap-2 w-[270px]">
                     <span className="text-gray-400 text-base">Trend 7d</span>
-                    <span className="text-green-500 text-center h-7">
-                      {" "}
-                      + 4.12%{" "}
-                    </span>
+                    <AreaChart width={319} height={28} 
+                    margin={{ top: 0, right: 24, left: 24, bottom: 0 }}
+                    data={asset.prices7d}>
+                      <Area
+                        type="monotone"
+                        dataKey="price"
+                        stroke="#8884d8"
+                        fill="#8884d8"
+                      />
+                    </AreaChart>
                   </div>
                   <button onClick={() => handleRemoveAsset(asset)}>
                     <img src="/Rounded-edge.svg" className="w-6 h-6"></img>
