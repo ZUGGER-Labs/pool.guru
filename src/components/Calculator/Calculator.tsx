@@ -108,6 +108,15 @@ function Calculator({ tokens }: { tokens: Token[] }) {
     return num ? (num * 100).toFixed(2) + "%" : 0;
   }
 
+  function caculateYields() {
+    if (selectedAssets.size === 2) {
+      
+    }else{
+      console.log("error")
+    }
+  }
+
+
   return (
     <div>
       <div className="mx-auto flex flex-col justify-center items-center">
@@ -195,14 +204,17 @@ function Calculator({ tokens }: { tokens: Token[] }) {
                   </div>
                   <div className="flex flex-col items-center justify-center gap-2 w-[270px]">
                     <span className="text-gray-400 text-base">Trend 7d</span>
-                    <AreaChart width={319} height={28} 
-                    margin={{ top: 0, right: 24, left: 24, bottom: 0 }}
-                    data={asset.prices7d}>
+                    <AreaChart
+                      width={319}
+                      height={28}
+                      margin={{ top: 0, right: 24, left: 24, bottom: 0 }}
+                      data={asset.prices7d}
+                    >
                       <Area
                         type="monotone"
                         dataKey="price"
-                        stroke="#8884d8"
-                        fill="#8884d8"
+                        stroke={asset.change7d > 0 ? "#1CC44B" : "#F94144"}
+                        fill={asset.change7d > 0 ? "#1CC44B" : "#F94144"}
                       />
                     </AreaChart>
                   </div>
@@ -215,7 +227,8 @@ function Calculator({ tokens }: { tokens: Token[] }) {
           </div>
         ) : null}
 
-        <button className="flex w-[688px] mt-6 p-2.5 justify-center items-center border-2 border-black bg-yellow-300">
+        <button className="flex w-[688px] mt-6 p-2.5 justify-center items-center border-2 border-black bg-yellow-300"
+        onClick={() => caculateYields()}>
           <span className="text-center text-base font-bold">Calculate</span>
         </button>
       </div>
