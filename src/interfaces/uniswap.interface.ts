@@ -60,6 +60,7 @@ export interface Token {
   latestPrice: number;
   prices7d: ITokenOHCL[];
   change7d: number;
+  isLoading: boolean;
 }
 
 export interface PoolDayData {

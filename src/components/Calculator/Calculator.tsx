@@ -2,22 +2,11 @@
 
 import { Token } from "@/interfaces/uniswap.interface";
 import * as Popover from "@radix-ui/react-popover";
-import { Command } from "cmdk";
 import { useRef, useState } from "react";
 import { AutoComplete } from "../ui/AutoComplete";
 import { query } from "@/utils/query";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  Area,
-  AreaChart,
-} from "recharts";
+import { Area, AreaChart } from "recharts";
+import { Skeleton } from "../ui/skeleton";
 
 const AddIcon: React.FC = () => (
   <div className="rounded-full border border-black w-10 h-10 flex justify-center items-center bg-[#FFE600]">
@@ -65,8 +54,10 @@ function Calculator({ tokens }: { tokens: Token[] }) {
   const [amount, setAmount] = useNumStrState("1000");
   const [selectedAssets, setSelectedAssets] = useState<Set<Token>>(new Set());
   const newSelectedAssets = new Set(selectedAssets);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const handleAddAsset = async (selectedOption: Token) => {
+    setIsLoading(true);
     const info = await fetchTokenInfo(selectedOption.id);
     const transformedPrices = info.prices7d.map((item: { open: string }) => ({
       price: parseFloat(item.open),
@@ -80,6 +71,7 @@ function Calculator({ tokens }: { tokens: Token[] }) {
     console.log("tokenInfo:", selectedOption);
     newSelectedAssets.add(selectedOption);
     setSelectedAssets(newSelectedAssets);
+    setIsLoading(false);
   };
 
   const handleRemoveAsset = (asset: Token) => {
@@ -110,12 +102,11 @@ function Calculator({ tokens }: { tokens: Token[] }) {
 
   function caculateYields() {
     if (selectedAssets.size === 2) {
-      
-    }else{
-      console.log("error")
+      // get all pools info
+    } else {
+      console.log("error");
     }
   }
-
 
   return (
     <div>
@@ -162,73 +153,85 @@ function Calculator({ tokens }: { tokens: Token[] }) {
           <div className="mt-6">
             <p className="font-bold leading-5 mb-2">Selected assets</p>
             <div className="flex flex-col items-center gap-2">
-              {[...selectedAssets].map((asset, index) => (
-                <div
-                  key={asset.id}
-                  className="flex w-[688px] p-4 border border-black bg-white items-center gap-6"
-                >
-                  <div className="flex flex-col items-center justify-center gap-2 w-[90px]">
-                    <div className="flex flex-row items-center gap-2">
-                      <img
-                        src={asset.logoURI}
-                        className="w-6 h-6"
-                        alt="Icon"
-                      ></img>
-                      <span className="flex flex-row text-base font-semibold w-full">
-                        {asset.symbol}
-                      </span>
-                    </div>
-                    <div className="flex rounded-full bg-gray-200 h-28px px-2 items-center">
-                      <span className="text-center text-base italic font-light whitespace-nowrap">
-                        {asset.poolCount} pools
-                      </span>
-                    </div>
+              {isLoading ? (
+                <div className="flex items-center space-x-4 w-[688px] p-4 border border-black bg-white">
+                  <Skeleton className="h-12 w-12 rounded-full" />
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-[250px]" />
+                    <Skeleton className="h-4 w-[200px]" />
                   </div>
-                  <div className="flex flex-col items-center justify-center gap-2 w-[90px]">
-                    <span className="text-gray-400 text-base">Price</span>
-                    <span className="text-base">
-                      {formatPrice(asset.latestPrice)}
-                    </span>
-                  </div>
-                  <div className="flex flex-col items-center justify-center gap-2 w-[90px]">
-                    <span className="text-gray-400 text-base">Change 7d</span>
-                    <span
-                      className={
-                        asset.change7d > 0
-                          ? "text-green-500 text-base"
-                          : "text-red-500 text-base"
-                      }
-                    >
-                      {formatChange7d(asset.change7d)}
-                    </span>
-                  </div>
-                  <div className="flex flex-col items-center justify-center gap-2 w-[270px]">
-                    <span className="text-gray-400 text-base">Trend 7d</span>
-                    <AreaChart
-                      width={319}
-                      height={28}
-                      margin={{ top: 0, right: 24, left: 24, bottom: 0 }}
-                      data={asset.prices7d}
-                    >
-                      <Area
-                        type="monotone"
-                        dataKey="price"
-                        stroke={asset.change7d > 0 ? "#1CC44B" : "#F94144"}
-                        fill={asset.change7d > 0 ? "#1CC44B" : "#F94144"}
-                      />
-                    </AreaChart>
-                  </div>
-                  <button onClick={() => handleRemoveAsset(asset)}>
-                    <img src="/Rounded-edge.svg" className="w-6 h-6"></img>
-                  </button>
                 </div>
-              ))}
+              ) : (
+                [...selectedAssets].map((asset, index) => (
+                  <div
+                    key={asset.id}
+                    className="flex w-[688px] p-4 border border-black bg-white items-center gap-6"
+                  >
+                    <div className="flex flex-col items-center justify-center gap-2 w-[90px]">
+                      <div className="flex flex-row items-center gap-2">
+                        <img
+                          src={asset.logoURI}
+                          className="w-6 h-6"
+                          alt="Icon"
+                        ></img>
+                        <span className="flex flex-row text-base font-semibold w-full">
+                          {asset.symbol}
+                        </span>
+                      </div>
+                      <div className="flex rounded-full bg-gray-200 h-28px px-2 items-center">
+                        <span className="text-center text-base italic font-light whitespace-nowrap">
+                          {asset.poolCount} pools
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-center justify-center gap-2 w-[90px]">
+                      <span className="text-gray-400 text-base">Price</span>
+                      <span className="text-base">
+                        {formatPrice(asset.latestPrice)}
+                      </span>
+                    </div>
+                    <div className="flex flex-col items-center justify-center gap-2 w-[90px]">
+                      <span className="text-gray-400 text-base">Change 7d</span>
+                      <span
+                        className={
+                          asset.change7d > 0
+                            ? "text-green-500 text-base"
+                            : "text-red-500 text-base"
+                        }
+                      >
+                        {formatChange7d(asset.change7d)}
+                      </span>
+                    </div>
+                    <div className="flex flex-col items-center justify-center gap-2 w-[270px]">
+                      <span className="text-gray-400 text-base">Trend 7d</span>
+                      <AreaChart
+                        width={319}
+                        height={28}
+                        margin={{ top: 0, right: 24, left: 24, bottom: 0 }}
+                        data={asset.prices7d}
+                      >
+                        <Area
+                          type="monotone"
+                          dataKey="price"
+                          stroke={asset.change7d > 0 ? "#1CC44B" : "#F94144"}
+                          fill={asset.change7d > 0 ? "#1CC44B" : "#F94144"}
+                        />
+                      </AreaChart>
+                    </div>
+                    <button onClick={() => handleRemoveAsset(asset)}>
+                      <img src="/Rounded-edge.svg" className="w-6 h-6"></img>
+                    </button>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         ) : null}
 
-        <button className="flex w-[688px] mt-6 p-2.5 justify-center items-center border-2 border-black bg-yellow-300"
-        onClick={() => caculateYields()}>
+        <button
+          className="flex w-[688px] mt-6 p-2.5 justify-center items-center border-2 border-black bg-yellow-300"
+          onClick={() => caculateYields()}
+        >
           <span className="text-center text-base font-bold">Calculate</span>
         </button>
       </div>
