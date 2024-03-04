@@ -140,15 +140,23 @@ function PoolList(props: PoolListProps) {
     setTotal(total);
   };
 
-  const SortNameAndArrow = ({ name }: { name: string }) => {
+  const SortNameAndArrow = ({
+    name,
+    showName,
+  }: {
+    name: string;
+    showName?: string;
+  }) => {
     const sorted = sortKey.field === name;
     const order = sortKey.order;
 
     return (
       <span className="flex flex-row items-center">
-        <span>{name}</span>
+        <span>{showName ? showName : name}</span>
         {sorted && (
-          <span className="pl-1">{order === "desc" ? <RxArrowDown /> : <RxArrowUp />}</span>
+          <span className="pl-1">
+            {order === "desc" ? <RxArrowDown /> : <RxArrowUp />}
+          </span>
         )}
         {/* {!sorted && (
           <span className="gray-500">
@@ -225,19 +233,28 @@ function PoolList(props: PoolListProps) {
                       className="text-sm"
                       onClick={() => onFieldSort("%FeeAPY(24H)")}
                     >
-                      <SortNameAndArrow name="%FeeAPY(24H)" />
+                      <SortNameAndArrow
+                        name="%FeeAPY(24H)"
+                        showName="%fAPY(24H)"
+                      />
                     </HeaderCell>
                     <HeaderCell
                       className="text-sm"
                       onClick={() => onFieldSort("%FeeAPY(7D)")}
                     >
-                      <SortNameAndArrow name="%FeeAPY(7D)" />
+                      <SortNameAndArrow
+                        name="%FeeAPY(7D)"
+                        showName="%fAPY(7D)"
+                      />
                     </HeaderCell>
                     <HeaderCell
                       className="text-sm"
                       onClick={() => onFieldSort("%FeeAPY(14D)")}
                     >
-                      <SortNameAndArrow name="%FeeAPY(14D)" />
+                      <SortNameAndArrow
+                        name="%FeeAPY(14D)"
+                        showName="%fAPY(14D)"
+                      />
                     </HeaderCell>
                   </HeaderRow>
                 </Header>
@@ -283,17 +300,18 @@ function PoolList(props: PoolListProps) {
             )}
           </Table>
         </div>
-        <div className="hidden md:block">
-          <span>
-            Showing {props.itemsPerPage} out of {props.total} pools
-          </span>
-        </div>
+        <div className="w-full px-2 py-2 flex flex-row justify-between items-center">
+          <div className="hidden md:block">
+            <span>
+              Showing {props.itemsPerPage} out of {total} pools
+            </span>
+          </div>
 
-        <div className="w-full md:w-1/3">
-          <div className="flex flex-row">
-            <div>Prev</div>
-            <div>Page 1 of 10</div>
-            <div>Next</div>
+          <div className="">
+            <div className="flex flex-row">
+              <div className="px-2">Prev</div>
+              <div className="px-2">Next</div>
+            </div>
           </div>
         </div>
       </div>

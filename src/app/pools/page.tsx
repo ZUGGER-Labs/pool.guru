@@ -7,7 +7,7 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   ...meta,
-  title: "pool list - " + title,
+  title: "Pool list - " + title,
 };
 
 // Pools List
