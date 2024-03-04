@@ -1,3 +1,4 @@
+import { IChainDEX } from "@/components/Pool/PoolList";
 import { query } from "@/utils/query";
 
 export type TPoolSortBy =
@@ -35,4 +36,13 @@ export async function fetchPools(param: IPoolFilters) {
   const res = await query("/pools/info", param);
 
   return res;
+}
+
+export function getChainDex(chainId: number, dex: string): IChainDEX {
+  return {
+    dexName: dex,
+    dexLogo: string,
+  chainName:  CHAIN_NAME[chainId],
+  chainLogo: string,
+  }
 }

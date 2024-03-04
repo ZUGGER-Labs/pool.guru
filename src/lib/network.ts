@@ -15,6 +15,24 @@ const CHAIN_NAME: Record<number, string> = {
   [ChainId.BASE]: "base",
 };
 
+const CHAIN_LOGO: Record<number, string> = {
+  [ChainId.MAINNET]: "ethereum",
+  [ChainId.ARBITRUM_ONE]: "arbitrum",
+  [ChainId.OPTIMISM]: "optimism",
+  [ChainId.POLYGON]: "polygon",
+  [ChainId.CELO]: "celo",
+  [ChainId.BNB]: "bnb",
+  [ChainId.AVALANCHE]: "avax",
+  [ChainId.BASE]: "base",
+};
+
+const DEX_LOGO: Record<string, string> = {
+  'uniswapv3': "ethereum",
+  'uniswapv2': "ethereum",
+  'panacakev3': "arbitrum",
+  'panacakev2': "arbitrum",
+};
+
 const CHAIN_ID_BY_NAME: Record<string, number> = {
   "ethereum": ChainId.MAINNET,
   "arbitrum": ChainId.ARBITRUM_ONE,
@@ -97,6 +115,8 @@ function getBlockQueryEndpoint(chainId: number) {
 
 export {
   CHAIN_NAME,
+  DEX_LOGO,
+  CHAIN_LOGO,
   CHAIN_ID_BY_NAME,
   getNetworkDexEndpoint,
   getBlockQueryEndpoint,

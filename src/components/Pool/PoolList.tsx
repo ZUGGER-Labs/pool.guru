@@ -20,7 +20,7 @@ import PoolDetail from "./PoolDetail";
 import { formatAmount } from "@/utils/format";
 
 export interface PoolListProps {
-  itemsPerPage?: number;
+  itemsPerPage: number;
   pools: IPoolData[];
   total: number
 }
@@ -85,12 +85,9 @@ function PoolList(props: PoolListProps) {
                     <HeaderCell className="text-sm">Vol/Fee(24H)</HeaderCell>
                     <HeaderCell className="text-sm">Vol/Fee(7D)</HeaderCell>
                     <HeaderCell className="text-sm">Vol/Fee(14D)</HeaderCell>
-                    <HeaderCell className="text-sm">APY(24H)</HeaderCell>
-                    <HeaderCell className="text-sm">APY(7D)</HeaderCell>
-                    <HeaderCell className="text-sm">APY(14D)</HeaderCell>
-                    <HeaderCell className="text-sm">FeeAPY(24H)</HeaderCell>
-                    <HeaderCell className="text-sm">FeeAPY(7D)</HeaderCell>
-                    <HeaderCell className="text-sm">FeeAPY(14D)</HeaderCell>
+                    <HeaderCell className="text-sm">%FeeAPY(24H)</HeaderCell>
+                    <HeaderCell className="text-sm">%FeeAPY(7D)</HeaderCell>
+                    <HeaderCell className="text-sm">%FeeAPY(14D)</HeaderCell>
                   </HeaderRow>
                 </Header>
 
@@ -108,12 +105,9 @@ function PoolList(props: PoolListProps) {
                       <Cell>{formatAmount(item.volume24H)}/{formatAmount(item.fee24H)}</Cell>
                       <Cell>{formatAmount(item.volume7D)}/{formatAmount(item.fee7D)}</Cell>
                       <Cell>{formatAmount(item.volume14D)}/{formatAmount(item.fee14D)}</Cell>
-                      <Cell>{item.apy24H}</Cell>
-                      <Cell>{item.apy7D}</Cell>
-                      <Cell>{item.apy14D}</Cell>
-                      <Cell>{item.feeApy24H}</Cell>
-                      <Cell>{item.feeApy7D}</Cell>
-                      <Cell>{item.feeApy14D}</Cell>
+                      <Cell>{formatAmount(item.feeApy24H)}</Cell>
+                      <Cell>{formatAmount(item.feeApy7D)}</Cell>
+                      <Cell>{formatAmount(item.feeApy14D)}</Cell>
                     </Row>
                   ))}
                 </Body>
@@ -122,7 +116,7 @@ function PoolList(props: PoolListProps) {
           </Table>
         </div>
         <div className="hidden md:block">
-          <span>Showing 10 out of {props.total} pools</span>
+          <span>Showing {props.itemsPerPage} out of {props.total} pools</span>
         </div>
 
         <div className="w-full md:w-1/3">

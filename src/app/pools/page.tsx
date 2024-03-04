@@ -4,98 +4,7 @@ import Link from "next/link";
 
 // Pools List
 async function Pools() {
-  /*
-  const pools: IPoolData[] = [{
-    poolName: 'WBTC/WETH',
-    baseLogo: '',
-    quoteLogo: '',
-    chainDex: {
-      dexName: 'uniswapv3',
-      dexLogo: '',
-      chainName: 'ETH',
-      chainLogo: '',
-    },
-    tvlUSD: '500',
-    volume24H: '500',
-    volume7D: '500',
-    volume14D: '500',
-    fee24H: '5',
-    fee7D: '5',
-    fee14D: '5',
-    apy24H: '500',
-    apy7D: '500',
-    apy14D: '500',
-    feeApy24H: '500',
-    feeApy7D: '500',
-    feeApy14D: '500',
-  }, {
-    baseLogo: '',
-    quoteLogo: '',
-    chainDex: {
-      dexName: 'uniswapv3',
-      dexLogo: '',
-      chainName: 'ETH',
-      chainLogo: '',
-    },
-    tvlUSD: '500',
-    volume24H: '500',
-    volume7D: '500',
-    volume14D: '500',
-    fee24H: '5',
-    fee7D: '5',
-    fee14D: '5',
-    apy24H: '500',
-    apy7D: '500',
-    apy14D: '500',
-    feeApy24H: '500',
-    feeApy7D: '500',
-    feeApy14D: '500',
-  }, {
-    baseLogo: '',
-    quoteLogo: '',
-    chainDex: {
-      dexName: 'uniswapv3',
-      dexLogo: '',
-      chainName: 'ETH',
-      chainLogo: '',
-    },
-    tvlUSD: '500',
-    volume24H: '500',
-    volume7D: '500',
-    volume14D: '500',
-    fee24H: '5',
-    fee7D: '5',
-    fee14D: '5',
-    apy24H: '500',
-    apy7D: '500',
-    apy14D: '500',
-    feeApy24H: '500',
-    feeApy7D: '500',
-    feeApy14D: '500',
-  }, {
-    baseLogo: '',
-    quoteLogo: '',
-    chainDex: {
-      dexName: 'uniswapv3',
-      dexLogo: '',
-      chainName: 'ETH',
-      chainLogo: '',
-    },
-    tvlUSD: '500',
-    volume24H: '500',
-    volume7D: '500',
-    volume14D: '500',
-    fee24H: '5',
-    fee7D: '5',
-    fee14D: '5',
-    apy24H: '500',
-    apy7D: '500',
-    apy14D: '500',
-    feeApy24H: '500',
-    feeApy7D: '500',
-    feeApy14D: '500',
-  }] //
-  */
+  let itemsPerPage = 20
   let resp = await fetchPools({});
   const total = resp.total;
   const pools = resp.apyList.map((item: any) => {
@@ -125,7 +34,7 @@ async function Pools() {
 
   return (
     <main className="flex flex-col items-center justify-between p-24 md:max-w-[1600px] m-auto">
-      <PoolList pools={pools} total={total} />
+      <PoolList pools={pools} itemsPerPage={itemsPerPage} total={total} />
     </main>
   );
 }

@@ -15,15 +15,17 @@ export function getDeltaTimestamps(): [number, number, number] {
 export const query = async (endpoint: string, query: any): Promise<any> => {
   const uri = (process.env.NEXT_PUBLIC_API || 'https://api.poolguru.xyz') + endpoint
 
-  // console.log(`query uri: ${uri}, query: ${query}`)
+  console.log(`query uri: ${uri}`)
   const resp = await fetch(uri, {
     method: "POST",
     headers: { 
       "Content-Type": "application/json",
     },
+    cache: 'no-cache',
     body: JSON.stringify(query),
   });
 
+  // console.log('resp:', resp)
   if (resp.status !== 200) {
     console.log("query failed:", uri, query);
     console.log("invalid resp:", resp);
