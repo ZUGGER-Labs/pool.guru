@@ -38,11 +38,15 @@ const toFeeAmount = (feeTier: string): FeeAmount => {
 }
 
 function PoolDetail({
+  chainId,
+  poolId,
   poolData,
 }: {
+  chainId: number,
+  poolId: string,
   poolData: LiquidityPool;
 }) {
-  const chainId = poolData.chainId || 1
+  // const chainId = poolData.chainId || 1
   const poolAddress = poolData.id
   const token0 = new Token(chainId, poolData.inputTokens[0].id, +poolData.inputTokens[0].decimals)
   const token1 = new Token(chainId, poolData.inputTokens[0].id, +poolData.inputTokens[1].decimals)

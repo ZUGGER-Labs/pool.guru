@@ -15,16 +15,30 @@ import { RxArrowUp, RxArrowDown } from "react-icons/rx";
 import { useTheme } from "@table-library/react-table-library/theme";
 import { getTheme } from "@table-library/react-table-library/baseline";
 
-import { LiquidityPool, Pool } from "@/interfaces/uniswap.interface";
-import { useMemo, useState } from "react";
-import PoolDetail from "./PoolDetail";
+import { useEffect, useMemo, useState } from "react";
 import { formatAmount } from "@/utils/format";
-import { TPoolSortBy, convertToPoolData, fetchPools } from "@/lib/pools";
+import {
+  FilterChainId,
+  FilterDexId,
+  TPoolSortBy,
+  convertToPoolData,
+  fetchPools,
+} from "@/lib/pools";
+import PoolFilter from "./PoolFilter";
+import {
+  FilterConfig,
+  getQuerySearchFiler,
+  toFilterValueNames,
+} from "@/lib/filter";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { buildURI, buildURIByKeys } from "@/lib/page";
+import Link from "next/link";
 
 export interface PoolListProps {
   itemsPerPage: number;
   pools: IPoolData[];
   total: number;
+  filters: FilterConfig[];
 }
 
 export interface IChainDEX {
@@ -55,10 +69,6 @@ export interface IPoolData {
   feeApy24H: string;
   feeApy7D: string;
   feeApy14D: string;
-}
-
-function PoolFilter() {
-  return <></>;
 }
 
 function toSortParam(field: string): TPoolSortBy {
@@ -92,19 +102,10 @@ function PoolList(props: PoolListProps) {
     nodes: props.pools,
   });
   const [total, setTotal] = useState<number>(props.total);
+  const pathname = usePathname();
+  const query = useSearchParams();
+  const router = useRouter();
 
-  const fileds = [
-    "TVL",
-    "Vol(24H)",
-    "Vol(7D)",
-    "Vol(14D)",
-    "Fee(24H)",
-    "Fee(7D)",
-    "Fee(14D)",
-    "%FeeAPY(24H)",
-    "%FeeAPY(7D)",
-    "%FeeAPY(14D)",
-  ];
   const [sortKey, setSortKey] = useState({ field: "TVL", order: "desc" });
   const theme = useTheme(getTheme());
   const onFieldSort = async (field: string) => {
@@ -125,19 +126,92 @@ function PoolList(props: PoolListProps) {
       newSortKey.order = "desc";
     }
 
-    let resp = await fetchPools({
-      sortBy: toSortParam(newSortKey.field),
-      order: newSortKey.order,
-    });
-
-    const total = resp.total;
-    const pools = resp.apyList.map((item: any) => {
-      // console.log('logo:', item.baseToken.logoURI)
-      return convertToPoolData(item);
-    });
+    router.push(
+      buildURIByKeys(
+        pathname,
+        query,
+        ["sortBy", "order"],
+        [toSortParam(newSortKey.field), newSortKey.order]
+      )
+    );
     setSortKey({ ...newSortKey });
-    setData({ nodes: pools });
-    setTotal(total);
+  };
+
+  useEffect(() => {
+    const chains = getQuerySearchFiler(query, "cat-" + FilterChainId);
+    const dexes = toFilterValueNames(
+      props.filters,
+      FilterDexId,
+      getQuerySearchFiler(query, "cat-" + FilterDexId)
+    );
+    // const tokens = []
+    const refreshData = async () => {
+      const resp = await fetchPools({
+        page: query.get("page") ? +query.get("page")! : 1,
+        chains: chains,
+        dexes: dexes,
+        itemsPerPage: query.get("itemsPerPage")
+          ? +query.get("itemsPerPage")!
+          : 20,
+        sortBy: toSortParam(sortKey.field),
+        order: sortKey.order as "desc" | "asc",
+      });
+      const total = resp.total;
+      const pools = resp.apyList.map((item: any) => {
+        // console.log('logo:', item.baseToken.logoURI)
+        return convertToPoolData(item);
+      });
+      setData({ nodes: pools });
+      setTotal(total);
+    };
+
+    refreshData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query]);
+
+  const pageURI = (prev: boolean) => {
+    let page = 1;
+    if (query.get("page")) {
+      page = +query.get("page")!;
+    }
+
+    if (prev) {
+      if (page <= 1) {
+        return { pagable: false, uri: buildURI(pathname, query, "page", "1") };
+      } else {
+        return {
+          pagable: true,
+          uri: buildURI(pathname, query, "page", page - 1 + ""),
+        };
+      }
+    } else {
+      if (page === total) {
+        return {
+          pagable: false,
+          uri: buildURI(pathname, query, "page", page + ""),
+        };
+      } else {
+        return {
+          pagable: true,
+          uri: buildURI(pathname, query, "page", page + 1 + ""),
+        };
+      }
+    }
+  };
+
+  const PageLink = ({ prev }: { prev: boolean }) => {
+    const { pagable, uri } = pageURI(prev);
+
+    console.log(`page link: prev=${prev} pagable=${pagable} uri=${uri}`)
+    if (prev) {
+      if (!pagable) {
+        return <>Prev</>;
+      }
+      return <Link href={uri}>Prev</Link>;
+    } else {
+      if (!pagable) return <>Next</>;
+      return <Link href={uri}>Next</Link>;
+    }
   };
 
   const SortNameAndArrow = ({
@@ -168,10 +242,14 @@ function PoolList(props: PoolListProps) {
     );
   };
 
+  const clickRow = (item: any) => {
+    window.open("/pool/" + item.id, "_blank", "noopener,noreferrer");
+  };
+
   return (
     <div>
       <div className="flex flex-row justify-between items-center">
-        <PoolFilter />
+        <PoolFilter filters={props.filters} />
       </div>
 
       <div></div>
@@ -261,7 +339,13 @@ function PoolList(props: PoolListProps) {
 
                 <Body>
                   {tableList.map((item: any, idx: any) => (
-                    <Row key={idx} item={item}>
+                    <Row
+                      key={idx}
+                      item={item}
+                      onClick={() => clickRow(item)}
+                      data-href={"/pool/" + item.id}
+                      className="cursor-pointer"
+                    >
                       <Cell
                         title={
                           item.chainDex.chainName + " " + item.chainDex.dexName
@@ -309,8 +393,12 @@ function PoolList(props: PoolListProps) {
 
           <div className="">
             <div className="flex flex-row">
-              <div className="px-2">Prev</div>
-              <div className="px-2">Next</div>
+              <div className="px-2">
+                <PageLink prev={true} />
+              </div>
+              <div className="px-2">
+                <PageLink prev={false} />
+              </div>
             </div>
           </div>
         </div>

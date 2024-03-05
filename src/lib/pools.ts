@@ -2,6 +2,10 @@ import { IChainDEX } from "@/components/Pool/PoolList";
 import { query } from "@/utils/query";
 import { CHAIN_NAME } from "./network";
 
+export const FilterChainId = 1
+export const FilterDexId = 10
+export const FilterTokenId = 20
+
 export type TPoolSortBy =
   | "tvlUSD"
   | "volUSD7D"
@@ -39,6 +43,10 @@ export async function fetchPools(param: IPoolFilters) {
   const res = await query("/pools/info", param);
 
   return res;
+}
+
+export async function fetchPoolFilters() {
+  return query('/pools/filters', {})
 }
 
 export function getChainDex(chainId: number, dex: string): IChainDEX {

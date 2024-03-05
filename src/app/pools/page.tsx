@@ -1,5 +1,5 @@
 import PoolList, { IPoolData } from "@/components/Pool/PoolList";
-import { convertToPoolData, fetchPools } from "@/lib/pools";
+import { convertToPoolData, fetchPoolFilters, fetchPools } from "@/lib/pools";
 import Link from "next/link";
 
 import meta, { title } from "@/lib/meta";
@@ -19,10 +19,11 @@ async function Pools() {
     // console.log('logo:', item.baseToken.logoURI)
     return convertToPoolData(item);
   });
+  const filters = await fetchPoolFilters()
 
   return (
-    <main className="flex flex-col items-center justify-between p-24 md:max-w-[1600px] m-auto">
-      <PoolList pools={pools} itemsPerPage={itemsPerPage} total={total} />
+    <main className="flex flex-col items-center justify-between p-4 md:max-w-[1600px] m-auto">
+      <PoolList pools={pools} itemsPerPage={itemsPerPage} total={total} filters={filters} />
     </main>
   );
 }

@@ -1,7 +1,6 @@
 "use client";
 
-import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import { ChevronDown, ChevronRight, Check, Dot } from "lucide-react";
+import { Check, Dot } from "lucide-react";
 import { useContext, useState } from "react";
 import _ from "lodash";
 
@@ -11,25 +10,24 @@ import { FilterContext } from "./FilterContext";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { buildURI } from "@/lib/page";
 
-export interface ChoiceDialogProps {
+export interface ChoiceProps {
   fc: FilterConfig;
   isMulti: boolean;
 }
 
-function ChoiceDialog({ fc, isMulti }: ChoiceDialogProps) {
+function ChoiceMobile({ fc, isMulti }: ChoiceProps) {
   const { selected, setSelected } = useContext(FilterContext);
   const { cat, choices } = fc;
   const catKey = "cat-" + cat.catId;
   const valueIdList = selected[catKey] || [];
-  const [open, setOpen] = useState(false);
-  const router = useRouter()
-  const pathname = usePathname()
-  const query = useSearchParams()
+
   const m: { [key: string]: boolean } = {};
   for (let k in valueIdList) {
+    // console.log(catKey, valueIdList[k])
     m[valueIdList[k] + ""] = true;
   }
   const [tmpSelected, setTmpSelected] = useState<{ [key: string]: boolean }>(m); // 多选临时选中项
+  // console.log('choice mobile:', catKey, m, tmpSelected, valueIdList)
 
   const toggleClick = (e: React.SyntheticEvent<HTMLElement>, id: number) => {
     e.stopPropagation();
@@ -60,59 +58,36 @@ function ChoiceDialog({ fc, isMulti }: ChoiceDialogProps) {
     } else {
       if (actived) {
         // toggle to false
+        setTmpSelected({})
         setSelected({ ...selected, [catKey]: [] });
-        router.push(buildURI(pathname, query, catKey, null))
+        // router.push(buildURI(pathname, query, catKey, null))
       } else {
+        setTmpSelected({[id]: true})
         setSelected({ ...selected, [catKey]: [id] });
-        router.push(buildURI(pathname, query, catKey, id+''))
+        // router.push(buildURI(pathname, query, catKey, id+''))
       }
     }
   };
 
   const isActive = (idx: number) =>
-    isMulti ? tmpSelected[idx] : selected[catKey] && selected[catKey].indexOf(idx) !== -1;
-
-  const onClear = () => {
-    setTmpSelected({});
-    setSelected({ ...selected, [catKey]: [] });
-    
-    router.push(buildURI(pathname, query, catKey, null))
-    setOpen(false);
-  };
-
-  const onApply = () => {
-    const valList = _.keys(tmpSelected).map(k => Number(k))
-    setSelected({ ...selected, [catKey]: valList });
-    // %255B202%2C206%255D
-    // %[202,206%]
-    router.push(buildURI(pathname, query, catKey, JSON.stringify(valList)))
-    setOpen(false);
-  };
+    isMulti
+      ? tmpSelected[idx]
+      : selected[catKey] && selected[catKey].indexOf(idx) !== -1;
 
   return (
     <div>
-      <DropdownMenu.Root open={open} onOpenChange={(o) => setOpen(o)}>
-        <DropdownMenu.Trigger asChild>
+      <div>
+        <div>
           <button className="flex flex-row items-center py-1 px-4">
-            <span className={cn(open ? "text-blue-500" : "")}>
+            <span>
               {cat.configCatCn}
             </span>
-            {open && (
-              <span className="transition-all">
-                <ChevronDown color="rgb(59 130 246)" strokeWidth={1} />
-              </span>
-            )}
-            {!open && (
-              <span className="transition-all">
-                <ChevronRight strokeWidth={1} />
-              </span>
-            )}
           </button>
-        </DropdownMenu.Trigger>
+        </div>
 
-        <DropdownMenu.Portal>
-          <DropdownMenu.Content className="bg-slate-50 min-w-[320px] max-w-[640px] rounded-md text-sm p-4 z-10">
-            <div className="grid gap-4 grid-cols-4">
+        <div>
+          <div className="bg-slate-50 w-[300px] rounded-md text-sm p-2 z-10">
+            <div className="grid gap-4 grid-cols-3">
               {choices.map((child, idx) => {
                 return (
                   <div key={idx}>
@@ -158,28 +133,11 @@ function ChoiceDialog({ fc, isMulti }: ChoiceDialogProps) {
                 );
               })}
             </div>
-
-            {isMulti && choices.length > 0 && (
-              <div className="mt-2 flex flex-row justify-end items-center pr-2">
-                <button
-                  onClick={onClear}
-                  className="text-[#222] p-2 mr-6 border border-slate-300"
-                >
-                  Clear
-                </button>
-                <button
-                  onClick={onApply}
-                  className="text-white bg-[#222] p-2 border border-slate-300"
-                >
-                  Apply
-                </button>
-              </div>
-            )}
-          </DropdownMenu.Content>
-        </DropdownMenu.Portal>
-      </DropdownMenu.Root>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
 
-export default ChoiceDialog;
+export default ChoiceMobile;
