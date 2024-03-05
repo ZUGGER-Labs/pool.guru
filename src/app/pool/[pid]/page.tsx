@@ -1,12 +1,12 @@
 import { PageProps } from "@/lib/page";
 import PoolDetail from "@/components/Pool/PoolDetail";
 import { chain } from "lodash";
-import { getPoolData } from "@/uniswap/graph";
+import { getPoolInfo } from "@/lib/pool";
 
 async function Pool({ params, searchParams }: PageProps) {
   let chainId;
-  const pid = "0x88e6a0c2ddd26feeb64f039a2c41296fcb3f5640"; // params.pid;
-  const poolData = await getPoolData({ chainId, poolAddress: pid });
+  const pid = params.pid;
+  const poolData = await getPoolInfo(pid);
 
   if (searchParams["chainId"]) {
     if (typeof searchParams["chainId"] === "string") {
