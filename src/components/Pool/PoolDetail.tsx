@@ -1,40 +1,171 @@
 "use client";
 
+import { createChart } from "lightweight-charts";
+
 import { LiquidityPool, Pool } from "@/interfaces/uniswap.interface";
-import { FEE_TIER_TO_TICK_SPACING, PoolTickData, TickProcessed, fetchTicksSurroundingPrice } from "@/uniswap/tick";
+import {
+  FEE_TIER_TO_TICK_SPACING,
+  PoolTickData,
+  TickProcessed,
+  fetchTicksSurroundingPrice,
+} from "@/uniswap/tick";
 import { formatAmount } from "@/utils/format";
 import { Token, CurrencyAmount } from "@uniswap/sdk-core";
-import { FeeAmount, TICK_SPACINGS, TickMath,  Pool as V3Pool } from "@uniswap/v3-sdk";
+import {
+  FeeAmount,
+  TICK_SPACINGS,
+  TickMath,
+  Pool as V3Pool,
+} from "@uniswap/v3-sdk";
 import BigNumber from "bignumber.js";
 import { useEffect, useState } from "react";
+import { Chain } from "../common/Chain";
+import { DEX } from "../common/DEX";
+import PriceVolChart from "../charts/PriceVolChart";
+import TVLFeeChart from "../charts/TVLFeeChart";
+import PerformanceChart from "../charts/PerformanceChart";
+import APYFeeChart from "../charts/APYFeeChart";
 
 export interface ChartEntry {
-  index: number
-  isCurrent: boolean
-  activeLiquidity: number
-  price0: number
-  price1: number
-  tvlToken0: number
-  tvlToken1: number
+  index: number;
+  isCurrent: boolean;
+  activeLiquidity: number;
+  price0: number;
+  price1: number;
+  tvlToken0: number;
+  tvlToken1: number;
 }
 
-export const MAX_UINT128 = BigNumber(2).pow(128).minus(1)
+export const MAX_UINT128 = BigNumber(2).pow(128).minus(1);
 
 const toFeeAmount = (feeTier: string): FeeAmount => {
   switch (feeTier) {
-    case '100':
-      return FeeAmount.LOWEST
-    case '500':
-      return FeeAmount.LOW
-    case '3000':
-      return FeeAmount.MEDIUM
-    case '10000':
-      return FeeAmount.HIGH
+    case "100":
+      return FeeAmount.LOWEST;
+    case "500":
+      return FeeAmount.LOW;
+    case "3000":
+      return FeeAmount.MEDIUM;
+    case "10000":
+      return FeeAmount.HIGH;
 
     default:
-      console.log('invalid feeTier: ' + feeTier)
-      return +feeTier as FeeAmount
+      console.log("invalid feeTier: " + feeTier);
+      return +feeTier as FeeAmount;
   }
+};
+
+function adjustOHCL(klines: any[]) {
+  const ohcl: any[] = [];
+  const vol: any[] = [];
+  const tvl: any[] = [];
+  const fees: any[] = [];
+  const ratio: any[] = []; // fees/tvl
+
+  for (let item of klines) {
+    const time = item.date;
+    ohcl.push({
+      time: item.date,
+      open: +item.basePriceOpen,
+      high: +item.basePriceHigh,
+      close: +item.basePriceClose,
+      low: +item.basePriceLow,
+    });
+    vol.push({
+      time: item.date,
+      value: +item.volumeUSD,
+    });
+    tvl.push({
+      time: item.date,
+      value: +item.tvlUSD,
+    });
+    fees.push({
+      time: item.date,
+      value: +item.feesUSD,
+    });
+
+    ratio.push({
+      time: item.date,
+      value:
+        item.tvlUSD === "0"
+          ? "0"
+          : BigNumber(item.feesUSD).div(item.tvlUSD).toNumber(),
+    });
+  }
+
+  return { ohcl, vol, tvl, fees, ratio };
+}
+
+function performanceData(data: any) {
+  const apyBaseByUSD = data.apyBaseByUSD,
+    apyPoolByUSD = data.apyPoolByUSD,
+    apyQuoteByUSD = data.apyQuoteByUSD,
+    apyBaseByNative = data.apyBaseByNative,
+    apyPoolByNative = data.apyPoolByNative,
+    apyQuoteByNative = data.apyQuoteByNative;
+
+  const apyBaseByUSDList: any[] = [];
+  const apyPoolByUSDList: any[] = [];
+  const apyQuoteByUSDList: any[] = [];
+  const apyBaseByNativeList: any[] = [];
+  const apyPoolByNativeList: any[] = [];
+  const apyQuoteByNativeList: any[] = [];
+  const cumFeeApy: any[] = []
+  const feeApy: any[] = []
+
+  for (let i = 0; i < data.ohcl.length; i++) {
+    const date = data.ohcl[i].date;
+    apyBaseByUSDList.push({
+      time: date,
+      value: +apyBaseByUSD[i],
+    });
+    apyPoolByUSDList.push({
+      time: date,
+      value: +apyPoolByUSD[i],
+    });
+    apyQuoteByUSDList.push({
+      time: date,
+      value: +apyQuoteByUSD[i],
+    });
+    apyBaseByNativeList.push({
+      time: date,
+      value: +apyBaseByNative[i],
+    });
+    apyPoolByNativeList.push({
+      time: date,
+      value: +apyPoolByNative[i],
+    });
+    apyQuoteByNativeList.push({
+      time: date,
+      value: +apyQuoteByNative[i],
+    });
+    cumFeeApy.push({
+      time:date,
+      value: BigNumber(data.feeApyByUSD[i]).times(365*24).div(i+1).toNumber()
+    })
+
+    let hourFeeRatio = BigNumber(0)
+    if (i === 0) {
+      hourFeeRatio = BigNumber(data.feeApyByUSD[0])
+    } else {
+      hourFeeRatio = BigNumber(data.feeApyByUSD[i]).minus(data.feeApyByUSD[i-1])
+    }
+    feeApy.push({
+      time: date,
+      value: hourFeeRatio.times(365*24).toNumber(),
+    })
+  }
+
+  return {
+    apyBaseByUSDList,
+    apyPoolByUSDList,
+    apyQuoteByUSDList,
+    apyBaseByNativeList,
+    apyPoolByNativeList,
+    apyQuoteByNativeList,
+    cumFeeApy,
+    feeApy,
+  };
 }
 
 function PoolDetail({
@@ -42,10 +173,78 @@ function PoolDetail({
   poolId,
   poolData,
 }: {
-  chainId: number,
-  poolId: string,
-  poolData: LiquidityPool;
+  chainId: number;
+  poolId: string;
+  poolData: any;
 }) {
+  console.log("pool data:", poolData);
+
+  const { ohcl, vol, tvl, fees, ratio } = adjustOHCL(poolData.ohcl);
+  const {
+    apyBaseByUSDList,
+    apyPoolByUSDList,
+    apyQuoteByUSDList,
+    apyBaseByNativeList,
+    apyPoolByNativeList,
+    apyQuoteByNativeList,
+    cumFeeApy,
+    feeApy,
+  } = performanceData(poolData);
+
+  // console.log("ohcl:", ohcl);
+  // console.log("vol:", vol);
+  return (
+    <div className="w-full flex flex-col">
+      <div className="flex flex-row">
+        <Chain chainId={chainId} />
+        <DEX name="uniswapv3" />
+        <div>TVL</div>
+        <div>7D Volume</div>
+        <div>7D Fees APY</div>
+      </div>
+
+      <div>
+        <div>
+          Price/Volume Chart
+          <PriceVolChart ohcl={ohcl} vol={vol} height={400} />
+        </div>
+      </div>
+
+      <div className="flex flex-col">
+        <div>Performance</div>
+        <PerformanceChart
+          usdOrNative="USD"
+          apyBaseByUSDList={apyBaseByUSDList}
+          apyPoolByUSDList={apyPoolByUSDList}
+          apyQuoteByUSDList={apyQuoteByUSDList}
+          apyBaseByNativeList={apyBaseByNativeList}
+          apyPoolByNativeList={apyPoolByNativeList}
+          apyQuoteByNativeList={apyQuoteByNativeList}
+          width={1248}
+          height={400}
+        />
+      </div>
+
+      <div className="flex flex-col">
+        <div>
+          TVL/Volume/Fees/TVL chart
+          <TVLFeeChart
+            tvl={tvl}
+            fee={fees}
+            ratio={ratio}
+            width={1248}
+            height={400}
+          />
+        </div>
+      </div>
+
+      <div className="flex flex-col">
+        <div>APY/Fees</div>
+      <APYFeeChart apy={feeApy} fee={fees} cumApy={cumFeeApy} />
+      </div>
+    </div>
+  );
+  /*
   // const chainId = poolData.chainId || 1
   const poolAddress = poolData.id
   const token0 = new Token(chainId, poolData.inputTokens[0].id, +poolData.inputTokens[0].decimals)
@@ -171,6 +370,7 @@ function PoolDetail({
       </table>
     </div>
   );
+  */
 }
 
 export default PoolDetail;
