@@ -7,17 +7,6 @@ export interface IdValue {
   value: string;
 }
 
-export interface VPSFilterResult {
-  provider: IdValue;
-  cpu: IdValue;
-  memory: IdValue;
-  disk: IdValue;
-  traffic: IdValue;
-  line: IdValue;
-  ipv4: IdValue;
-  ipv6: IdValue;
-}
-
 export interface FilterCatValue {
   valId: number;
   configCat: string;
@@ -31,6 +20,8 @@ export interface FilterCat {
   mulitInput: boolean
   quantifiable: boolean;
   filterable: boolean;
+  customable?: boolean;
+  mandatory?: boolean;
   configCat: string;
   configCatCn: string;
   catDesc?: any;
@@ -84,6 +75,53 @@ function extractSearchParams(params: {
   return {productCat, configCats: param };
 }
 
+function getQuerySearchFiler(search: URLSearchParams, key: string) {
+  const vals = search.get(key + '')
+  if (!vals) return [];
+
+  try {
+    const val = JSON.parse(vals);
+    if (typeof val === "number") {
+      return [val];
+    } else {
+      return val;
+    }
+  } catch {
+    console.log(`invalid query item: key=${key} val=${vals}`);
+    return []
+  }
+}
+
+// 将 filter value 对应的 key 转换为 name
+function toFilterValueNames(fcs: FilterConfig[], key: number, vals: number[]) {
+  let fc: FilterConfig | undefined = undefined
+
+  if (vals.length === 0) return [];
+
+  for (let item of fcs) {
+    if (item.cat.catId === key) {
+      fc = item
+      break
+    }
+  }
+  if (fc === undefined) {
+    throw new Error('not found filterConfig by catId: ' + key)
+  }
+  
+  const names: string[] = []
+  const choices = fc.choices
+  for (let item of choices) {
+    if (vals.indexOf(item.valId) !== -1) {
+      names.push(item.catValue)
+    }
+  }
+
+  return names
+}
+
+
 export {
+  getQuerySearchFiler,
+  toFilterValueNames,
   extractSearchParams
 }

@@ -47,3 +47,8 @@
   background: #ededed;
   color: #171717;
 }
+
+.config-val-checked {
+  border-top: 16px solid transparent;
+  border-right: 16px solid #222;
+}

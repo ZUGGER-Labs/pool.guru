@@ -35,4 +35,6 @@ const meta = {
   },
 };
 
+export const title = "DEX pool/position APY";
+
 export default meta;

@@ -15,6 +15,24 @@ const CHAIN_NAME: Record<number, string> = {
   [ChainId.BASE]: "base",
 };
 
+const CHAIN_LOGO: Record<number, string> = {
+  [ChainId.MAINNET]: "https://tokenlogo.xyz/assets/chain/ethereum.svg",
+  [ChainId.ARBITRUM_ONE]: "https://tokenlogo.xyz/assets/chain/arbitrum.svg",
+  [ChainId.OPTIMISM]: "https://tokenlogo.xyz/assets/chain/optimism.svg",
+  [ChainId.POLYGON]: "https://tokenlogo.xyz/assets/chain/polygon.svg",
+  [ChainId.CELO]: "https://tokenlogo.xyz/assets/chain/celo.svg",
+  [ChainId.BNB]: "https://tokenlogo.xyz/assets/chain/bsc.svg",
+  [ChainId.AVALANCHE]: "https://tokenlogo.xyz/assets/chain/avalanche.svg",
+  [ChainId.BASE]: "https://tokenlogo.xyz/assets/chain/base.svg",
+};
+
+const DEX_LOGO: Record<string, string> = {
+  'uniswapv3': "https://tokenlogo.xyz/assets/token/0x1f9840a85d5af5bf1d1762f925bdaddc4201f984.svg",
+  'uniswapv2': "https://tokenlogo.xyz/assets/token/0x1f9840a85d5af5bf1d1762f925bdaddc4201f984.svg",
+  'panacakev3': "https://tokenlogo.xyz/assets/token/0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82.svg",
+  'panacakev2': "https://tokenlogo.xyz/assets/token/0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82.svg",
+};
+
 const CHAIN_ID_BY_NAME: Record<string, number> = {
   "ethereum": ChainId.MAINNET,
   "arbitrum": ChainId.ARBITRUM_ONE,
@@ -95,9 +113,24 @@ function getBlockQueryEndpoint(chainId: number) {
   return endpoint;
 }
 
+function getChainNameLogo(chainId: number) {
+  return {
+    name: CHAIN_NAME[chainId],
+    logo: CHAIN_LOGO[chainId]
+  }
+}
+
+function getDEXLogoByName(dex: string) {
+  return DEX_LOGO[dex]
+}
+
 export {
   CHAIN_NAME,
+  DEX_LOGO,
+  CHAIN_LOGO,
   CHAIN_ID_BY_NAME,
+  getChainNameLogo,
+  getDEXLogoByName,
   getNetworkDexEndpoint,
   getBlockQueryEndpoint,
   getNetworkName,
