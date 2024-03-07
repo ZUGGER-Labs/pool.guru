@@ -2,90 +2,123 @@
 
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { ChevronDown, ChevronRight, Check, Dot } from "lucide-react";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import _ from "lodash";
 
 import { FilterConfig } from "@/lib/filter";
 import { cn } from "@/lib/utils";
-import { FilterContext } from "./FilterContext";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { buildURI } from "@/lib/page";
+import { CatInputContext, ICatValue } from "./FilterContext";
 
-export interface ChoiceDialogProps {
+export interface ChoiceProps {
   fc: FilterConfig;
   isMulti: boolean;
 }
 
-function ChoiceDialog({ fc, isMulti }: ChoiceDialogProps) {
-  const { selected, setSelected } = useContext(FilterContext);
+function ChoiceInput({ fc, isMulti }: ChoiceProps) {
+  const { selected, setSelected } = useContext(CatInputContext);
   const { cat, choices } = fc;
   const catKey = "cat-" + cat.catId;
   const valueIdList = selected[catKey] || [];
   const [open, setOpen] = useState(false);
-  const router = useRouter()
-  const pathname = usePathname()
-  const query = useSearchParams()
-  const m: { [key: string]: boolean } = {};
-  for (let k in valueIdList) {
-    m[valueIdList[k] + ""] = true;
-  }
-  const [tmpSelected, setTmpSelected] = useState<{ [key: string]: boolean }>(m); // 多选临时选中项
+  const [customInput, setCustomInput] = useState(false);
+  const [customVal, setCustomVal] = useState("");
+
+  const m: { [key: string]: ICatValue } = _.keyBy(
+    valueIdList,
+    (o) => o.valId + ""
+  );
+  const [tmpSelected, setTmpSelected] = useState<{ [key: string]: ICatValue }>(
+    m
+  ); // 多选临时选中项
+
+  useEffect(() => {
+    if (cat.customable) {
+      choices.push({ valId: 0, configCat: cat.configCat, catValue: "自定义" });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cat.customable]);
 
   const toggleClick = (e: React.SyntheticEvent<HTMLElement>, id: number) => {
     e.stopPropagation();
     e.preventDefault();
 
-    let actived = !!tmpSelected[id];
-
+    let actived = false;
+    for (let item of valueIdList) {
+      if (item.valId === id) {
+        // this cat value has been select
+        actived = true;
+        break;
+      }
+    }
+    const choice = choices.filter((c) => c.valId === id)[0];
     if (isMulti) {
       if (actived) {
-        setTmpSelected({ ...tmpSelected, [id + ""]: false });
-        const newVal: number[] = [];
-
-        _.mapKeys(tmpSelected, (val, key) => {
-          const iKey = +key;
-          if (id !== iKey) {
-            newVal.push(iKey);
-          }
-        });
-        setSelected({ ...selected, [catKey]: newVal });
+        // const catValList = tmpSelected[catKey]
+        delete tmpSelected[id + ""];
+        setTmpSelected({ ...tmpSelected });
+        // const newVal = selected[catKey].filter((val) => val !== id);
+        // setSelected({ ...selected, [catKey]: newVal });
       } else {
-        setTmpSelected({ ...tmpSelected, [id + ""]: true });
-        const newVal: number[] = [id];
-        _.mapKeys(tmpSelected, (val, key) => {
-          newVal.push(+key);
+        setTmpSelected({
+          ...tmpSelected,
+          [id + ""]: { valId: choice.valId, value: choice.catValue },
         });
-        setSelected({ ...selected, [catKey]: newVal });
+        // const newVal = _.clone(selected[catKey]);
+        // newVal.push(id);
+        // setSelected({ ...selected, [catKey]: newVal });
       }
     } else {
-      if (actived) {
-        // toggle to false
-        setSelected({ ...selected, [catKey]: [] });
-        router.push(buildURI(pathname, query, catKey, null))
+      if (id === 0) {
+        // show input
+        setCustomInput(true);
+
+        setSelected({ ...selected, [catKey]: [{ valId: 0, value: "" }] });
       } else {
-        setSelected({ ...selected, [catKey]: [id] });
-        router.push(buildURI(pathname, query, catKey, id+''))
+        setCustomInput(false);
+        if (actived) {
+          // toggle to false
+          setSelected({ ...selected, [catKey]: [] });
+        } else {
+          const val = choice.catValue;
+          setSelected({ ...selected, [catKey]: [{ valId: id, value: val }] });
+          setOpen(false);
+        }
       }
     }
   };
 
-  const isActive = (idx: number) =>
-    isMulti ? tmpSelected[idx] : selected[catKey] && selected[catKey].indexOf(idx) !== -1;
+  const isActive = (idx: number) => {
+    if (isMulti) {
+      return tmpSelected[idx];
+    }
+    const valList = selected[catKey];
+    for (let val of valList) {
+      if (val.valId === idx) {
+        return true;
+      }
+    }
+    return false;
+  };
 
   const onClear = () => {
     setTmpSelected({});
     setSelected({ ...selected, [catKey]: [] });
-    
-    router.push(buildURI(pathname, query, catKey, null))
+    setCustomVal("");
+    setCustomInput(false);
+
     setOpen(false);
   };
 
   const onApply = () => {
-    const valList = _.keys(tmpSelected).map(k => Number(k))
+    const customItem = { valId: 0, value: customVal };
+    setTmpSelected({
+      ...tmpSelected,
+      "0": customItem,
+    });
+    const valList = [customItem]; // _.values(tmpSelected); // _.keys(tmpSelected).map(k => Number(k))
     setSelected({ ...selected, [catKey]: valList });
     // %255B202%2C206%255D
     // %[202,206%]
-    router.push(buildURI(pathname, query, catKey, JSON.stringify(valList)))
     setOpen(false);
   };
 
@@ -159,8 +192,17 @@ function ChoiceDialog({ fc, isMulti }: ChoiceDialogProps) {
               })}
             </div>
 
-            {isMulti && choices.length > 0 && (
+            {((isMulti && choices.length > 0) || customInput) && (
               <div className="mt-2 flex flex-row justify-end items-center pr-2">
+                {customInput && (
+                  <input
+                    type="text"
+                    autoFocus={true}
+                    value={customVal}
+                    className="leading-6 px-2 py-2 rounded-none focus:rounded-none mr-4"
+                    onChange={(e) => setCustomVal(e.target.value)}
+                  />
+                )}
                 <button
                   onClick={onClear}
                   className="text-[#222] p-2 mr-6 border border-slate-300"
@@ -182,4 +224,4 @@ function ChoiceDialog({ fc, isMulti }: ChoiceDialogProps) {
   );
 }
 
-export default ChoiceDialog;
+export default ChoiceInput;

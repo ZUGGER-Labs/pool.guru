@@ -16,7 +16,7 @@ export const formatAmount = (num: string | number | bigint | undefined, digits =
   }
   return numbro(num).format({
     average: true,
-    mantissa: num > 1000 ? 2 : digits,
+    mantissa: num > 1000000 ? 1 : num > 1000 ? 2 : digits,
     abbreviations: {
       million: "M",
       billion: "B",
