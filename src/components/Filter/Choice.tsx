@@ -22,9 +22,9 @@ function ChoiceDialog({ fc, isMulti }: ChoiceDialogProps) {
   const catKey = "cat-" + cat.catId;
   const valueIdList = selected[catKey] || [];
   const [open, setOpen] = useState(false);
-  const router = useRouter()
-  const pathname = usePathname()
-  const query = useSearchParams()
+  const router = useRouter();
+  const pathname = usePathname();
+  const query = useSearchParams();
   const m: { [key: string]: boolean } = {};
   for (let k in valueIdList) {
     m[valueIdList[k] + ""] = true;
@@ -38,9 +38,9 @@ function ChoiceDialog({ fc, isMulti }: ChoiceDialogProps) {
     let actived = !!tmpSelected[id];
 
     if (isMulti) {
+      const newVal: number[] = [];
       if (actived) {
         setTmpSelected({ ...tmpSelected, [id + ""]: false });
-        const newVal: number[] = [];
 
         _.mapKeys(tmpSelected, (val, key) => {
           const iKey = +key;
@@ -51,41 +51,50 @@ function ChoiceDialog({ fc, isMulti }: ChoiceDialogProps) {
         setSelected({ ...selected, [catKey]: newVal });
       } else {
         setTmpSelected({ ...tmpSelected, [id + ""]: true });
-        const newVal: number[] = [id];
         _.mapKeys(tmpSelected, (val, key) => {
           newVal.push(+key);
         });
         setSelected({ ...selected, [catKey]: newVal });
       }
+      console.log('selected:', catKey, newVal, selected[catKey])
     } else {
       if (actived) {
         // toggle to false
         setSelected({ ...selected, [catKey]: [] });
-        router.push(buildURI(pathname, query, catKey, null))
+        router.push(buildURI(pathname, query, catKey, null));
       } else {
         setSelected({ ...selected, [catKey]: [id] });
-        router.push(buildURI(pathname, query, catKey, id+''))
+        router.push(buildURI(pathname, query, catKey, id + ""));
       }
     }
   };
 
   const isActive = (idx: number) =>
-    isMulti ? tmpSelected[idx] : selected[catKey] && selected[catKey].indexOf(idx) !== -1;
+    isMulti
+      ? tmpSelected[idx]
+      : selected[catKey] && selected[catKey].indexOf(idx) !== -1;
+
+  const selectedCount = () => {
+    // if (isMulti) {
+    //   return _.size(tmpSelected)
+    // }
+    return _.size(selected[catKey]);
+  };
 
   const onClear = () => {
     setTmpSelected({});
     setSelected({ ...selected, [catKey]: [] });
-    
-    router.push(buildURI(pathname, query, catKey, null))
+
+    router.push(buildURI(pathname, query, catKey, null));
     setOpen(false);
   };
 
   const onApply = () => {
-    const valList = _.keys(tmpSelected).map(k => Number(k))
+    const valList = _.keys(tmpSelected).map((k) => Number(k));
     setSelected({ ...selected, [catKey]: valList });
     // %255B202%2C206%255D
     // %[202,206%]
-    router.push(buildURI(pathname, query, catKey, JSON.stringify(valList)))
+    router.push(buildURI(pathname, query, catKey, JSON.stringify(valList)));
     setOpen(false);
   };
 
@@ -97,6 +106,11 @@ function ChoiceDialog({ fc, isMulti }: ChoiceDialogProps) {
             <span className={cn(open ? "text-blue-500" : "")}>
               {cat.configCatCn}
             </span>
+            {selectedCount() > 0 && (
+              <span className="mx-2 w-6 h-6 rounded-full bg-[#42ff77] inline-flex justify-center items-center">
+                {selectedCount()}
+              </span>
+            )}
             {open && (
               <span className="transition-all">
                 <ChevronDown color="rgb(59 130 246)" strokeWidth={1} />

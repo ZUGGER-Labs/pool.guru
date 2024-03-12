@@ -71,30 +71,55 @@ export interface IPoolData {
   feeApy14D: string;
 }
 
-function toSortParam(field: string): TPoolSortBy {
-  switch (field) {
-    case "TVL":
-      return "tvlUSD";
-    case "Vol(24H)":
-      return "volUSD24H";
-    case "Vol(7D)":
-      return "volUSD7D";
-    case "Vol(14D)":
-      return "volUSD14D";
-    case "Fee(24H)":
-      return "feeUSD24H";
-    case "Fee(7D)":
-      return "feeUSD7D";
-    case "Fee(14D)":
-      return "feeUSD14D";
-    case "%FeeAPY(24H)":
-      return "feeApy24H";
-    case "%FeeAPY(7D)":
-      return "feeApy7D";
-    case "%FeeAPY(14D)":
-      return "feeApy14D";
+const sortKeyToField: Record<TPoolSortBy, string> = {
+  "tvlUSD": 'TVL',
+  "volUSD7D" :'Vol(7D)',
+  "volUSD24H":'Vol(24H)',
+  "volUSD14D":'Vol(14D)',
+  "feeUSD24H":'Fee(24H)',
+  "feeUSD7D":'Fee(7D)',
+  "feeUSD14D":'Fee(14D)',
+  "apyByUSD24H":'APYByUSD(24H)',
+  "apyByUSD7D":'APYByUSD(7D)',
+  "apyByUSD14D":'APYByUSD(14D)',
+  "feeApy24H":'%FeeAPY(24H)',
+  "feeApy7D":'%FeeAPY(7D)',
+  "feeApy14D":'%FeeAPY(14D)',
+}
+
+const sortFieldToKey:  Record<string, TPoolSortBy> = {
+  'TVL': "tvlUSD",
+  'Vol(7D)': "volUSD7D" ,
+  'Vol(24H)': "volUSD24H",
+  'Vol(14D)': "volUSD14D",
+  'Fee(24H)': "feeUSD24H",
+  'Fee(7D)': "feeUSD7D",
+  'Fee(14D)': "feeUSD14D",
+  'APYByUSD(24H)': "apyByUSD24H",
+  'APYByUSD(7D)': "apyByUSD7D",
+  'APYByUSD(14D)': "apyByUSD14D",
+  '%FeeAPY(24H)': "feeApy24H",
+  '%FeeAPY(7D)': "feeApy7D",
+  '%FeeAPY(14D)': "feeApy14D",
+}
+
+
+function toSortField(key: TPoolSortBy): string {
+  if (sortKeyToField[key]) {
+    return sortKeyToField[key]
   }
-  throw new Error("invalid field:" + field);
+  // console.log('invalid field')
+  // return field as TPoolSortBy
+  throw new Error("invalid key: " + key);
+}
+
+function toSortParam(field: string): TPoolSortBy {
+  if (sortFieldToKey[field]) {
+    return sortFieldToKey[field]
+  }
+  // console.log('invalid field')
+  // return field as TPoolSortBy
+  throw new Error("invalid field: " + field);
 }
 
 function PoolList(props: PoolListProps) {
@@ -106,7 +131,12 @@ function PoolList(props: PoolListProps) {
   const query = useSearchParams();
   const router = useRouter();
 
-  const [sortKey, setSortKey] = useState({ field: "TVL", order: "desc" });
+  const sortBy = query.get("sortBy");
+  const sortOrder = query.get("order");
+  const [sortKey, setSortKey] = useState({
+    field: !sortBy ? "TVL" : toSortField(sortBy as TPoolSortBy),
+    order: !sortOrder ? "desc" : sortOrder,
+  });
   const theme = useTheme(getTheme());
   const onFieldSort = async (field: string) => {
     console.log("click:", field);
@@ -202,7 +232,7 @@ function PoolList(props: PoolListProps) {
   const PageLink = ({ prev }: { prev: boolean }) => {
     const { pagable, uri } = pageURI(prev);
 
-    console.log(`page link: prev=${prev} pagable=${pagable} uri=${uri}`)
+    // console.log(`page link: prev=${prev} pagable=${pagable} uri=${uri}`);
     if (prev) {
       if (!pagable) {
         return <>Prev</>;
