@@ -408,8 +408,9 @@ function PoolList(props: PoolListProps) {
                       >
                         <div className="flex flex-col justify-start items-center">
                           <div className="flex flex-row">
+                            <span>{item.feeTier}</span>
                             <img
-                              className="h-6 mr-4"
+                              className="h-6 px-1"
                               src={item.chainDex.dexLogo}
                               alt={item.chainDex.dexName}
                               title={item.chainDex.dexName}

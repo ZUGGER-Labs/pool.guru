@@ -15,18 +15,18 @@ const meta = {
   description: "Uniswap v3 Liquidity calculator",
   openGraph: {
     title: "Uniswap v3 Pool Liquidity calculator",
-    images: "/icon.jpg",
+    images: "/icon.png",
     description:
       "Uniswap v3 Liquidity calculator",
     locale: "en",
     type: "website",
   },
   icons: {
-    icon: "/icon.jpg",
-    shortcut: "/icon.jpg",
+    icon: "/icon.png",
+    shortcut: "/icon.png",
     apple: [
-      { url: "/apple-icon.jpg" },
-      { url: "/apple-icon-x3.jpg", sizes: "180x180", type: "image/jpg" },
+      { url: "/apple-icon.png" },
+      { url: "/apple-icon-x3.png", sizes: "180x180", type: "image/jpg" },
     ],
     other: {
       rel: "apple-touch-icon-precomposed",
