@@ -27,7 +27,7 @@ async function Pool({ params, searchParams }: PageProps) {
   }
 
   return (
-    <main className="flex flex-col items-center justify-between p-4 md:max-w-7xl w-full m-auto">
+    <main className="flex flex-col items-center justify-between p-2 md:max-w-7xl w-full m-auto">
       <PoolDetail chainId={chainId} poolId={pid} poolData={poolData} />
     </main>
   );

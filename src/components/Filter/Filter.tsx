@@ -68,7 +68,7 @@ function Filter({
           </div>
           {filterConfigs.map((filter, idx) => {
             return (
-              <ChoiceDialog key={idx} isMulti={filter.cat.multiFilter} fc={filter} />
+              <ChoiceDialog key={idx} isMulti={filter.cat.multiFilter} selectMenu={filter.cat.selectMenu} fc={filter} />
             );
           })}
         </FilterContext.Provider>

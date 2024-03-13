@@ -72,41 +72,40 @@ export interface IPoolData {
 }
 
 const sortKeyToField: Record<TPoolSortBy, string> = {
-  "tvlUSD": 'TVL',
-  "volUSD7D" :'Vol(7D)',
-  "volUSD24H":'Vol(24H)',
-  "volUSD14D":'Vol(14D)',
-  "feeUSD24H":'Fee(24H)',
-  "feeUSD7D":'Fee(7D)',
-  "feeUSD14D":'Fee(14D)',
-  "apyByUSD24H":'APYByUSD(24H)',
-  "apyByUSD7D":'APYByUSD(7D)',
-  "apyByUSD14D":'APYByUSD(14D)',
-  "feeApy24H":'%FeeAPY(24H)',
-  "feeApy7D":'%FeeAPY(7D)',
-  "feeApy14D":'%FeeAPY(14D)',
-}
+  tvlUSD: "TVL",
+  volUSD7D: "Vol(7D)",
+  volUSD24H: "Vol(24H)",
+  volUSD14D: "Vol(14D)",
+  feeUSD24H: "Fee(24H)",
+  feeUSD7D: "Fee(7D)",
+  feeUSD14D: "Fee(14D)",
+  apyByUSD24H: "APYByUSD(24H)",
+  apyByUSD7D: "APYByUSD(7D)",
+  apyByUSD14D: "APYByUSD(14D)",
+  feeApy24H: "%FeeAPY(24H)",
+  feeApy7D: "%FeeAPY(7D)",
+  feeApy14D: "%FeeAPY(14D)",
+};
 
-const sortFieldToKey:  Record<string, TPoolSortBy> = {
-  'TVL': "tvlUSD",
-  'Vol(7D)': "volUSD7D" ,
-  'Vol(24H)': "volUSD24H",
-  'Vol(14D)': "volUSD14D",
-  'Fee(24H)': "feeUSD24H",
-  'Fee(7D)': "feeUSD7D",
-  'Fee(14D)': "feeUSD14D",
-  'APYByUSD(24H)': "apyByUSD24H",
-  'APYByUSD(7D)': "apyByUSD7D",
-  'APYByUSD(14D)': "apyByUSD14D",
-  '%FeeAPY(24H)': "feeApy24H",
-  '%FeeAPY(7D)': "feeApy7D",
-  '%FeeAPY(14D)': "feeApy14D",
-}
-
+const sortFieldToKey: Record<string, TPoolSortBy> = {
+  TVL: "tvlUSD",
+  "Vol(7D)": "volUSD7D",
+  "Vol(24H)": "volUSD24H",
+  "Vol(14D)": "volUSD14D",
+  "Fee(24H)": "feeUSD24H",
+  "Fee(7D)": "feeUSD7D",
+  "Fee(14D)": "feeUSD14D",
+  "APYByUSD(24H)": "apyByUSD24H",
+  "APYByUSD(7D)": "apyByUSD7D",
+  "APYByUSD(14D)": "apyByUSD14D",
+  "%FeeAPY(24H)": "feeApy24H",
+  "%FeeAPY(7D)": "feeApy7D",
+  "%FeeAPY(14D)": "feeApy14D",
+};
 
 function toSortField(key: TPoolSortBy): string {
   if (sortKeyToField[key]) {
-    return sortKeyToField[key]
+    return sortKeyToField[key];
   }
   // console.log('invalid field')
   // return field as TPoolSortBy
@@ -115,7 +114,7 @@ function toSortField(key: TPoolSortBy): string {
 
 function toSortParam(field: string): TPoolSortBy {
   if (sortFieldToKey[field]) {
-    return sortFieldToKey[field]
+    return sortFieldToKey[field];
   }
   // console.log('invalid field')
   // return field as TPoolSortBy
@@ -277,21 +276,23 @@ function PoolList(props: PoolListProps) {
   };
 
   return (
-    <div>
+    <div className="w-full">
       <div className="flex flex-row justify-between items-center">
         <PoolFilter filters={props.filters} />
       </div>
 
-      <div></div>
-
-      <div className="flex flex-col justify-between items-center">
-        <div>
+      <div className="flex flex-col justify-between items-center w-full">
+        <div className="w-full">
           <Table data={data} theme={theme}>
             {(tableList: any) => (
               <>
                 <Header>
                   <HeaderRow>
-                    <HeaderCell className="text-sm">Pool</HeaderCell>
+                    <HeaderCell className="text-sm text-center">
+                      Pool
+                    </HeaderCell>
+                    <HeaderCell className="text-sm">Chain/Protocol</HeaderCell>
+
                     <HeaderCell
                       className="text-sm"
                       onClick={() => onFieldSort("TVL")}
@@ -324,7 +325,7 @@ function PoolList(props: PoolListProps) {
                       <SortNameAndArrow name="Fee(7D)" />
                     </HeaderCell>
 
-                    <HeaderCell
+                    {/* <HeaderCell
                       className="text-sm"
                       onClick={() => onFieldSort("Vol(14D)")}
                     >
@@ -335,7 +336,7 @@ function PoolList(props: PoolListProps) {
                       onClick={() => onFieldSort("Fee(14D)")}
                     >
                       <SortNameAndArrow name="Fee(14D)" />
-                    </HeaderCell>
+                    </HeaderCell> */}
 
                     <HeaderCell
                       className="text-sm"
@@ -355,7 +356,7 @@ function PoolList(props: PoolListProps) {
                         showName="%fAPY(7D)"
                       />
                     </HeaderCell>
-                    <HeaderCell
+                    {/* <HeaderCell
                       className="text-sm"
                       onClick={() => onFieldSort("%FeeAPY(14D)")}
                     >
@@ -363,7 +364,7 @@ function PoolList(props: PoolListProps) {
                         name="%FeeAPY(14D)"
                         showName="%fAPY(14D)"
                       />
-                    </HeaderCell>
+                    </HeaderCell> */}
                   </HeaderRow>
                 </Header>
 
@@ -376,24 +377,50 @@ function PoolList(props: PoolListProps) {
                       data-href={"/pool/" + item.id}
                       className="cursor-pointer"
                     >
+                      <Cell title={item.symbol}>
+                        <div className="flex flex-col justify-start items-center">
+                          <div className="flex flex-row">
+                            <img
+                              className="h-5"
+                              src={item.baseLogo}
+                              alt={item.baseName}
+                              title={item.baseName}
+                            />
+                            <img
+                              className="h-5"
+                              src={item.quoteLogo}
+                              alt={item.quoteName}
+                              title={item.quoteName}
+                            />
+                          </div>
+                          <div className="text-sm" title={item.symbol}>
+                            {item.symbol}
+                          </div>
+                        </div>
+                      </Cell>
+
                       <Cell
                         title={
-                          item.chainDex.chainName + " " + item.chainDex.dexName
+                          item.chainDex.dexName +
+                          " - " +
+                          item.chainDex.chainName
                         }
                       >
-                        <div className="flex flex-row">
-                          <img
-                            className="h-5"
-                            src={item.baseLogo}
-                            alt={item.baseName}
-                            title={item.baseName}
-                          />
-                          <img
-                            className="h-5"
-                            src={item.quoteLogo}
-                            alt={item.quoteName}
-                            title={item.quoteName}
-                          />
+                        <div className="flex flex-col justify-start items-center">
+                          <div className="flex flex-row">
+                            <img
+                              className="h-6 mr-4"
+                              src={item.chainDex.dexLogo}
+                              alt={item.chainDex.dexName}
+                              title={item.chainDex.dexName}
+                            />
+                            <img
+                              className="h-6"
+                              src={item.chainDex.chainLogo}
+                              alt={item.chainDex.chainName}
+                              title={item.chainDex.chainName}
+                            />
+                          </div>
                         </div>
                       </Cell>
 
@@ -402,11 +429,11 @@ function PoolList(props: PoolListProps) {
                       <Cell>{formatAmount(item.fee24H)}</Cell>
                       <Cell>{formatAmount(item.volume7D)}</Cell>
                       <Cell>{formatAmount(item.fee7D)}</Cell>
-                      <Cell>{formatAmount(item.volume14D)}</Cell>
-                      <Cell>{formatAmount(item.fee14D)}</Cell>
+                      {/* <Cell>{formatAmount(item.volume14D)}</Cell> */}
+                      {/* <Cell>{formatAmount(item.fee14D)}</Cell> */}
                       <Cell>{formatAmount(item.feeApy24H)}</Cell>
                       <Cell>{formatAmount(item.feeApy7D)}</Cell>
-                      <Cell>{formatAmount(item.feeApy14D)}</Cell>
+                      {/* <Cell>{formatAmount(item.feeApy14D)}</Cell> */}
                     </Row>
                   ))}
                 </Body>

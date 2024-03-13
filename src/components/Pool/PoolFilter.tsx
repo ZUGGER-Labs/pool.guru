@@ -62,7 +62,7 @@ function PoolFilter({ filters }: { filters: FilterConfig[] }) {
   };
 
   return (
-    <div className="py-2">
+    <div className="py-2 flex flex-row items-center">
       <div className="w-screen flex md:hidden">
         <FilterContext.Provider value={props}>
           <div
@@ -75,7 +75,7 @@ function PoolFilter({ filters }: { filters: FilterConfig[] }) {
       </div>
 
       <div className="hidden md:flex md:w-full md:items-center md:flex-col text-sm">
-        <div className="flex flex-row">
+        <div className="flex flex-row items-center">
           <FilterContext.Provider value={props}>
             <div
               className="pr-32"
@@ -85,8 +85,8 @@ function PoolFilter({ filters }: { filters: FilterConfig[] }) {
             </div>
             {filters.map((filter, idx) => {
               return (
-                <div key={idx} className="w-32">
-                  <ChoiceDialog isMulti={filter.cat.multiFilter} fc={filter} />
+                <div key={idx} className="w-40">
+                  <ChoiceDialog isMulti={filter.cat.multiFilter} selectMenu={filter.cat.selectMenu} fc={filter} />
                 </div>
               );
             })}

@@ -5,7 +5,22 @@ import { ChevronDown, ChevronRight, Check, Dot } from "lucide-react";
 import { useContext, useState } from "react";
 import _ from "lodash";
 
-import { FilterConfig } from "@/lib/filter";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+import {
+  FilterConfig,
+  getFilterSelectName,
+  getQuerySearchFiler,
+  toFilterValueNames,
+} from "@/lib/filter";
 import { cn } from "@/lib/utils";
 import { FilterContext } from "./FilterContext";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -14,9 +29,10 @@ import { buildURI } from "@/lib/page";
 export interface ChoiceDialogProps {
   fc: FilterConfig;
   isMulti: boolean;
+  selectMenu?: boolean;
 }
 
-function ChoiceDialog({ fc, isMulti }: ChoiceDialogProps) {
+function ChoiceDialog({ fc, isMulti, selectMenu }: ChoiceDialogProps) {
   const { selected, setSelected } = useContext(FilterContext);
   const { cat, choices } = fc;
   const catKey = "cat-" + cat.catId;
@@ -56,7 +72,7 @@ function ChoiceDialog({ fc, isMulti }: ChoiceDialogProps) {
         });
         setSelected({ ...selected, [catKey]: newVal });
       }
-      console.log('selected:', catKey, newVal, selected[catKey])
+      console.log("selected:", catKey, newVal, selected[catKey]);
     } else {
       if (actived) {
         // toggle to false
@@ -97,6 +113,33 @@ function ChoiceDialog({ fc, isMulti }: ChoiceDialogProps) {
     router.push(buildURI(pathname, query, catKey, JSON.stringify(valList)));
     setOpen(false);
   };
+
+  if (selectMenu) {
+    return (
+      <div>
+        <Select>
+          <SelectTrigger className="w-40">
+            <SelectValue placeholder={"Select " + fc.cat.configCat} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              {/* <SelectLabel>
+                {getFilterSelectName(
+                  fc,
+                  getQuerySearchFiler(query, "cat-" + fc.cat.catId)
+                )}
+              </SelectLabel> */}
+              {choices.map((child, idx) => (
+                <SelectItem key={idx} value={child.valId + ""}>
+                  {child.catValue}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+      </div>
+    );
+  }
 
   return (
     <div>

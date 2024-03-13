@@ -31,7 +31,7 @@ async function Pools() {
   const filters = await fetchPoolFilters()
 
   return (
-    <main className="flex flex-col items-center justify-between p-4 md:max-w-7xl w-full m-auto">
+    <main className="flex flex-col items-center justify-between p-2 md:max-w-7xl w-full m-auto">
       <PoolList pools={pools} itemsPerPage={itemsPerPage} total={total} filters={filters} />
     </main>
   );

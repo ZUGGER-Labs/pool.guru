@@ -1,6 +1,6 @@
 import { IChainDEX } from "@/components/Pool/PoolList";
 import { query } from "@/utils/query";
-import { CHAIN_NAME } from "./network";
+import { CHAIN_LOGO, CHAIN_NAME, getDEXLogoByName } from "./network";
 
 export const FilterChainId = 1
 export const FilterDexId = 10
@@ -52,13 +52,32 @@ export async function fetchPoolFilters() {
 export function getChainDex(chainId: number, dex: string): IChainDEX {
   return {
     dexName: dex,
-    dexLogo: "",
+    dexLogo: getDEXLogoByName(dex),
     chainName: CHAIN_NAME[chainId],
-    chainLogo: "",
+    chainLogo: CHAIN_LOGO[chainId],
   };
 }
 
 export function convertToPoolData(item: any) {
+  let feeTier = '0.3%'
+
+  switch (item.feeTier) {
+    case '100':
+      feeTier = '0.01%'
+      break
+    case '500':
+      feeTier = '0.05%'
+      break
+    case '3000':
+      feeTier = '0.3%'
+      break
+    case '10000':
+      feeTier = '1%'
+      break
+    default:
+      feeTier = +item.feeRate / 1000 + '%'
+  }
+
   return {
     id: item.poolId,
     poolName: item.dex,
@@ -66,7 +85,8 @@ export function convertToPoolData(item: any) {
     baseName: item.baseToken.symbol,
     quoteLogo: item.quoteToken.logoURI,
     quoteName: item.quoteToken.symbol,
-    chainDex: {},
+    chainDex: getChainDex(item.chainId, item.dex),
+    symbol: item.baseToken.symbol + '/' + item.quoteToken.symbol + '-' + feeTier,
     tvlUSD: item.tvlUSD,
     volume24H: item.volumeUSD24H,
     volume7D: item.volumeUSD7D,
