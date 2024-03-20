@@ -5,7 +5,14 @@ import * as Popover from "@radix-ui/react-popover";
 import { useRef, useState } from "react";
 import { AutoComplete } from "../ui/AutoComplete";
 import { query } from "@/utils/query";
-import { Area, AreaChart } from "recharts";
+import {
+  Area,
+  AreaChart,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  YAxis,
+} from "recharts";
 import { Skeleton } from "../ui/skeleton";
 
 const AddIcon: React.FC = () => (
@@ -204,19 +211,22 @@ function Calculator({ tokens }: { tokens: Token[] }) {
                     </div>
                     <div className="flex flex-col items-center justify-center gap-2 w-[270px]">
                       <span className="text-gray-400 text-base">Trend 7d</span>
-                      <AreaChart
-                        width={319}
-                        height={28}
-                        margin={{ top: 0, right: 24, left: 24, bottom: 0 }}
-                        data={asset.prices7d}
-                      >
-                        <Area
-                          type="monotone"
-                          dataKey="price"
-                          stroke={asset.change7d > 0 ? "#1CC44B" : "#F94144"}
-                          fill={asset.change7d > 0 ? "#1CC44B" : "#F94144"}
-                        />
-                      </AreaChart>
+
+                      <ResponsiveContainer width={319} height={28}>
+                        <LineChart
+                          data={asset.prices7d}
+                          margin={{ top: 0, right: 24, left: 24, bottom: 0 }}
+                        >
+                          <YAxis hide domain={["dataMin", "dataMax"]} />
+                          <Line
+                            type="monotone"
+                            dataKey="price"
+                            stroke={asset.change7d > 0 ? "#1CC44B" : "#F94144"}
+                            strokeWidth={2}
+                            dot={false}
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
                     </div>
                     <button onClick={() => handleRemoveAsset(asset)}>
                       <img src="/Rounded-edge.svg" className="w-6 h-6"></img>
