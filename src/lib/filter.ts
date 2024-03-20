@@ -25,6 +25,7 @@ export interface FilterCat {
   configCat: string;
   configCatCn: string;
   catDesc?: any;
+  selectMenu?: boolean;
 }
 
 export interface FilterConfig {
@@ -119,9 +120,22 @@ function toFilterValueNames(fcs: FilterConfig[], key: number, vals: number[]) {
   return names
 }
 
+// radio select
+function getFilterSelectName(fc: FilterConfig, val: number) {
+  const choices = fc.choices
+  for (let item of choices) {
+    if (item.valId == val) {
+      return item.catValue
+    }
+  }
+
+  return ''
+}
+
 
 export {
   getQuerySearchFiler,
   toFilterValueNames,
-  extractSearchParams
+  extractSearchParams,
+  getFilterSelectName
 }

@@ -1,6 +1,10 @@
 "use client";
 
-import { FilterConfig, getQuerySearchFiler, toFilterValueNames } from "@/lib/filter";
+import {
+  FilterConfig,
+  getQuerySearchFiler,
+  toFilterValueNames,
+} from "@/lib/filter";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { FilterContext, TFilterContext } from "../Filter/FilterContext";
@@ -37,13 +41,17 @@ function PoolFilter({ filters }: { filters: FilterConfig[] }) {
     }
   }
 
-  const filtered = (fc: FilterConfig) => {
-    const vals = initial['cat-' + fc.cat.catId]
-    if (vals.length === 0) {
-        return 'ALL'
-    }
-    return toFilterValueNames(filters, fc.cat.catId, getQuerySearchFiler(query, 'cat-' + fc.cat.catId))
-  }
+  // const filtered = (fc: FilterConfig) => {
+  //   const vals = initial["cat-" + fc.cat.catId];
+  //   if (vals.length === 0) {
+  //     return "ALL";
+  //   }
+  //   return toFilterValueNames(
+  //     filters,
+  //     fc.cat.catId,
+  //     getQuerySearchFiler(query, "cat-" + fc.cat.catId)
+  //   );
+  // };
 
   const [selected, setSelected] = useState(initial);
   const props: TFilterContext = {
@@ -54,7 +62,7 @@ function PoolFilter({ filters }: { filters: FilterConfig[] }) {
   };
 
   return (
-    <div className="pb-2">
+    <div className="py-2 flex flex-row items-center">
       <div className="w-screen flex md:hidden">
         <FilterContext.Provider value={props}>
           <div
@@ -67,30 +75,30 @@ function PoolFilter({ filters }: { filters: FilterConfig[] }) {
       </div>
 
       <div className="hidden md:flex md:w-full md:items-center md:flex-col text-sm">
-        <div className="flex flex-row">
+        <div className="flex flex-row items-center">
           <FilterContext.Provider value={props}>
             <div
-              className="pr-8"
+              className="pr-32"
               onClick={() => console.log("selected result:", props.selected)}
             >
               <FilterIcon strokeWidth={1.5} />
             </div>
             {filters.map((filter, idx) => {
               return (
-                <div key={idx} className="w-32">
-                  <ChoiceDialog isMulti={filter.cat.multiFilter} fc={filter} />
+                <div key={idx} className="w-40">
+                  <ChoiceDialog isMulti={filter.cat.multiFilter} selectMenu={filter.cat.selectMenu} fc={filter} />
                 </div>
               );
             })}
           </FilterContext.Provider>
         </div>
 
-        <div className="flex flex-row">
+        {/* <div className="flex flex-row">
           <div className="pr-8">Filtered</div>
           {filters.map((filter, idx) => {
             return <div key={idx} className="w-32 pl-1">{filtered(filter)}</div>;
           })}
-        </div>
+        </div> */}
       </div>
     </div>
   );
