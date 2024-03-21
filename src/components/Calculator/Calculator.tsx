@@ -14,6 +14,7 @@ import {
   YAxis,
 } from "recharts";
 import { Skeleton } from "../ui/skeleton";
+import { formatPrice } from "@/utils/format";
 
 const AddIcon: React.FC = () => (
   <div className="rounded-full border border-black w-10 h-10 flex justify-center items-center bg-[#FFE600]">
@@ -75,7 +76,6 @@ function Calculator({ tokens }: { tokens: Token[] }) {
       prices7d: transformedPrices,
       change7d: info.change7d,
     };
-    console.log("tokenInfo:", selectedOption);
     newSelectedAssets.add(selectedOption);
     setSelectedAssets(newSelectedAssets);
     setIsLoading(false);
@@ -85,20 +85,6 @@ function Calculator({ tokens }: { tokens: Token[] }) {
     newSelectedAssets.delete(asset);
     setSelectedAssets(newSelectedAssets);
   };
-
-  function formatPrice(num: number | string | undefined) {
-    if (typeof num === "string") {
-      num = parseFloat(num);
-    }
-    if (!num) {
-      return 0;
-    }
-    if (num >= 1000) {
-      return (num / 1000).toString().slice(0, 4) + "k";
-    } else {
-      return num.toString().slice(0, 4);
-    }
-  }
 
   function formatChange7d(num: number | string | undefined) {
     if (typeof num === "string") {
