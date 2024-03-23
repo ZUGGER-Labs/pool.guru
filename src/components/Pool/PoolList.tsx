@@ -291,7 +291,7 @@ function PoolList(props: PoolListProps) {
                     <HeaderCell className="text-sm text-center">
                       Pool
                     </HeaderCell>
-                    <HeaderCell className="text-sm">Chain/Protocol</HeaderCell>
+                    <HeaderCell className="text-sm">APP/Chain</HeaderCell>
 
                     <HeaderCell
                       className="text-sm"
@@ -301,6 +301,7 @@ function PoolList(props: PoolListProps) {
                     </HeaderCell>
                     <HeaderCell
                       className="text-sm"
+                      title="Volume 24H by USD"
                       onClick={() => onFieldSort("Vol(24H)")}
                     >
                       <SortNameAndArrow name="Vol(24H)" />
@@ -314,12 +315,14 @@ function PoolList(props: PoolListProps) {
 
                     <HeaderCell
                       className="text-sm"
+                      title="Volume 7D by USD"
                       onClick={() => onFieldSort("Vol(7D)")}
                     >
                       <SortNameAndArrow name="Vol(7D)" />
                     </HeaderCell>
                     <HeaderCell
                       className="text-sm"
+                      title="Pool Fees by USD"
                       onClick={() => onFieldSort("Fee(7D)")}
                     >
                       <SortNameAndArrow name="Fee(7D)" />
@@ -344,7 +347,7 @@ function PoolList(props: PoolListProps) {
                     >
                       <SortNameAndArrow
                         name="%FeeAPY(24H)"
-                        showName="%fAPY(24H)"
+                        showName="FeeAPY(24H)"
                       />
                     </HeaderCell>
                     <HeaderCell
@@ -353,7 +356,7 @@ function PoolList(props: PoolListProps) {
                     >
                       <SortNameAndArrow
                         name="%FeeAPY(7D)"
-                        showName="%fAPY(7D)"
+                        showName="FeeAPY(7D)"
                       />
                     </HeaderCell>
                     {/* <HeaderCell
