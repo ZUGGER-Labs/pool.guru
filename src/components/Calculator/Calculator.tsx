@@ -2,29 +2,36 @@
 
 import { Token } from "@/interfaces/uniswap.interface";
 import * as Popover from "@radix-ui/react-popover";
-import { Command } from "cmdk";
 import { useRef, useState } from "react";
 import { AutoComplete } from "../ui/AutoComplete";
 import { query } from "@/utils/query";
+import {
+  Area,
+  AreaChart,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  YAxis,
+} from "recharts";
+import { Skeleton } from "../ui/skeleton";
+import { formatPrice } from "@/utils/format";
 
-function AddIcon() {
-  return (
-    <div className="rounded-full border border-black w-10 h-10 flex justify-center items-center bg-[#FFE600]">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        fill="none"
-      >
-        <path
-          d="M10.8425 24V0H13.1575V24H10.8425ZM0 13.1664V10.8336H24V13.1664H0Z"
-          fill="black"
-        />
-      </svg>
-    </div>
-  );
-}
+const AddIcon: React.FC = () => (
+  <div className="rounded-full border border-black w-10 h-10 flex justify-center items-center bg-[#FFE600]">
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+    >
+      <path
+        d="M10.8425 24V0H13.1575V24H10.8425ZM0 13.1664V10.8336H24V13.1664H0Z"
+        fill="black"
+      />
+    </svg>
+  </div>
+);
 
 const useNumStrState = (defaultVal = ""): [string, (val: string) => void] => {
   const removeLeadingZeros = (s: string) => {
@@ -47,45 +54,53 @@ const useNumStrState = (defaultVal = ""): [string, (val: string) => void] => {
   return [numVal, handleChange];
 };
 
-interface ITokenOHCL {
-  tokenId: string;
-  high: string | number;
-  close: string | number;
-  open: string | number;
-  low: string | number;
-  startTs: string | number;
-  hour: number;
-}
-
-interface ITokenInfo7D {
-  latestPrice: string | number;
-  prices7d: ITokenOHCL[];
-  change7d: string | number;
-}
 const fetchTokenInfo = async (tokenId: string) => {
-  console.log('fetchTokenInfo:', tokenId)
   return await query("/token/info7d", { tokenId });
 };
 
 function Calculator({ tokens }: { tokens: Token[] }) {
   const [amount, setAmount] = useNumStrState("1000");
   const [selectedAssets, setSelectedAssets] = useState<Set<Token>>(new Set());
-  const [token0Info, setToken0Info] = useState<ITokenInfo7D>();
+  const newSelectedAssets = new Set(selectedAssets);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const handleAddAsset = async (selectedOption: Token) => {
-    const newSelectedAssets = new Set(selectedAssets);
+    setIsLoading(true);
+    const info = await fetchTokenInfo(selectedOption.id);
+    const transformedPrices = info.prices7d.map((item: { open: string }) => ({
+      price: parseFloat(item.open),
+    }));
+    selectedOption = {
+      ...selectedOption,
+      latestPrice: info.latestPrice,
+      prices7d: transformedPrices,
+      change7d: info.change7d,
+    };
     newSelectedAssets.add(selectedOption);
     setSelectedAssets(newSelectedAssets);
-    const info = await fetchTokenInfo(selectedOption.id)
-    console.log('tokenInfo:', info)
-    setToken0Info(info)
+    setIsLoading(false);
   };
 
   const handleRemoveAsset = (asset: Token) => {
-    const newSelectedAssets = new Set(selectedAssets);
     newSelectedAssets.delete(asset);
     setSelectedAssets(newSelectedAssets);
   };
+
+  function formatChange7d(num: number | string | undefined) {
+    if (typeof num === "string") {
+      num = parseFloat(num);
+    }
+    return num ? (num * 100).toFixed(2) + "%" : 0;
+  }
+
+  function caculateYields() {
+    if (selectedAssets.size === 2) {
+      // get all pools info
+    } else {
+      console.log("error");
+    }
+  }
+
   return (
     <div>
       <div className="mx-auto flex flex-col justify-center items-center">
@@ -131,53 +146,88 @@ function Calculator({ tokens }: { tokens: Token[] }) {
           <div className="mt-6">
             <p className="font-bold leading-5 mb-2">Selected assets</p>
             <div className="flex flex-col items-center gap-2">
-              {[...selectedAssets].map((asset, index) => (
-                <div
-                  key={asset.id}
-                  className="flex w-[688px] p-4 border border-black bg-white items-center gap-6"
-                >
-                  <div className="flex flex-col items-center justify-center gap-2 w-[90px]">
-                    <div className="flex flex-row items-center gap-2">
-                      <img
-                        src={asset.logoURI}
-                        className="w-6 h-6"
-                        alt="Icon"
-                      ></img>
-                      <span className="flex flex-row text-base font-semibold w-full">
-                        {asset.symbol}
-                      </span>
-                    </div>
-                    <div className="flex rounded-full bg-gray-200 h-28px px-2 items-center">
-                      <span className="text-center text-base italic font-light whitespace-nowrap">
-                        {asset.poolCount} pools
-                      </span>
-                    </div>
+              {isLoading ? (
+                <div className="flex items-center space-x-4 w-[688px] p-4 border border-black bg-white">
+                  <Skeleton className="h-12 w-12 rounded-full" />
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-[250px]" />
+                    <Skeleton className="h-4 w-[200px]" />
                   </div>
-                  <div className="flex flex-col items-center justify-center gap-2 w-[90px]">
-                    <span className="text-gray-400 text-base">Price</span>
-                    <span className="text-base">2.45K</span>
-                  </div>
-                  <div className="flex flex-col items-center justify-center gap-2 w-[90px]">
-                    <span className="text-gray-400 text-base">Change 7d</span>
-                    <span className="text-green-500 text-base"> + 4.12% </span>
-                  </div>
-                  <div className="flex flex-col items-center justify-center gap-2 w-[270px]">
-                    <span className="text-gray-400 text-base">Trend 7d</span>
-                    <span className="text-green-500 text-center h-7">
-                      {" "}
-                      + 4.12%{" "}
-                    </span>
-                  </div>
-                  <button onClick={() => handleRemoveAsset(asset)}>
-                    <img src="/Rounded-edge.svg" className="w-6 h-6"></img>
-                  </button>
                 </div>
-              ))}
+              ) : (
+                [...selectedAssets].map((asset, index) => (
+                  <div
+                    key={asset.id}
+                    className="flex w-[688px] p-4 border border-black bg-white items-center gap-6"
+                  >
+                    <div className="flex flex-col items-center justify-center gap-2 w-[90px]">
+                      <div className="flex flex-row items-center gap-2">
+                        <img
+                          src={asset.logoURI}
+                          className="w-6 h-6"
+                          alt="Icon"
+                        ></img>
+                        <span className="flex flex-row text-base font-semibold w-full">
+                          {asset.symbol}
+                        </span>
+                      </div>
+                      <div className="flex rounded-full bg-gray-200 h-28px px-2 items-center">
+                        <span className="text-center text-base italic font-light whitespace-nowrap">
+                          {asset.poolCount} pools
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-center justify-center gap-2 w-[90px]">
+                      <span className="text-gray-400 text-base">Price</span>
+                      <span className="text-base">
+                        {formatPrice(asset.latestPrice)}
+                      </span>
+                    </div>
+                    <div className="flex flex-col items-center justify-center gap-2 w-[90px]">
+                      <span className="text-gray-400 text-base">Change 7d</span>
+                      <span
+                        className={
+                          asset.change7d > 0
+                            ? "text-green-500 text-base"
+                            : "text-red-500 text-base"
+                        }
+                      >
+                        {formatChange7d(asset.change7d)}
+                      </span>
+                    </div>
+                    <div className="flex flex-col items-center justify-center gap-2 w-[270px]">
+                      <span className="text-gray-400 text-base">Trend 7d</span>
+
+                      <ResponsiveContainer width={319} height={28}>
+                        <LineChart
+                          data={asset.prices7d}
+                          margin={{ top: 0, right: 24, left: 24, bottom: 0 }}
+                        >
+                          <YAxis hide domain={["dataMin", "dataMax"]} />
+                          <Line
+                            type="monotone"
+                            dataKey="price"
+                            stroke={asset.change7d > 0 ? "#1CC44B" : "#F94144"}
+                            strokeWidth={2}
+                            dot={false}
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+                    <button onClick={() => handleRemoveAsset(asset)}>
+                      <img src="/Rounded-edge.svg" className="w-6 h-6"></img>
+                    </button>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         ) : null}
 
-        <button className="flex w-[688px] mt-6 p-2.5 justify-center items-center border-2 border-black bg-yellow-300">
+        <button
+          className="flex w-[688px] mt-6 p-2.5 justify-center items-center border-2 border-black bg-yellow-300"
+          onClick={() => caculateYields()}
+        >
           <span className="text-center text-base font-bold">Calculate</span>
         </button>
       </div>
