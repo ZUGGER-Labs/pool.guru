@@ -15,6 +15,11 @@ import {
 } from "recharts";
 import { Skeleton } from "../ui/skeleton";
 import { formatPrice } from "@/utils/format";
+import PerformanceChart from "../charts/PerformanceChart";
+import PoolDetail from "../Pool/PoolDetail";
+import { functions } from "lodash";
+import { getPoolInfo } from "@/lib/pool";
+import YieldChart from "./YieldChart";
 
 const AddIcon: React.FC = () => (
   <div className="rounded-full border border-black w-10 h-10 flex justify-center items-center bg-[#FFE600]">
@@ -63,6 +68,9 @@ function Calculator({ tokens }: { tokens: Token[] }) {
   const [selectedAssets, setSelectedAssets] = useState<Set<Token>>(new Set());
   const newSelectedAssets = new Set(selectedAssets);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const pid = "0x8ad599c3a0ff1de082011efddc58f1908eb6e6d8";
+  const [chartVisible, setChartVisible] = useState(false);
+  const [poolData, setPoolData] = useState([]);
 
   const handleAddAsset = async (selectedOption: Token) => {
     setIsLoading(true);
@@ -93,13 +101,19 @@ function Calculator({ tokens }: { tokens: Token[] }) {
     return num ? (num * 100).toFixed(2) + "%" : 0;
   }
 
-  function caculateYields() {
-    if (selectedAssets.size === 2) {
-      // get all pools info
-    } else {
-      console.log("error");
+  async function caculateYields() {
+    try {
+        const data = await getPoolInfo(pid);
+        console.log(data);
+        if (data && Object.keys(data).length > 0) {
+            setChartVisible(true);
+            setPoolData(data);
+            console.log(chartVisible);
+        }
+    } catch (error) {
+        console.error('Error fetching pool data:', error);
     }
-  }
+}
 
   return (
     <div>
@@ -232,7 +246,11 @@ function Calculator({ tokens }: { tokens: Token[] }) {
         </button>
       </div>
 
-      <div></div>
+      {chartVisible ? (
+        <div className="flex flex-col items-center justify-between p-4 md:max-w-7xl w-full m-auto">
+          <YieldChart chainId={1} poolId={pid} poolData={poolData} />
+        </div>
+      ): null}
     </div>
   );
 }

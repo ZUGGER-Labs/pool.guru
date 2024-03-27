@@ -96,7 +96,7 @@ function adjustOHCL(klines: any[]) {
   return { ohcl, vol, tvl, fees, ratio };
 }
 
-function performanceData(data: any) {
+export function performanceData(data: any) {
   const apyBaseByUSD = data.apyBaseByUSD,
     apyPoolByUSD = data.apyPoolByUSD,
     apyQuoteByUSD = data.apyQuoteByUSD,
