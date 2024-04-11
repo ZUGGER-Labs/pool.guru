@@ -48,15 +48,6 @@ jobs:
             echo "Unable to determine package manager"
             exit 1
           fi
-      - name: Create .env file
-        uses: SpicyPizza/create-envfile@v2.0.3
-        with:
-          envkey_NEXT_PUBLIC_BASE_URL: ${{ vars.NEXT_PUBLIC_BASE_URL }}
-          envkey_DATABASE_URL: ${{ vars.DATABASE_URL }}
-          envkey_NEXT_PUBLIC_API: ${{ vars.NEXT_PUBLIC_API }}
-          file_name: .env
-          fail_on_empty: false
-          sort_keys: false
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
