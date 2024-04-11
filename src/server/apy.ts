@@ -8,13 +8,14 @@ import { getEthPriceUSD } from "./positions";
 import { getPoolTokens } from "./tvl";
 import BigNumber from "bignumber.js";
 import { calcPoolVolumeFee } from "@/uniswap/graph";
-import dayjs from "dayjs";
+import { default as dayjs } from 'dayjs';
 import { ChainId } from "@uniswap/sdk-core";
 import { getContractAddress } from "viem";
 import { getAddressBySymbol, getWBTC, getWETH } from "@/uniswap/wrapper";
 import { impermanentLossV3 } from "@/uniswap/loss";
 const utc = require("dayjs/plugin/utc"); // 引入 UTC 插件
 dayjs.extend(utc); // 使用 UTC 插件
+import moment from "moment";
 
 function isNull(a: any): boolean {
   return a === null || a === undefined;
@@ -141,7 +142,7 @@ async function calcPoolApy(
 
   const ethPrice = BigNumber(ethPriceUSD);
   const prev1d = Math.floor(
-      dayjs.utc().startOf("day").subtract(1, "day").unix() / 86400
+    moment.utc().startOf("day").subtract(1, "day").unix() / 86400
     ),
     prev7d = prev1d - 7,
     prev30d = prev1d - 30;

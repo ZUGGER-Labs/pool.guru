@@ -1,5 +1,4 @@
 import TokenImageURI from "./tokenImageURI.json";
-import chainTokenImageURI from "./chainTokenImageURI.json";
 
 // return unique string in string[]
 export const getUniqueItems = (arr: string[]): string[] => {

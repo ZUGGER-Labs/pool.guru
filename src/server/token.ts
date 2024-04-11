@@ -1,4 +1,4 @@
-import chainTokenImageURI from "../uniswap/chainTokenImageURI.json";
+import chainTokenImageURI from "../uniswap/tokenImageURI.json";
 import { CHAIN_ID_BY_NAME } from "@/lib/network";
 import { Token } from "@/interfaces/uniswap.interface";
 import _ from "lodash";
