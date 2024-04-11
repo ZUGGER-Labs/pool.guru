@@ -7,7 +7,7 @@ import { getGraphClient } from "./client";
 import { QueryOptions, gql } from "@apollo/client";
 
 import { db } from "@/db/db";
-import { DBPositionData, dbPositionDatas, dbPositions } from "@/db/schema";
+import { DBPositionData, dbPositionData, dbPositions } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
 import { processPositions } from "@/uniswap/position";
 import { getPoolInfos, getUniswapv3PoolById } from "./pools";
@@ -86,7 +86,7 @@ async function refreshPoolPositions(
     for (let i = 0; i < posData.length; i++) {
       const item = posData[i];
       try {
-        await tx.insert(dbPositionDatas).values(item);
+        await tx.insert(dbPositionData).values(item);
       } catch (err) {
         console.log("idx=%d data:", i, item);
         console.error(err);

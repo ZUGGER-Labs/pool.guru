@@ -56,6 +56,10 @@ async function sortTokens(chainIds?: number[], topN?: number) {
         volumeUSD: "0",
         logoURI: getTokenLogoURL(pool.token0.id),
         totalValueLockedUSD: "0",
+        latestPrice: 0,
+        prices7d: [],
+        change7d: 0,
+        isLoading: false
       };
     }
 
@@ -71,6 +75,10 @@ async function sortTokens(chainIds?: number[], topN?: number) {
         volumeUSD: "0",
         logoURI: getTokenLogoURL(pool.token1.id),
         totalValueLockedUSD: "0",
+        latestPrice: 0,
+        prices7d: [],
+        change7d: 0,
+        isLoading: false
       };
     }
   }

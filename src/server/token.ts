@@ -1,4 +1,4 @@
-import chainTokenImageURI from "../uniswap/chainTokenImageURI.json";
+import chainTokenImageURI from "../uniswap/tokenImageURI.json";
 import { CHAIN_ID_BY_NAME } from "@/lib/network";
 import { Token } from "@/interfaces/uniswap.interface";
 import _ from "lodash";
@@ -68,18 +68,18 @@ function toDBToken(chainId: number, token: Token): DBToken {
     } as DBToken
 }
 
-function fromDBToken(token: DBToken): Token {
-    return {
-        id: token.tokenId,
-        name: token.name,
-        symbol: token.symbol,
-        logoURI: token.logoURI || '',
-        decimals: '' + token.decimals,
-        poolCount: 0,
-        volumeUSD: '0',
-        totalValueLockedUSD: '0'
-    }
-}
+// function fromDBToken(token: DBToken): Token {
+//     return {
+//         id: token.tokenId,
+//         name: token.name,
+//         symbol: token.symbol,
+//         logoURI: token.logoURI || '',
+//         decimals: '' + token.decimals,
+//         poolCount: 0,
+//         volumeUSD: '0',
+//         totalValueLockedUSD: '0'
+//     }
+// }
 
 // create or update token by tokenId
 async function saveToken(chainId: number, token: Token) {
