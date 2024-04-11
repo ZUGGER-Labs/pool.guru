@@ -68,18 +68,18 @@ function toDBToken(chainId: number, token: Token): DBToken {
     } as DBToken
 }
 
-function fromDBToken(token: DBToken): Token {
-    return {
-        id: token.tokenId,
-        name: token.name,
-        symbol: token.symbol,
-        logoURI: token.logoURI || '',
-        decimals: '' + token.decimals,
-        poolCount: 0,
-        volumeUSD: '0',
-        totalValueLockedUSD: '0'
-    }
-}
+// function fromDBToken(token: DBToken): Token {
+//     return {
+//         id: token.tokenId,
+//         name: token.name,
+//         symbol: token.symbol,
+//         logoURI: token.logoURI || '',
+//         decimals: '' + token.decimals,
+//         poolCount: 0,
+//         volumeUSD: '0',
+//         totalValueLockedUSD: '0'
+//     }
+// }
 
 // create or update token by tokenId
 async function saveToken(chainId: number, token: Token) {

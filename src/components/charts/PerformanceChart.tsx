@@ -34,9 +34,9 @@ export interface IChart {
 function PerformanceChart(props: IChart) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const toolTipRef = useRef<HTMLDivElement | null>(null);
-  const toolTipWidth = 80;
-  const toolTipHeight = 80;
-  const toolTipMargin = 15;
+  const toolTipWidth = 200;
+  const toolTipHeight = 180;
+  const toolTipMargin = 40;
   const {
     apyBaseByUSDList,
     apyPoolByUSDList,
@@ -47,10 +47,7 @@ function PerformanceChart(props: IChart) {
     usdOrNative,
     height,
     width,
-    colors: {
-      backgroundColor = "rgba(0, 0, 0, 0)",
-      textColor = "black",
-    } = {},
+    colors: { backgroundColor = "rgba(0, 0, 0, 0)", textColor = "black" } = {},
     isLoading,
   } = props;
 
@@ -167,51 +164,69 @@ function PerformanceChart(props: IChart) {
       apyQuoteSeries.setData(apyQuoteByNativeList);
     }
 
-    chart.subscribeCrosshairMove((param) =>
-      toolTipControl(param, apyBaseSeries)
-    );
+    chart.subscribeCrosshairMove((param) => {
+      toolTipControl(param, apyPoolSeries);
+        // toolTipControl(param, apyBaseSeries);
+        // toolTipControl(param, apyQuoteSeries);
+    });
 
     const toolTipControl = (param: any, series: any) => {
       if (toolTipRef.current && chartContainerRef.current) {
-        if (
-          param.point === undefined ||
-          !param.time ||
-          param.point.x < 0 ||
-          param.point.y < 0
-        ) {
-          toolTipRef.current.style.display = "none";
-        } else {
-          toolTipRef.current.style.display = "block";
-          toolTipRef.current.style.position = "absolute";
-          let localOffset = new Date().getTimezoneOffset();
-          let dateToString = moment
-            .unix(param.time)
-            .utcOffset(localOffset)
-            .format("DD MMMM YYYY HH:mm");
-          const data = param.seriesData.get(series);
-          const price = data && "value" in data ? data.value : "";
-          // const currentPrice =
-          //   chartData[chartData.length - 1] &&
-          //   chartData[chartData.length - 1].value;
+        // if (
+        //   param.point === undefined ||
+        //   !param.time ||
+        //   param.point.x < 0 ||
+        //   param.point.y < 0
+        // ) {
+        //   toolTipRef.current.style.display = "none";
+        // } else {
+        toolTipRef.current.style.display = "block";
+        toolTipRef.current.style.position = "absolute";
+        let localOffset = new Date().getTimezoneOffset();
+        let dateToString = moment
+          .unix(param.time)
+          .utcOffset(localOffset)
+          .format("DD MMMM YYYY HH:mm");
+        const data = param.seriesData.get(series);
+        const price = data && "value" in data ? data.value : "";
+        // const currentPrice =
+        //   chartData[chartData.length - 1] &&
+        //   chartData[chartData.length - 1].value;
 
-          toolTipRef.current.innerHTML = `
-          <div>
-            <span>${dateToString}</span>
+        toolTipRef.current.innerHTML = `
+          <div style="padding: 8px">
+            <span style="font-size: 16px;">${dateToString}</span>
+            <div>
+              <span>Uniswap LP</span>
+             <span>${(price)}</span>
+            </div>
+            <div>
+              <span>Token Pair HODL</span>
+             <span>price</span>
+            </div>
+            <div>
+              <span>100% TokenA HODL</span>
+              <span>price</span>
+            </div>
+            <div>
+              <span>100% TokenA HODL</span>
+              <span>price</span>
+            </div>
           </div>`;
 
-          const y = param.point.y;
-          let left = param.point.x + toolTipMargin;
-          if (left > chartContainerRef.current.clientWidth - toolTipWidth) {
-            left = param.point.x - toolTipMargin - toolTipWidth;
-          }
-
-          let top = y + toolTipMargin;
-          if (top > chartContainerRef.current.clientHeight - toolTipHeight) {
-            top = y - toolTipHeight - toolTipMargin;
-          }
-          toolTipRef.current.style.left = left + "px";
-          toolTipRef.current.style.top = top + 400 + "px";
+        const y = param.point.y;
+        let left = param.point.x + toolTipMargin;
+        if (left > chartContainerRef.current.clientWidth - toolTipWidth) {
+          left = param.point.x - toolTipMargin - toolTipWidth;
         }
+
+        let top = y + toolTipMargin;
+        if (top > chartContainerRef.current.clientHeight - toolTipHeight) {
+          top = y - toolTipHeight - toolTipMargin;
+        }
+        toolTipRef.current.style.left = left + "px";
+        toolTipRef.current.style.top = top + 400 + "px";
+        // }
       }
     };
 
@@ -249,7 +264,17 @@ function PerformanceChart(props: IChart) {
 }
 
 const ToolTip = styled.div`
-  
+  width: 200px;
+  height: 180px;
+  background-color: white;
+  padding: 12px;
+  box-sizing: border-box;
+  font-size: 16px;
+  text-align: left;
+  z-index: 1000;
+  pointer-events: none;
+  border: 1px solid;
+  border-radius: 2px;
 `;
 
 const Loading = styled.div`
