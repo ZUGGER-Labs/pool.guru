@@ -54,6 +54,9 @@ jobs:
           envkey_NEXT_PUBLIC_BASE_URL: ${{ vars.NEXT_PUBLIC_BASE_URL }}
           envkey_DATABASE_URL: ${{ vars.DATABASE_URL }}
           envkey_NEXT_PUBLIC_API: ${{ vars.NEXT_PUBLIC_API }}
+          file_name: .env
+          fail_on_empty: false
+          sort_keys: false
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
