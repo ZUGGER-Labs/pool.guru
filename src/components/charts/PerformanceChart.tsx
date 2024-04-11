@@ -1,7 +1,7 @@
 "use client";
 
 import { ColorType, createChart } from "lightweight-charts";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export interface IChartColor {
   backgroundColor: string;
@@ -18,7 +18,7 @@ export interface IChart {
   apyBaseByNativeList: any[];
   apyPoolByNativeList: any[];
   apyQuoteByNativeList: any[];
-  usdOrNative: 'USD' | 'Native'
+  usdOrNative: "USD" | "Native";
   colors?: IChartColor;
   height?: number;
   width?: number;
@@ -37,13 +37,15 @@ function PerformanceChart(props: IChart) {
     height,
     width,
     colors: {
-      backgroundColor = "white",
+      backgroundColor = "black",
       lineColor = "#2962FF",
-      textColor = "black",
+      textColor = "white",
       areaTopColor = "#2962FF",
       areaBottomColor = "rgba(41, 98, 255, 0.28)",
     } = {},
   } = props;
+
+  const [customTooltipVisible, setCustomTooltipVisible] = useState(false);
 
   useEffect(() => {
     if (chartContainerRef.current === null) {
@@ -52,7 +54,6 @@ function PerformanceChart(props: IChart) {
 
     const handleResize = () => {
       if (!chartContainerRef.current) return;
-
       chart.applyOptions({ width: chartContainerRef.current.clientWidth });
     };
 
@@ -61,13 +62,31 @@ function PerformanceChart(props: IChart) {
         background: { type: ColorType.Solid, color: backgroundColor },
         textColor,
       },
+      grid: {
+        vertLines: {
+          visible: false,
+        },
+        horzLines: {
+          visible: false,
+        },
+      },
+      leftPriceScale: {
+        visible: true,
+      },
+      rightPriceScale: {
+        visible: false,
+      },
       width: width ? width : chartContainerRef.current.clientWidth,
       height: height ? height : 300,
     });
     chart.timeScale().fitContent();
 
     const apyBaseSeries = chart.addLineSeries({
-        priceScaleId: 'right'
+      priceScaleId: "right",
+      priceFormat: {
+        type: "custom",
+        formatter: (price: any) => (price * 100).toFixed(2) + "%", // 将价格乘以 100 并保留两位小数
+      },
     });
     apyBaseSeries.priceScale().applyOptions({
       scaleMargins: {
@@ -76,42 +95,46 @@ function PerformanceChart(props: IChart) {
       },
     });
     const apyPoolSeries = chart.addLineSeries({
-        color: '#00ff00',
-        priceScaleId: 'left'
-    })
+      color: "#8784f7",
+      priceScaleId: "left",
+      priceFormat: {
+        type: "custom",
+        formatter: (price: any) => (price * 100).toFixed(2) + "%", // 将价格乘以 100 并保留两位小数
+      },
+    });
     apyPoolSeries.priceScale().applyOptions({
-        scaleMargins: {
-            top: 0.1,
-            bottom: 0.1,
-          },
-    })
+      scaleMargins: {
+        top: 0.1,
+        bottom: 0.1,
+      },
+    });
     const apyQuoteSeries = chart.addLineSeries({
-        color: '#fff000',
-        priceScaleId: 'left'
-    })
+      color: "#ffa318",
+      priceScaleId: "left",
+      priceFormat: {
+        type: "custom",
+        formatter: (price: any) => (price * 100).toFixed(2) + "%", // 将价格乘以 100 并保留两位小数
+      },
+    });
     apyQuoteSeries.priceScale().applyOptions({
-        scaleMargins: {
-            top: 0.1,
-            bottom: 0.1,
-          },
-    })
+      scaleMargins: {
+        top: 0.1,
+        bottom: 0.1,
+      },
+    });
 
-    if (usdOrNative === 'USD') {
-        apyBaseSeries.setData(apyBaseByUSDList);
-        apyPoolSeries.setData(apyPoolByUSDList);
-        apyQuoteSeries.setData(apyQuoteByUSDList);
+    if (usdOrNative === "USD") {
+      console.log(apyBaseByUSDList);
+      console.log(apyPoolByUSDList);
+      console.log(apyQuoteByUSDList);
+      apyBaseSeries.setData(apyBaseByUSDList);
+      apyPoolSeries.setData(apyPoolByUSDList);
+      apyQuoteSeries.setData(apyQuoteByUSDList);
     } else {
-        apyBaseSeries.setData(apyBaseByNativeList);
-        apyPoolSeries.setData(apyPoolByNativeList);
-        apyQuoteSeries.setData(apyQuoteByNativeList)
+      apyBaseSeries.setData(apyBaseByNativeList);
+      apyPoolSeries.setData(apyPoolByNativeList);
+      apyQuoteSeries.setData(apyQuoteByNativeList);
     }
-
-    // const newSeries = chart.addAreaSeries({
-    //   lineColor,
-    //   topColor: areaTopColor,
-    //   bottomColor: areaBottomColor,
-    // });
-    // newSeries.setData(data);
 
     window.addEventListener("resize", handleResize);
 
@@ -136,6 +159,12 @@ function PerformanceChart(props: IChart) {
     height,
     width,
   ]);
+
+  return (
+    <div>
+      <div ref={chartContainerRef} />
+    </div>
+  );
 
   return <div ref={chartContainerRef} />;
 }
