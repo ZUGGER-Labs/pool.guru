@@ -10,8 +10,6 @@ export const metadata: Metadata = {
   title: "Pool list - " + title,
 };
 
-export const runtime = 'edge';
-
 async function Pool({ params, searchParams }: PageProps) {
   let chainId;
   const pid = params.pid;

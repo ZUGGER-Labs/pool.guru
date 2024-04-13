@@ -3,19 +3,12 @@
 import Link from "next/link";
 import Image from "next/image";
 
-import { CiGlobe } from "react-icons/ci";
 import { CiLight } from "react-icons/ci";
-// import { MdCurrencyBitcoin } from "react-icons/md";
-// import { CiBellOn } from "react-icons/ci";
-// import { VscAdd } from "react-icons/vsc";
-
-// import { HeaderProps } from "@/utils/header";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useTranslation } from "@/i18n/client";
 import { getLang } from "@/i18n/settings";
 import ConnectButton from "./ConnectButton";
 
-// const Header = ({ t, pathname, lang, searchParams }: HeaderProps) => {
 const Header = () => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -59,8 +52,6 @@ const Header = () => {
             href={"/" + query}
             className="mr-6 flex-none overflow-hidden md:w-auto"
           >
-            {/* <MdCurrencyBitcoin className="w-8 h-8 text-[#F7931A]" /> */}
-            {/* <Image src="/fav.svg" alt="logo" width={32} height={32} /> */}
             <span className="text-[2rem] font-bold">PoolGuru</span>
           </Link>
 

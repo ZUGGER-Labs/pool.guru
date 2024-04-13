@@ -17,7 +17,6 @@ export async function generateMetadata(
     description: `${dex} pool ${poolId} price chart, APY chart, Fees TVL chart`,
   }
 }
-export const runtime = 'edge';
 
 // Pools List
 async function Pools() {

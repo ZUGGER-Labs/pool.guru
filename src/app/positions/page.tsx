@@ -3,7 +3,7 @@ import { PositionColumnDataType } from "@/interfaces/uniswap.interface";
 import { getPoolsByIdList } from "@/uniswap/graph";
 import { getPositions, processPositions } from "@/uniswap/position";
 import _ from "lodash";
-
+export const runtime = "nodejs";
 async function Positions() {
   const chainId = 1;
   const positions = await getPositions(chainId, {orderBy: 'liquidity', orderDirection: 'desc', total: 30});

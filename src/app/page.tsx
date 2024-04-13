@@ -3,11 +3,9 @@ import Calculator from "@/components/Calculator/Calculator";
 import { Token } from "@/interfaces/uniswap.interface";
 import { sortTokens } from "@/uniswap/token";
 import { query } from "@/utils/query";
-
 const fetchTokenByPoolCount = async (chainIds: number[], topN?: number) => {
   return await query('/token/sort', {chainIds, topN})
 }
-export const runtime = 'edge';
 
 export default async function Home(pageProps: PageProps) {
   // const tokens:Token[] = await sortTokens([], 10)
