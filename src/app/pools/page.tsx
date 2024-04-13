@@ -4,7 +4,7 @@ import Link from "next/link";
 
 import meta, { title } from "@/lib/meta";
 import { Metadata, ResolvingMetadata } from "next";
-
+export const runtime = 'edge'
 export async function generateMetadata(
   { params, searchParams }: any,
   parent: ResolvingMetadata

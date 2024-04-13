@@ -5,7 +5,7 @@ import { getPoolInfo } from "@/lib/pool";
 
 import meta, { title } from "@/lib/meta";
 import { Metadata } from "next";
-
+export const runtime = 'edge'
 export const metadata: Metadata = {
   ...meta,
   title: "Pool list - " + title,
