@@ -3,8 +3,6 @@
 import { NextRequest, NextResponse } from "next/server";
 export async function GET(req: NextRequest) {}
 
-export const runtime = 'edge';
-
 export async function POST(req: NextRequest) {
   // let { route, symbol, tokenId, chainId } = await req.json();
 
@@ -22,4 +20,5 @@ export async function POST(req: NextRequest) {
   //     });
   // }
 }
+export const runtime = 'edge';
 
