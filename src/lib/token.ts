@@ -1,6 +1,6 @@
 import { db } from "@/db/db";
 import { DBTokenOHCL, dbPoolInfo, dbTokenOHCL, tokenAlias } from "@/db/schema";
-import getRedis from "@/server/redis";
+
 import dayjs from "dayjs";
 import { SQL, and, asc, eq, gte, lte, or, sql } from "drizzle-orm";
 import _ from "lodash";
@@ -87,21 +87,6 @@ async function countTokenPools(
   )[0].count;
 }
 
-export async function getTokenLatestPrice(
-  symbol: string,
-  tokenId: string,
-  chainId?: number
-) {
-  chainId = chainId ? chainId : 1;
-  const rc = await getRedis();
-  const key = "tokenPrice-" + chainId;
-  if (symbol) {
-    return rc.hGet(key, symbol);
-  } else {
-    return rc.hGet(key, tokenId);
-  }
-}
-
 // 直接根据 messari 的 token 数据将 token hour ohcl 写入数据库中
 export async function getTokenHistoryPrice(
   tokenId: string,
@@ -168,8 +153,8 @@ export async function getTokenHistoryPrice(
 async function getTokenInfo(chainId: number, symbol: string, tokenId: string) {
   // prefer symbol, then tokenId
   const poolCount = await countTokenPools(symbol, tokenId, chainId);
-  const latestPrice =
-    (await getTokenLatestPrice(symbol, tokenId, chainId)) || "0";
+  // todo
+  const latestPrice = '';
   if (!tokenId) {
     tokenId = await symbolToTokenId(symbol, chainId);
   }
