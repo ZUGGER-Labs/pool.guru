@@ -1,7 +1,6 @@
 "use client";
 
 import { Token } from "@/interfaces/uniswap.interface";
-import * as Popover from "@radix-ui/react-popover";
 import { useRef, useState } from "react";
 import { AutoComplete } from "../ui/AutoComplete";
 import { query } from "@/utils/query";
@@ -180,7 +179,7 @@ function Calculator({ tokens }: { tokens: Token[] }) {
                           src={asset.logoURI}
                           className="w-6 h-6"
                           alt="Icon"
-                        ></img>
+                        />
                         <span className="flex flex-row text-base font-semibold w-full">
                           {asset.symbol}
                         </span>
@@ -229,7 +228,7 @@ function Calculator({ tokens }: { tokens: Token[] }) {
                       </ResponsiveContainer>
                     </div>
                     <button onClick={() => handleRemoveAsset(asset)}>
-                      <img src="/Rounded-edge.svg" className="w-6 h-6"></img>
+                      <img src="/Rounded-edge.svg" className="w-6 h-6"/>
                     </button>
                   </div>
                 ))

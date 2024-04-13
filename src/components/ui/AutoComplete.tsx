@@ -144,7 +144,7 @@ export const AutoComplete = ({
                             src={option.logoURI}
                             className="w-6 h-6"
                             alt="Icon"
-                          ></img>
+                          />
                           <span className="flex flex-row items-center h-7 text-base font-medium justify-between w-full">
                             {option.symbol}
                           </span>
