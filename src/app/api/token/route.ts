@@ -1,7 +1,6 @@
 import { getTokenInfo } from "@/lib/token";
 import { TokenMethodInfo7d } from "@/server/handler/method";
 import { NextRequest, NextResponse } from "next/server";
-export const runtime = 'edge'
 export async function GET(req: NextRequest) {}
 
 export async function POST(req: NextRequest) {
