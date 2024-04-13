@@ -8,6 +8,8 @@ const fetchTokenByPoolCount = async (chainIds: number[], topN?: number) => {
   return await query('/token/sort', {chainIds, topN})
 }
 
+export const runtime = 'edge'
+
 export default async function Home(pageProps: PageProps) {
   // const tokens:Token[] = await sortTokens([], 10)
   const tokens:Token[] = await fetchTokenByPoolCount([], 10)
