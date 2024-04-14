@@ -1,3 +1,4 @@
+/*
 import { ChainId } from "@uniswap/sdk-core";
 
 const symbolContractAddress: {
@@ -131,3 +132,4 @@ function getWBTC(chainId: number): string | string[] {
 }
 
 export { getWETH, getWBTC, getAddressBySymbol };
+*/
