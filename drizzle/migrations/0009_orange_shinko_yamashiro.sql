@@ -1,1 +1,0 @@
-ALTER TABLE "pool_info" ADD COLUMN "token1Symbol" varchar(120) NOT NULL;
