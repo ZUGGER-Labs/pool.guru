@@ -15,7 +15,7 @@ export function getDeltaTimestamps(): [number, number, number] {
 export const query = async (endpoint: string, query: any): Promise<any> => {
   const uri = (process.env.NEXT_PUBLIC_API || 'https://api.poolguru.xyz') + endpoint
 
-  console.log(`query uri: ${uri}`)
+  // console.log(`query uri: ${uri}`)
   const resp = await fetch(uri, {
     method: "POST",
     headers: { 

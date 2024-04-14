@@ -1,6 +1,5 @@
 import { PageProps } from "@/lib/page";
 import PoolDetail from "@/components/Pool/PoolDetail";
-import { chain } from "lodash";
 import { getPoolInfo } from "@/lib/pool";
 
 import meta, { title } from "@/lib/meta";

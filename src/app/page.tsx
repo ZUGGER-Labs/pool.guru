@@ -1,8 +1,9 @@
 import { PageProps } from "@/lib/page";
 import Calculator from "@/components/Calculator/Calculator";
 import { Token } from "@/interfaces/uniswap.interface";
-import { sortTokens } from "@/uniswap/token";
+// import { sortTokens } from "@/uniswap/token";
 import { query } from "@/utils/query";
+
 const fetchTokenByPoolCount = async (chainIds: number[], topN?: number) => {
   return await query('/token/sort', {chainIds, topN})
 }
